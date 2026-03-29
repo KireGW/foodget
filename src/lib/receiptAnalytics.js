@@ -310,7 +310,32 @@ export function buildProductMovers(selectedMonth, availableMonths, receipts) {
   }
 }
 
-export function buildCategoryChart(monthlyItems) {
+export function buildCategoryChart(monthlyItems, receiptsForAverage = []) {
+  const averageMonthCount = Math.max(
+    1,
+    new Set(receiptsForAverage.map((receipt) => receipt.purchasedAt.slice(0, 7))).size,
+  )
+  const averageBudgetTotalPerMonth =
+    receiptsForAverage.reduce((sum, receipt) => {
+      return (
+        sum +
+        buildReceiptBudgetItems(receipt)
+          .filter((item) => item.category !== 'Exclude from budget')
+          .reduce((itemSum, item) => itemSum + item.totalMxn, 0)
+      )
+    }, 0) / averageMonthCount
+  const categoryAverageTotals = receiptsForAverage.reduce((summary, receipt) => {
+    buildReceiptBudgetItems(receipt).forEach((item) => {
+      if (item.category === 'Exclude from budget') {
+        return
+      }
+
+      summary.set(item.category, (summary.get(item.category) ?? 0) + item.totalMxn)
+    })
+
+    return summary
+  }, new Map())
+
   const totalsByCategory = monthlyItems.reduce((summary, item) => {
     const currentCategory = summary.get(item.category) ?? {
       totalMxnValue: 0,
@@ -337,9 +362,23 @@ export function buildCategoryChart(monthlyItems) {
   const maxValue = entries[0]?.[1].totalMxnValue ?? 0
 
   return entries.map(([category, details]) => ({
+    categoryAverageValue:
+      (categoryAverageTotals.get(category) ?? details.totalMxnValue) / averageMonthCount,
     category,
     totalMxnValue: details.totalMxnValue,
     totalMxn: formatCurrency(details.totalMxnValue, 'MXN'),
+    averageMonthlySpendMxnValue:
+      (categoryAverageTotals.get(category) ?? details.totalMxnValue) / averageMonthCount,
+    averageMonthlySpendMxn: formatCurrency(
+      (categoryAverageTotals.get(category) ?? details.totalMxnValue) / averageMonthCount,
+      'MXN',
+    ),
+    averageShare:
+      averageBudgetTotalPerMonth === 0
+        ? 0
+        : (((categoryAverageTotals.get(category) ?? details.totalMxnValue) / averageMonthCount) /
+            averageBudgetTotalPerMonth) *
+          100,
     share: maxValue === 0 ? 0 : (Math.abs(details.totalMxnValue) / maxValue) * 100,
     isNegative: details.totalMxnValue < 0,
     items: [...details.items].sort((left, right) => right.totalMxnValue - left.totalMxnValue),
@@ -355,6 +394,7 @@ export function buildCategoryChartForMonth(selectedMonth, receipts) {
     buildMonthlyItems(
       receipts.filter((receipt) => receipt.purchasedAt.startsWith(selectedMonth)),
     ),
+    receipts,
   )
 }
 

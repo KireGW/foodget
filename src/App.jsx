@@ -20,6 +20,12 @@ function App() {
     setItemizedRangeStart,
     itemizedRangeEnd,
     setItemizedRangeEnd,
+    categoryRangeMode,
+    setCategoryRangeMode,
+    categoryRangeStart,
+    setCategoryRangeStart,
+    categoryRangeEnd,
+    setCategoryRangeEnd,
     metrics,
     categoryChart,
     categoryChartsByMonth,
@@ -96,6 +102,12 @@ function App() {
         categoryChartsByMonth={categoryChartsByMonth}
         availableMonths={availableMonths}
         selectedMonth={selectedMonth}
+        categoryRangeMode={categoryRangeMode}
+        onCategoryRangeModeChange={setCategoryRangeMode}
+        categoryRangeStart={categoryRangeStart}
+        onCategoryRangeStartChange={setCategoryRangeStart}
+        categoryRangeEnd={categoryRangeEnd}
+        onCategoryRangeEndChange={setCategoryRangeEnd}
       />
 
       <ReceiptReviewPanel

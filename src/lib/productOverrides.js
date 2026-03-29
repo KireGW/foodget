@@ -82,6 +82,7 @@ export function buildProductMappings(receipts, overrides) {
         latestReceiptUrl: receipt.url,
         latestReceiptFileName: receipt.fileName,
         latestStore: receipt.store ?? 'Unknown',
+        latestSourceType: receipt.sourceType ?? 'parsed',
         normalizationStatus: override ? 'user_override' : item.normalizationStatus,
       }
 
@@ -93,6 +94,7 @@ export function buildProductMappings(receipts, overrides) {
         currentProduct.latestReceiptUrl = receipt.url
         currentProduct.latestReceiptFileName = receipt.fileName
         currentProduct.latestStore = receipt.store ?? 'Unknown'
+        currentProduct.latestSourceType = receipt.sourceType ?? 'parsed'
       }
 
       productMappings.set(lookupKey, currentProduct)

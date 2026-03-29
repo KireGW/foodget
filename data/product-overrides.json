@@ -1526,5 +1526,10 @@
     "originalName": "AGUACATE HASS POR KILO",
     "canonicalName": "Aguacate",
     "category": "Produce"
+  },
+  {
+    "originalName": "Detergente lavavajillas",
+    "canonicalName": "Detergente para lavavajillas",
+    "category": "Household"
   }
 ]

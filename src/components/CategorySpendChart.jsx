@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 export function CategorySpendChart({
+  categoryChart,
   categoryChartsByMonth,
   availableMonths,
   selectedMonth,
+  categoryRangeMode,
+  onCategoryRangeModeChange,
+  categoryRangeStart,
+  onCategoryRangeStartChange,
+  categoryRangeEnd,
+  onCategoryRangeEndChange,
 }) {
   const [isOpen, setIsOpen] = useState(true)
   const [openCategory, setOpenCategory] = useState(null)
@@ -23,10 +30,13 @@ export function CategorySpendChart({
     return selectedMonth
   }, [availableMonths, selectedChartMonth, selectedMonth])
 
-  const categoryChart = useMemo(
-    () => categoryChartsByMonth[effectiveSelectedMonth] ?? [],
-    [categoryChartsByMonth, effectiveSelectedMonth],
-  )
+  const activeCategoryChart = useMemo(() => {
+    if (categoryRangeMode === 'custom') {
+      return categoryChart
+    }
+
+    return categoryChartsByMonth[effectiveSelectedMonth] ?? []
+  }, [categoryChart, categoryChartsByMonth, categoryRangeMode, effectiveSelectedMonth])
 
   const effectiveComparisonMonth = useMemo(() => {
     if (!comparisonMonth || comparisonMonth === effectiveSelectedMonth) {
@@ -42,7 +52,7 @@ export function CategorySpendChart({
     const comparisonChart = effectiveComparisonMonth
       ? (categoryChartsByMonth[effectiveComparisonMonth] ?? [])
       : []
-    const currentMap = new Map(categoryChart.map((entry) => [entry.category, entry]))
+    const currentMap = new Map(activeCategoryChart.map((entry) => [entry.category, entry]))
     const comparisonMap = new Map(comparisonChart.map((entry) => [entry.category, entry]))
     const categories = [...new Set([...currentMap.keys(), ...comparisonMap.keys()])]
     const maxValue = categories.reduce((max, category) => {
@@ -60,6 +70,9 @@ export function CategorySpendChart({
           category,
           totalMxnValue: currentEntry?.totalMxnValue ?? 0,
           totalMxn: currentEntry?.totalMxn ?? 'MX$0',
+          averageMonthlySpendMxnValue: currentEntry?.averageMonthlySpendMxnValue ?? 0,
+          averageMonthlySpendMxn: currentEntry?.averageMonthlySpendMxn ?? 'MX$0',
+          averageShare: currentEntry?.averageShare ?? 0,
           isNegative: currentEntry?.isNegative ?? false,
           items: currentEntry?.items ?? [],
           share:
@@ -83,11 +96,11 @@ export function CategorySpendChart({
         )
         return rightWeight - leftWeight
       })
-  }, [categoryChart, categoryChartsByMonth, effectiveComparisonMonth])
+  }, [activeCategoryChart, categoryChartsByMonth, effectiveComparisonMonth])
 
   const currentMonthTotal = useMemo(
-    () => categoryChart.reduce((sum, entry) => sum + entry.totalMxnValue, 0),
-    [categoryChart],
+    () => activeCategoryChart.reduce((sum, entry) => sum + entry.totalMxnValue, 0),
+    [activeCategoryChart],
   )
 
   const toggleCategory = (category) => {
@@ -127,16 +140,57 @@ export function CategorySpendChart({
           <label className="month-select category-chart__compare">
             <span>Month</span>
             <select
-              value={effectiveSelectedMonth}
-              onChange={(event) => setSelectedChartMonth(event.target.value)}
+              value={categoryRangeMode === 'custom' ? 'custom' : effectiveSelectedMonth}
+              onChange={(event) => {
+                if (event.target.value === 'custom') {
+                  onCategoryRangeModeChange('custom')
+                  return
+                }
+
+                onCategoryRangeModeChange('month')
+                setSelectedChartMonth(event.target.value)
+              }}
             >
               {availableMonths.map((month) => (
                 <option key={month.value} value={month.value}>
                   {month.label}
                 </option>
               ))}
+              <option value="custom">Custom range</option>
             </select>
           </label>
+
+          {categoryRangeMode === 'custom' ? (
+            <>
+              <label className="month-select category-chart__compare">
+                <span>From</span>
+                <select
+                  value={categoryRangeStart}
+                  onChange={(event) => onCategoryRangeStartChange(event.target.value)}
+                >
+                  {availableMonths.map((month) => (
+                    <option key={`category-start-${month.value}`} value={month.value}>
+                      {month.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="month-select category-chart__compare">
+                <span>To</span>
+                <select
+                  value={categoryRangeEnd}
+                  onChange={(event) => onCategoryRangeEndChange(event.target.value)}
+                >
+                  {availableMonths.map((month) => (
+                    <option key={`category-end-${month.value}`} value={month.value}>
+                      {month.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          ) : null}
 
           <label className="month-select category-chart__compare">
             <span>Compare with</span>
@@ -181,6 +235,13 @@ export function CategorySpendChart({
         </p>
       ) : (
         <div className="category-chart" role="img" aria-label="Bar chart of monthly spend by category">
+          <div className="category-chart__header" aria-hidden="true">
+            <span className="category-chart__header-spacer" />
+            <div className="category-chart__header-values">
+              <span>Avg / month</span>
+              <span>Total</span>
+            </div>
+          </div>
           {mergedChart.map((entry) => (
             <article
               key={entry.category}
@@ -210,7 +271,10 @@ export function CategorySpendChart({
                       </small>
                     </div>
                   </div>
-                  <span className="category-chart__total">{entry.totalMxn}</span>
+                  <div className="category-chart__value-group">
+                    <small className="category-chart__average">{entry.averageMonthlySpendMxn}</small>
+                    <strong className="category-chart__total">{entry.totalMxn}</strong>
+                  </div>
                 </div>
                 <div className="category-chart__bars" aria-hidden="true">
                   <div className="category-chart__track">

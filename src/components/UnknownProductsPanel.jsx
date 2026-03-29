@@ -123,6 +123,9 @@ export function UnknownProductsPanel({
                     <td>
                       <div className="mapping-code">
                         <strong>{product.originalName}</strong>
+                        {product.latestSourceType === 'manual' ? (
+                          <small className="mapping-code__meta">Manual entry</small>
+                        ) : null}
                         {product.productCode ? (
                           <small>
                             <button
@@ -242,6 +245,9 @@ export function UnknownProductsPanel({
                   <div className="mobile-mapping-card__header">
                     <div className="mapping-code">
                       <strong>{product.originalName}</strong>
+                      {product.latestSourceType === 'manual' ? (
+                        <small className="mapping-code__meta">Manual entry</small>
+                      ) : null}
                       {product.productCode ? (
                         <small>
                           <button

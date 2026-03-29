@@ -94,6 +94,13 @@ export function useBudgetApp() {
   const [itemizedRangeEnd, setItemizedRangeEnd] = useState(
     availableMonths[availableMonths.length - 1]?.value ?? '',
   )
+  const [categoryRangeMode, setCategoryRangeMode] = useState('month')
+  const [categoryRangeStart, setCategoryRangeStart] = useState(
+    availableMonths[0]?.value ?? '',
+  )
+  const [categoryRangeEnd, setCategoryRangeEnd] = useState(
+    availableMonths[availableMonths.length - 1]?.value ?? '',
+  )
 
   useEffect(() => {
     if (
@@ -116,7 +123,21 @@ export function useBudgetApp() {
     if (!availableMonths.some((month) => month.value === itemizedRangeEnd)) {
       setItemizedRangeEnd(availableMonths[availableMonths.length - 1].value)
     }
-  }, [availableMonths, itemizedRangeStart, itemizedRangeEnd])
+
+    if (!availableMonths.some((month) => month.value === categoryRangeStart)) {
+      setCategoryRangeStart(availableMonths[0].value)
+    }
+
+    if (!availableMonths.some((month) => month.value === categoryRangeEnd)) {
+      setCategoryRangeEnd(availableMonths[availableMonths.length - 1].value)
+    }
+  }, [
+    availableMonths,
+    itemizedRangeStart,
+    itemizedRangeEnd,
+    categoryRangeStart,
+    categoryRangeEnd,
+  ])
 
   useEffect(() => {
     async function loadReceiptCatalog() {
@@ -240,14 +261,58 @@ export function useBudgetApp() {
     [itemizedReceipts, receiptsWithManualCorrections],
   )
 
+  const categoryRangeReceipts = useMemo(() => {
+    if (categoryRangeMode !== 'custom') {
+      return monthReceipts
+    }
+
+    const startMonth = categoryRangeStart || availableMonths[0]?.value
+    const endMonth = categoryRangeEnd || availableMonths[availableMonths.length - 1]?.value
+
+    if (!startMonth || !endMonth) {
+      return monthReceipts
+    }
+
+    const normalizedStart = startMonth <= endMonth ? startMonth : endMonth
+    const normalizedEnd = startMonth <= endMonth ? endMonth : startMonth
+
+    return receiptsWithManualCorrections.filter((receipt) => {
+      const receiptMonth = receipt.purchasedAt.slice(0, 7)
+      return receiptMonth >= normalizedStart && receiptMonth <= normalizedEnd
+    })
+  }, [
+    categoryRangeMode,
+    categoryRangeStart,
+    categoryRangeEnd,
+    availableMonths,
+    monthReceipts,
+    receiptsWithManualCorrections,
+  ])
+
   const metrics = useMemo(
     () => buildMetrics(selectedMonth, monthReceipts, monthlyItems, receiptReviews),
     [selectedMonth, monthReceipts, monthlyItems, receiptReviews],
   )
 
   const categoryChart = useMemo(
-    () => buildCategoryChart(monthlyItems),
-    [monthlyItems],
+    () => {
+      const chartItems =
+        categoryRangeMode === 'custom'
+          ? buildMonthlyItems(categoryRangeReceipts, receiptsWithManualCorrections)
+          : monthlyItems
+      const averageReceipts =
+        categoryRangeMode === 'custom'
+          ? categoryRangeReceipts
+          : receiptsWithManualCorrections
+
+      return buildCategoryChart(chartItems, averageReceipts)
+    },
+    [
+      categoryRangeMode,
+      categoryRangeReceipts,
+      monthlyItems,
+      receiptsWithManualCorrections,
+    ],
   )
   const categoryChartsByMonth = useMemo(
     () =>
@@ -305,11 +370,7 @@ export function useBudgetApp() {
     [receiptEntries],
   )
   const productMappings = useMemo(
-    () =>
-      buildProductMappings(
-        sourceReceipts.filter((receipt) => receipt.sourceType !== 'manual'),
-        productOverrides,
-      ),
+    () => buildProductMappings(sourceReceipts, productOverrides),
     [sourceReceipts, productOverrides],
   )
 
@@ -586,6 +647,12 @@ export function useBudgetApp() {
     setItemizedRangeStart,
     itemizedRangeEnd,
     setItemizedRangeEnd,
+    categoryRangeMode,
+    setCategoryRangeMode,
+    categoryRangeStart,
+    setCategoryRangeStart,
+    categoryRangeEnd,
+    setCategoryRangeEnd,
     metrics,
     categoryChart,
     categoryChartsByMonth,
