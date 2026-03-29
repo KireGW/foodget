@@ -1,4 +1,5 @@
 import express from 'express'
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import multer from 'multer'
@@ -7,6 +8,7 @@ import {
   buildImportPlanFromFile,
   buildImportPlanFromText,
   extractPdfText,
+  parseReceiptForImport,
   readReceiptCatalog,
 } from '../scripts/receiptParser.mjs'
 
@@ -82,6 +84,13 @@ app.get('/api/receipt-item-overrides', (_req, res) => {
 app.get('/api/manual-receipts', (_req, res) => {
   res.json({
     receipts: readManualReceipts(),
+  })
+})
+
+app.get('/api/receipts/catalog', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store')
+  res.json({
+    receipts: readReceiptCatalog(receiptsDir),
   })
 })
 
@@ -346,6 +355,7 @@ app.post('/api/manual-receipts', (req, res) => {
 
 app.post('/api/receipts/import', upload.array('receipts', 20), (req, res) => {
   const files = req.files ?? []
+  const allowDuplicates = String(req.body?.allowDuplicates ?? '').toLowerCase() === 'true'
 
   if (!Array.isArray(files) || files.length === 0) {
     res.status(400).json({ error: 'No PDF files were uploaded.' })
@@ -354,12 +364,40 @@ app.post('/api/receipts/import', upload.array('receipts', 20), (req, res) => {
 
   try {
     const imported = []
+    const existingCatalog = readReceiptCatalog(receiptsDir)
+    const existingHashes = new Map(
+      existingCatalog.map((receipt) => [
+        receipt.relativePath,
+        hashFile(path.join(receiptsDir, receipt.relativePath)),
+      ]),
+    )
 
     for (const file of files) {
       const extractedText = extractPdfText(file.path)
       const textPlan = buildImportPlanFromText(extractedText, file.originalname)
       const fallbackPlan = buildImportPlanFromFile(file.originalname, new Date())
       const importPlan = textPlan ?? fallbackPlan
+      const parsedReceipt = parseReceiptForImport(extractedText, importPlan.purchasedAt)
+      const incomingHash = hashFile(file.path)
+      const duplicateMatch = allowDuplicates
+        ? null
+        : findDuplicateReceipt(
+            existingCatalog,
+            existingHashes,
+            incomingHash,
+            importPlan,
+            parsedReceipt,
+          )
+
+      if (duplicateMatch) {
+        cleanupTempFiles(files)
+        res.status(409).json({
+          error: 'This receipt looks identical to one that is already imported.',
+          duplicate: duplicateMatch,
+        })
+        return
+      }
+
       const targetMonthDir = path.join(receiptsDir, importPlan.folderMonth)
 
       fs.mkdirSync(targetMonthDir, { recursive: true })
@@ -420,6 +458,75 @@ function buildUniqueFileName(directory, baseName, extension) {
   }
 
   return candidate
+}
+
+function findDuplicateReceipt(
+  existingCatalog,
+  existingHashes,
+  incomingHash,
+  importPlan,
+  parsedReceipt,
+) {
+  const byteMatch = existingCatalog.find(
+    (receipt) => existingHashes.get(receipt.relativePath) === incomingHash,
+  )
+
+  if (byteMatch) {
+    return buildDuplicateDescriptor(byteMatch)
+  }
+
+  if (parsedReceipt.totalMxnValue == null || parsedReceipt.items.length === 0) {
+    return null
+  }
+
+  const incomingFingerprint = buildReceiptFingerprint(importPlan.purchasedAt, parsedReceipt)
+
+  const existingReceipt = existingCatalog.find((receipt) => {
+    if (receipt.totalMxnValue == null || receipt.items.length === 0) {
+      return false
+    }
+
+    return buildReceiptFingerprint(receipt.purchasedAt, receipt) === incomingFingerprint
+  })
+
+  if (!existingReceipt) {
+    return null
+  }
+
+  return buildDuplicateDescriptor(existingReceipt)
+}
+
+function buildReceiptFingerprint(purchasedAt, receipt) {
+  const normalizedItems = receipt.items.map((item) => [
+    item.productCode ?? '',
+    item.originalName ?? item.name ?? '',
+    Number(item.quantity ?? 0).toFixed(3),
+    Number(item.totalMxnValue ?? item.totalMxn ?? 0).toFixed(2),
+  ])
+
+  return JSON.stringify({
+    purchasedAt,
+    total: Number(receipt.totalMxnValue ?? 0).toFixed(2),
+    items: normalizedItems,
+  })
+}
+
+function buildDuplicateDescriptor(receipt) {
+  return {
+    receiptId: receipt.id,
+    fileName: receipt.fileName,
+    purchasedAt: receipt.purchasedAt,
+    totalMxn: receipt.totalMxn,
+    itemCount: receipt.items.reduce(
+      (sum, item) => sum + (item.unitType === 'weight' ? 1 : item.quantity),
+      0,
+    ),
+    lineCount: receipt.items.length,
+  }
+}
+
+function hashFile(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex')
 }
 
 function sanitizeSegment(value) {

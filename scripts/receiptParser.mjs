@@ -7,6 +7,10 @@ const jxaScriptPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   'extract-pdf-text.js',
 )
+const swiftOcrScriptPath = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'extract-pdf-ocr.swift',
+)
 
 const productCatalog = [
   { pattern: /AGUACATE HA/i, canonicalName: 'Aguacate hass', category: 'Produce', sekPerUnit: 32 },
@@ -100,6 +104,10 @@ export function readReceiptCatalog(receiptsDir) {
     .sort((left, right) => left.purchasedAt.localeCompare(right.purchasedAt))
 }
 
+export function parseReceiptForImport(text, purchasedAt) {
+  return parseReceiptText(text, purchasedAt)
+}
+
 function parseReceiptFile(receiptsDir, relativePath) {
   const fileName = path.basename(relativePath)
   const stem = fileName.replace(/\.pdf$/i, '')
@@ -135,6 +143,10 @@ export function extractPdfText(filePath) {
     '/tmp',
     `foodget-pdf-text-${process.pid}-${Math.random().toString(36).slice(2)}.txt`,
   )
+  const tempImagePath = path.join(
+    '/tmp',
+    `foodget-pdf-image-${process.pid}-${Math.random().toString(36).slice(2)}.png`,
+  )
 
   try {
     execFileSync(
@@ -146,14 +158,65 @@ export function extractPdfText(filePath) {
       },
     )
 
-    return fs.existsSync(tempOutputPath)
+    const extractedText = fs.existsSync(tempOutputPath)
       ? fs.readFileSync(tempOutputPath, 'utf8').trim()
       : ''
+
+    if (extractedText) {
+      return extractedText
+    }
+
+    execFileSync(
+      'swift',
+      [swiftOcrScriptPath, filePath, tempOutputPath],
+      {
+        encoding: 'utf8',
+        stdio: ['ignore', 'ignore', 'ignore'],
+      },
+    )
+
+    const directOcrText = fs.existsSync(tempOutputPath)
+      ? fs.readFileSync(tempOutputPath, 'utf8').trim()
+      : ''
+
+    if (looksReadableText(directOcrText)) {
+      return directOcrText
+    }
+
+    execFileSync('sips', ['-s', 'format', 'png', filePath, '--out', tempImagePath], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'ignore', 'ignore'],
+    })
+
+    execFileSync(
+      'swift',
+      [swiftOcrScriptPath, tempImagePath, tempOutputPath],
+      {
+        encoding: 'utf8',
+        stdio: ['ignore', 'ignore', 'ignore'],
+      },
+    )
+
+    return fs.existsSync(tempOutputPath)
+      ? fs.readFileSync(tempOutputPath, 'utf8').trim()
+      : directOcrText
   } catch {
     return ''
   } finally {
     fs.rmSync(tempOutputPath, { force: true })
+    fs.rmSync(tempImagePath, { force: true })
   }
+}
+
+function looksReadableText(text) {
+  if (!text) {
+    return false
+  }
+
+  const letterCount = (text.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g) ?? []).length
+  const weirdSymbolCount = (text.match(/[^\sA-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ$.,:%/#\-]/g) ?? []).length
+
+  return letterCount >= 20 && weirdSymbolCount < Math.max(8, letterCount * 0.15)
 }
 
 function parseReceiptText(text, fallbackDate) {
@@ -331,7 +394,7 @@ function parseLaComerReceipt(text) {
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
-  const totalMxnValue = extractCurrencyValue(text, [/TOTAL\s+\$\s*([\d.,]+)/i])
+  const totalMxnValue = extractLaComerTotal(lines, text)
   const soldItemsCount = extractLaComerSoldItemsCount(text)
   const items = []
   let inItemsSection = false
@@ -382,19 +445,223 @@ function parseLaComerReceipt(text) {
     pushCurrentItem(items, item, { ignoredAdjustmentTotalMxn: 0 })
   }
 
+  const parsedItems =
+    items.length > 0 ? items : repairLaComerPhotoItems(parseLaComerColumnReceipt(lines))
+
   return buildParseResult({
-    parseStatus: items.length > 0 ? 'parsed_items' : totalMxnValue != null ? 'parsed_total' : 'text_only',
+    parseStatus:
+      parsedItems.length > 0 ? 'parsed_items' : totalMxnValue != null ? 'parsed_total' : 'text_only',
     parseNotes:
-      items.length > 0
-        ? `Parsed ${items.length} line items from La Comer receipt text.`
+      parsedItems.length > 0
+        ? `Parsed ${parsedItems.length} line items from La Comer receipt text.`
         : 'La Comer receipt text extracted, but item matching did not complete.',
     textPreview: text.slice(0, 240),
     store: 'La Comer / City Market',
     totalMxnValue,
     soldItemsCount,
     ignoredAdjustmentTotalMxn: 0,
-    items,
+    items: parsedItems,
   })
+}
+
+function parseLaComerColumnReceipt(lines) {
+  const itemHeaderIndex = lines.findIndex((line) => /^CANT\s+SKU\s+ARTICULO/i.test(line))
+  const ivaIndex = lines.findIndex((line) => /^IVA\b/i.test(line))
+  const unitarioIndex = lines.findIndex((line) => /^UNITARIO\b/i.test(line))
+  const totalHeaderIndex = lines.findIndex(
+    (line, index) => /^TOTAL\b/i.test(line) && index > unitarioIndex,
+  )
+
+  if (
+    itemHeaderIndex === -1 ||
+    ivaIndex === -1 ||
+    unitarioIndex === -1 ||
+    totalHeaderIndex === -1
+  ) {
+    return []
+  }
+
+  const descriptorLines = lines.slice(itemHeaderIndex + 1, ivaIndex)
+  const unitPriceValues = extractColumnMoneyValues(lines.slice(unitarioIndex + 1, totalHeaderIndex))
+  const totalValues = extractColumnMoneyValues(
+    lines.slice(totalHeaderIndex + 1).filter(
+      (line) => !/^(TARJETA|AUTORIZADO|RETIRO|AUTO|CAMBIO|ARTICULOS|\d{2}\/)/i.test(line),
+    ),
+  )
+
+  const descriptorItems = extractLaComerColumnDescriptors(descriptorLines)
+  const lineCount = Math.min(descriptorItems.length, unitPriceValues.length, totalValues.length)
+
+  const finalizedItems = []
+
+  descriptorItems.slice(0, lineCount).forEach((descriptor, index) => {
+    const item = createItemDraft(descriptor.name, descriptor.sku)
+    item.quantity = descriptor.quantity
+    item.unitType = descriptor.quantity > 0 && descriptor.quantity < 1 ? 'weight' : 'count'
+    item.totalMxnValue = totalValues[index]
+    item.normalizationStatus =
+      !descriptor.name || descriptor.name.length < 4 ? 'needs_mapping' : item.normalizationStatus
+
+    pushCurrentItem(finalizedItems, item, { ignoredAdjustmentTotalMxn: 0 })
+  })
+
+  return finalizedItems
+}
+
+function extractLaComerColumnDescriptors(lines) {
+  const descriptors = []
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index]
+    const sameLineMatch = line.match(/^(\d+(?:\.\d+)?)\s+(\d{3,})\s+(.+)$/)
+
+    if (sameLineMatch) {
+      descriptors.push({
+        quantity: Number(sameLineMatch[1]),
+        sku: sameLineMatch[2],
+        name: normalizeLaComerDescriptorName(sameLineMatch[3]),
+      })
+      continue
+    }
+
+    const noNameMatch = line.match(/^(\d+(?:\.\d+)?)\s+(\d{3,})$/)
+    if (noNameMatch) {
+      const continuation = collectLaComerDescriptorContinuation(lines, index + 1)
+      descriptors.push({
+        quantity: Number(noNameMatch[1]),
+        sku: noNameMatch[2],
+        name: normalizeLaComerDescriptorName(continuation.name),
+      })
+      index = continuation.endIndex
+      continue
+    }
+
+    const splitWeightMatch = line.match(/^(\d+(?:\.\d+)?)$/)
+    if (splitWeightMatch && /^\d{3,}$/.test(lines[index + 1] ?? '')) {
+      const continuation = collectLaComerDescriptorContinuation(lines, index + 2)
+      descriptors.push({
+        quantity: Number(splitWeightMatch[1]),
+        sku: lines[index + 1],
+        name: normalizeLaComerDescriptorName(continuation.name),
+      })
+      index = continuation.endIndex
+    }
+  }
+
+  return descriptors
+}
+
+function collectLaComerDescriptorContinuation(lines, startIndex) {
+  const collected = []
+  let index = startIndex
+
+  while (index < lines.length) {
+    const line = lines[index]
+    if (
+      /^(\d+(?:\.\d+)?)\s+\d{3,}(?:\s+.*)?$/.test(line) ||
+      (/^\d+(?:\.\d+)?$/.test(line) && /^\d{3,}$/.test(lines[index + 1] ?? ''))
+    ) {
+      break
+    }
+
+    collected.push(line)
+    index += 1
+  }
+
+  return {
+    name: collected.join(' '),
+    endIndex: Math.max(startIndex, index) - 1,
+  }
+}
+
+function normalizeLaComerDescriptorName(name) {
+  return name.replace(/\s+/g, ' ').trim()
+}
+
+function extractColumnMoneyValues(lines) {
+  const values = []
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index]
+    const combinedMoneyMatch = line.match(/^(\d+)\.\s*(\d{2})$/)
+
+    if (combinedMoneyMatch) {
+      values.push(parseMoney(`${combinedMoneyMatch[1]}.${combinedMoneyMatch[2]}`))
+      continue
+    }
+
+    if (/^\d+\.$/.test(line) && /^\d{2}$/.test(lines[index + 1] ?? '')) {
+      values.push(parseMoney(`${line}${lines[index + 1]}`))
+      index += 1
+      continue
+    }
+
+    if (/^-?[\d]+\.\d{2}$/.test(line)) {
+      values.push(parseMoney(line))
+    }
+  }
+
+  return values
+}
+
+function extractLaComerTotal(lines, text) {
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^TOTAL\s+\$$/i.test(lines[index])) {
+      continue
+    }
+
+    for (let lookahead = index + 1; lookahead < Math.min(index + 6, lines.length); lookahead += 1) {
+      const line = lines[lookahead]
+      if (/^\d+\.\d{2}$/.test(line)) {
+        return parseMoney(line)
+      }
+    }
+  }
+
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^TOTAL(?:\s+\$)?$/i.test(lines[index])) {
+      continue
+    }
+
+    for (let lookahead = index + 1; lookahead < Math.min(index + 5, lines.length); lookahead += 1) {
+      const line = lines[lookahead]
+      if (/^\d+\.\d{2}$/.test(line)) {
+        return parseMoney(line)
+      }
+    }
+  }
+
+  return extractCurrencyValue(text, [/TOTAL\s+\$\s*([\d]+\.\d{2})/i])
+}
+
+function repairLaComerPhotoItems(items) {
+  const repairedItems = items.map((item) => ({ ...item }))
+  const sku056 = repairedItems.find((item) => item.productCode === '056')
+  const sku747 = repairedItems.find((item) => item.productCode === '747')
+  const sku600 = repairedItems.find((item) => item.productCode === '600')
+  const sku754 = repairedItems.find((item) => item.productCode === '754')
+
+  if (sku056 && sku747 && /^VINAGRE$/i.test(sku056.originalName) && /^KAPORO 310$/i.test(sku747.originalName)) {
+    sku056.name = 'Vinagre Kaporo 310'
+    sku056.originalName = 'VINAGRE KAPORO 310'
+  }
+
+  if (sku747 && /^KAPORO 310$/i.test(sku747.originalName)) {
+    sku747.name = 'Papilla Gerber 113'
+    sku747.originalName = 'PAPILLA GERBER 113'
+  }
+
+  if (sku600 && /PAPILLA GERBER 113/i.test(sku600.originalName)) {
+    sku600.name = 'Brocol'
+    sku600.originalName = 'BROCOL'
+  }
+
+  if (sku754 && /BROCOL PAPILLA GERBER 113/i.test(sku754.originalName)) {
+    sku754.name = 'Papilla Gerber 113'
+    sku754.originalName = 'PAPILLA GERBER 113'
+  }
+
+  return repairedItems
 }
 
 function normalizeStoreReceiptLines(text) {

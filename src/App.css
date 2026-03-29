@@ -133,6 +133,30 @@
   font-size: 0.95rem;
 }
 
+.duplicate-import-modal {
+  margin-top: 1rem;
+}
+
+.duplicate-import-modal__card {
+  border: 1px solid rgba(219, 167, 59, 0.35);
+  background: linear-gradient(180deg, rgba(255, 248, 227, 0.98), rgba(255, 252, 242, 0.98));
+  border-radius: 24px;
+  padding: 1.1rem 1.1rem 1rem;
+  box-shadow: 0 18px 44px rgba(44, 59, 70, 0.12);
+}
+
+.duplicate-import-modal__card h3 {
+  margin: 0.25rem 0 0.65rem;
+  color: #18313f;
+}
+
+.duplicate-import-modal__actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
 .upload-list ul {
   margin: 0;
   padding: 0;

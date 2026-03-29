@@ -19,7 +19,10 @@ export function UploadPanel({
   isReadOnly = false,
   receiptCalendar,
   isUploading,
+  pendingDuplicateImport,
   onImportReceipts,
+  onConfirmDuplicateImport,
+  onCancelDuplicateImport,
   onCreateManualReceipt,
   onDeleteReceipt,
 }) {
@@ -108,6 +111,37 @@ export function UploadPanel({
         <strong>{uploadStatus}</strong>
         <span>{syncStatus}</span>
       </div>
+
+      {pendingDuplicateImport ? (
+        <div className="duplicate-import-modal" role="dialog" aria-modal="true">
+          <div className="duplicate-import-modal__card">
+            <p className="panel__eyebrow">Possible duplicate</p>
+            <h3>This receipt looks identical to one that is already imported.</h3>
+            <p className="upload-list__hint">
+              Existing receipt: <strong>{pendingDuplicateImport.duplicate.fileName}</strong>
+            </p>
+            <p className="upload-list__hint">
+              {formatDuplicateMeta(pendingDuplicateImport.duplicate)}
+            </p>
+            <div className="duplicate-import-modal__actions">
+              <button
+                type="button"
+                className="receipt-review-secondary"
+                onClick={onCancelDuplicateImport}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="mapping-save"
+                onClick={onConfirmDuplicateImport}
+              >
+                Import anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="manual-entry">
         <div className="upload-list__header">
@@ -343,6 +377,19 @@ export function UploadPanel({
       </div>
     </aside>
   )
+}
+
+function formatDuplicateMeta(duplicate) {
+  return `${formatDateLabel(duplicate.purchasedAt)} · ${duplicate.totalMxn} · ${duplicate.itemCount} items across ${duplicate.lineCount} lines`
+}
+
+function formatDateLabel(value) {
+  return new Intl.DateTimeFormat('en', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${value}T00:00:00Z`))
 }
 
 function formatParseStatus(receipt) {

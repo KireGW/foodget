@@ -136,7 +136,7 @@
   {
     "productCode": "00024456070004",
     "originalName": "SM TOMATE",
-    "canonicalName": "Tomate deshidratado",
+    "canonicalName": "Tomates deshidratados",
     "category": "Pantry"
   },
   {
@@ -364,7 +364,7 @@
   {
     "productCode": "0201370000007",
     "originalName": "BISTEC RES",
-    "canonicalName": "Bistec Res",
+    "canonicalName": "Bistec de res",
     "category": "Protein"
   },
   {
@@ -598,7 +598,7 @@
   {
     "productCode": "0000000031202",
     "originalName": "PIMIENTO VE",
-    "canonicalName": "Pimiento verde",
+    "canonicalName": "Pimiento",
     "category": "Produce"
   },
   {
@@ -948,5 +948,65 @@
     "originalName": "VV ARROZ S",
     "canonicalName": "Arroz",
     "category": "Pantry"
+  },
+  {
+    "productCode": "044",
+    "originalName": "PAPILLA 3CARROTS 11",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "056",
+    "originalName": "VINAGRE KAPORO 310",
+    "canonicalName": "Vinagre",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "198",
+    "originalName": "PAPILLA GERBER 113",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "241",
+    "originalName": "PANAL HUGGIES 40 PZ",
+    "canonicalName": "Pañales",
+    "category": "Household"
+  },
+  {
+    "productCode": "286",
+    "originalName": "PURÉ SMILEY KIDS 90",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "600",
+    "originalName": "BROCOL",
+    "canonicalName": "Brocoli",
+    "category": "Produce"
+  },
+  {
+    "productCode": "07503006465017",
+    "originalName": "CARBON",
+    "canonicalName": "Carbón",
+    "category": "Household"
+  },
+  {
+    "productCode": "05740900401464",
+    "originalName": "LURPAK MAN",
+    "canonicalName": "Mantequilla",
+    "category": "Dairy"
+  },
+  {
+    "productCode": "0000000046893",
+    "originalName": "PIMIENTO AM",
+    "canonicalName": "Pimiento",
+    "category": "Produce"
+  },
+  {
+    "productCode": "0000000046886",
+    "originalName": "PIMIENTO RO",
+    "canonicalName": "Pimiento",
+    "category": "Produce"
   }
 ]

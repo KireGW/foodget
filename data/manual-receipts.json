@@ -29,5 +29,36 @@
         "normalizationStatus": "user_override"
       }
     ]
+  },
+  {
+    "id": "manual-2026-03-28-comida-bebe",
+    "fileName": "Manual - Comida bebé",
+    "relativePath": null,
+    "purchasedAt": "2026-03-28",
+    "monthKey": "2026-03",
+    "url": null,
+    "parseStatus": "manual_entry",
+    "parseNotes": "Manual entry added in the app.",
+    "textPreview": "",
+    "store": "Manual entry",
+    "sourceType": "manual",
+    "totalMxnValue": 419,
+    "soldItemsCount": 1,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$419.00",
+    "items": [
+      {
+        "name": "Comida bebé",
+        "productCode": null,
+        "originalName": "Comida bebé",
+        "category": "Pantry",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 419,
+        "totalMxn": 419,
+        "swedenAverageSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
   }
 ]

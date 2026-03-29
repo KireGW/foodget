@@ -36,3 +36,7 @@ function buildHelpfulApiError(status, fallbackMessage) {
 
   return fallbackMessage
 }
+
+export function buildHelpfulUploadErrorMessage(status, fallbackMessage) {
+  return buildHelpfulApiError(status, fallbackMessage)
+}

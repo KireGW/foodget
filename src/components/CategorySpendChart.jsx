@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 
 export function CategorySpendChart({
-  categoryChart,
   categoryChartsByMonth,
   availableMonths,
   selectedMonth,
@@ -10,16 +9,33 @@ export function CategorySpendChart({
   const [openCategory, setOpenCategory] = useState(null)
   const [comparisonMonth, setComparisonMonth] = useState('')
   const [hoveredComparisonCategory, setHoveredComparisonCategory] = useState(null)
+  const [selectedChartMonth, setSelectedChartMonth] = useState(selectedMonth)
+
+  const effectiveSelectedMonth = useMemo(() => {
+    if (
+      selectedChartMonth &&
+      availableMonths.some((month) => month.value === selectedChartMonth)
+    ) {
+      return selectedChartMonth
+    }
+
+    return selectedMonth
+  }, [availableMonths, selectedChartMonth, selectedMonth])
+
+  const categoryChart = useMemo(
+    () => categoryChartsByMonth[effectiveSelectedMonth] ?? [],
+    [categoryChartsByMonth, effectiveSelectedMonth],
+  )
 
   const effectiveComparisonMonth = useMemo(() => {
-    if (!comparisonMonth || comparisonMonth === selectedMonth) {
+    if (!comparisonMonth || comparisonMonth === effectiveSelectedMonth) {
       return ''
     }
 
     return availableMonths.some((month) => month.value === comparisonMonth)
       ? comparisonMonth
       : ''
-  }, [availableMonths, comparisonMonth, selectedMonth])
+  }, [availableMonths, comparisonMonth, effectiveSelectedMonth])
 
   const mergedChart = useMemo(() => {
     const comparisonChart = effectiveComparisonMonth
@@ -89,6 +105,20 @@ export function CategorySpendChart({
 
         <div className="receipt-audit__controls">
           <label className="month-select category-chart__compare">
+            <span>Month</span>
+            <select
+              value={effectiveSelectedMonth}
+              onChange={(event) => setSelectedChartMonth(event.target.value)}
+            >
+              {availableMonths.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="month-select category-chart__compare">
             <span>Compare with</span>
             <select
               className={effectiveComparisonMonth ? 'category-chart__compare-select' : ''}
@@ -97,7 +127,7 @@ export function CategorySpendChart({
             >
               <option value="">No comparison</option>
               {availableMonths
-                .filter((month) => month.value !== selectedMonth)
+                .filter((month) => month.value !== effectiveSelectedMonth)
                 .map((month) => (
                   <option key={month.value} value={month.value}>
                     {month.label}

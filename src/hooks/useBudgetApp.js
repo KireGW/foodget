@@ -41,13 +41,16 @@ import {
   saveManualReceipt,
 } from '../lib/manualReceipts.js'
 import { uploadReceiptFiles } from '../lib/receiptUpload.js'
+import { DuplicateReceiptError } from '../lib/receiptUpload.js'
+import { fetchReceiptCatalog } from '../lib/receiptCatalog.js'
 
 export function useBudgetApp() {
+  const [liveReceipts, setLiveReceipts] = useState(receipts)
   const [manualReceipts, setManualReceipts] = useState([])
   const [isReadOnly, setIsReadOnly] = useState(false)
   const sourceReceipts = useMemo(
-    () => [...receipts, ...manualReceipts],
-    [manualReceipts],
+    () => [...liveReceipts, ...manualReceipts],
+    [liveReceipts, manualReceipts],
   )
   const [deletedReceiptIds, setDeletedReceiptIds] = useState([])
   const [uploadStatus, setUploadStatus] = useState(
@@ -58,6 +61,7 @@ export function useBudgetApp() {
   const [receiptReviews, setReceiptReviews] = useState([])
   const [receiptItemOverrides, setReceiptItemOverrides] = useState([])
   const [learningSuggestions, setLearningSuggestions] = useState([])
+  const [pendingDuplicateImport, setPendingDuplicateImport] = useState(null)
   const [overrideStatus, setOverrideStatus] = useState(
     'Auto-categorized products can stay as they are, and you can correct anything that looks off.',
   )
@@ -92,6 +96,19 @@ export function useBudgetApp() {
       setSelectedMonth(availableMonths[availableMonths.length - 1].value)
     }
   }, [availableMonths, selectedMonth])
+
+  useEffect(() => {
+    async function loadReceiptCatalog() {
+      try {
+        const loadedReceipts = await fetchReceiptCatalog()
+        setLiveReceipts(loadedReceipts)
+      } catch {
+        setLiveReceipts(receipts)
+      }
+    }
+
+    loadReceiptCatalog()
+  }, [])
 
   useEffect(() => {
     async function loadProductOverrides() {
@@ -252,13 +269,13 @@ export function useBudgetApp() {
   ).length
 
   const syncStatus =
-    isReadOnly && receipts.length === 0
+    isReadOnly && liveReceipts.length === 0
       ? 'This deployed view cannot parse receipt PDFs. Open the local Mac app to ingest and parse receipts.'
       : receiptsWithManualCorrections.length === 0
       ? 'No receipts found yet.'
       : `${receiptsWithManualCorrections.length} receipt${receiptsWithManualCorrections.length === 1 ? '' : 's'} loaded, ${parsedCount} interpreted PDF${parsedCount === 1 ? '' : 's'} so far.`
 
-  async function importReceipts(fileList) {
+  async function importReceipts(fileList, options = {}) {
     if (isReadOnly) {
       setUploadStatus(
         'This deployed version is read-only. Upload receipts in your local app.',
@@ -278,19 +295,42 @@ export function useBudgetApp() {
     setUploadStatus(`Importing ${files.length} receipt${files.length === 1 ? '' : 's'}...`)
 
     try {
-      const result = await uploadReceiptFiles(files)
+      const result = await uploadReceiptFiles(files, options)
+      setPendingDuplicateImport(null)
       setUploadStatus(result.message)
 
       window.setTimeout(() => {
         window.location.reload()
       }, 450)
     } catch (error) {
+      if (error instanceof DuplicateReceiptError) {
+        setPendingDuplicateImport({
+          files,
+          duplicate: error.duplicate,
+        })
+        setUploadStatus('Possible duplicate found. Confirm whether you want to import it anyway.')
+        return
+      }
+
       setUploadStatus(
         error instanceof Error ? error.message : 'Receipt upload failed.',
       )
     } finally {
       setIsUploading(false)
     }
+  }
+
+  async function confirmDuplicateImport() {
+    if (!pendingDuplicateImport) {
+      return
+    }
+
+    await importReceipts(pendingDuplicateImport.files, { allowDuplicates: true })
+  }
+
+  function cancelDuplicateImport() {
+    setPendingDuplicateImport(null)
+    setUploadStatus('Duplicate import canceled.')
   }
 
   async function deleteReceipt(receipt) {
@@ -507,7 +547,10 @@ export function useBudgetApp() {
     uploadStatus,
     isReadOnly,
     isUploading,
+    pendingDuplicateImport,
     importReceipts,
+    confirmDuplicateImport,
+    cancelDuplicateImport,
     createManualReceipt,
     deleteReceipt,
     overrideStatus,

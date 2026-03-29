@@ -29,7 +29,10 @@ function App() {
     uploadStatus,
     isReadOnly,
     isUploading,
+    pendingDuplicateImport,
     importReceipts,
+    confirmDuplicateImport,
+    cancelDuplicateImport,
     createManualReceipt,
     deleteReceipt,
     overrideStatus,
@@ -60,7 +63,10 @@ function App() {
           isReadOnly={isReadOnly}
           receiptCalendar={receiptCalendar}
           isUploading={isUploading}
+          pendingDuplicateImport={pendingDuplicateImport}
           onImportReceipts={importReceipts}
+          onConfirmDuplicateImport={confirmDuplicateImport}
+          onCancelDuplicateImport={cancelDuplicateImport}
           onCreateManualReceipt={createManualReceipt}
           onDeleteReceipt={deleteReceipt}
         />
