@@ -79,35 +79,67 @@ export function MonthlyOverview({
             building the report.
           </p>
           ) : (
-            <table className="overview-table">
-              <thead>
-                <tr>
-                  <th>{renderSortButton('Item', 'item', sortConfig, setSortConfig)}</th>
-                  <th>{renderSortButton('Category', 'category', sortConfig, setSortConfig)}</th>
-                  <th>{renderSortButton('Items', 'items', sortConfig, setSortConfig)}</th>
-                  <th>{renderSortButton('Spent (MXN)', 'spent', sortConfig, setSortConfig)}</th>
-                  <th>{renderSortButton('Avg / item (MXN)', 'unitMxn', sortConfig, setSortConfig)}</th>
-                </tr>
-              </thead>
-              <tbody>
+            <>
+              <table className="overview-table desktop-table">
+                <thead>
+                  <tr>
+                    <th>{renderSortButton('Item', 'item', sortConfig, setSortConfig)}</th>
+                    <th>{renderSortButton('Category', 'category', sortConfig, setSortConfig)}</th>
+                    <th>{renderSortButton('Items', 'items', sortConfig, setSortConfig)}</th>
+                    <th>{renderSortButton('Spent (MXN)', 'spent', sortConfig, setSortConfig)}</th>
+                    <th>{renderSortButton('Avg / item (MXN)', 'unitMxn', sortConfig, setSortConfig)}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedItems.map((item) => (
+                    <tr key={item.name}>
+                      <td>
+                        <div className="item-cell">
+                          <span>{item.name}</span>
+                          {item.originalNames[0] !== item.name ? (
+                            <small>{item.originalNames.join(', ')}</small>
+                          ) : null}
+                        </div>
+                      </td>
+                      <td>{item.category}</td>
+                      <td>{item.itemCountLabel}</td>
+                      <td>{item.totalMxn}</td>
+                      <td>{item.unitMxn}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="mobile-item-cards">
                 {sortedItems.map((item) => (
-                  <tr key={item.name}>
-                    <td>
+                  <article key={item.name} className="mobile-item-card">
+                    <div className="mobile-item-card__header">
                       <div className="item-cell">
-                        <span>{item.name}</span>
+                        <strong>{item.name}</strong>
                         {item.originalNames[0] !== item.name ? (
                           <small>{item.originalNames.join(', ')}</small>
                         ) : null}
                       </div>
-                    </td>
-                    <td>{item.category}</td>
-                    <td>{item.itemCountLabel}</td>
-                    <td>{item.totalMxn}</td>
-                    <td>{item.unitMxn}</td>
-                  </tr>
+                      <span className="mobile-item-card__category">{item.category}</span>
+                    </div>
+                    <div className="mobile-item-card__metrics">
+                      <div>
+                        <span>Items</span>
+                        <strong>{item.itemCountLabel}</strong>
+                      </div>
+                      <div>
+                        <span>Spent</span>
+                        <strong>{item.totalMxn}</strong>
+                      </div>
+                      <div>
+                        <span>Avg / item</span>
+                        <strong>{item.unitMxn}</strong>
+                      </div>
+                    </div>
+                  </article>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
         </div>
       )}
