@@ -124,7 +124,7 @@
   {
     "productCode": "07501071301452",
     "originalName": "VV ARROZ S",
-    "canonicalName": "Arroz para sushi",
+    "canonicalName": "Arroz",
     "category": "Pantry"
   },
   {
@@ -154,7 +154,7 @@
   {
     "productCode": "07501000131440",
     "originalName": "PAN DE CAJ",
-    "canonicalName": "Pan Bimbo multigrano",
+    "canonicalName": "Pan",
     "category": "Bakery"
   },
   {
@@ -178,7 +178,7 @@
   {
     "productCode": "00049733000079",
     "originalName": "SALSA CHOL",
-    "canonicalName": "Salsa picante Cholula original",
+    "canonicalName": "Salsa picante Cholula",
     "category": "Pantry"
   },
   {
@@ -214,7 +214,7 @@
   {
     "productCode": "00055773077032",
     "originalName": "MCCAIN OND",
-    "canonicalName": "Papas a la francesa McCain",
+    "canonicalName": "Papas a la francesa",
     "category": "Pantry"
   },
   {
@@ -262,7 +262,7 @@
   {
     "productCode": "07501024225095",
     "originalName": "CREM ENT 2",
-    "canonicalName": "Hongos cremini",
+    "canonicalName": "Hongos",
     "category": "Produce"
   },
   {
@@ -281,7 +281,7 @@
     "productCode": "834",
     "originalName": "SUPL SELTZ 1 PZA",
     "canonicalName": "Suero",
-    "category": "Household"
+    "category": "Pantry"
   },
   {
     "productCode": "00000000043069",
@@ -304,7 +304,7 @@
   {
     "productCode": "0000000030823",
     "originalName": "BROCOLI",
-    "canonicalName": "Brocoli",
+    "canonicalName": "Brócoli",
     "category": "Produce"
   },
   {
@@ -418,7 +418,7 @@
   {
     "productCode": "07501020565225",
     "originalName": "VOLCA PANE",
-    "canonicalName": "Queso Panela Los Volcanes",
+    "canonicalName": "Queso panela",
     "category": "Dairy"
   },
   {
@@ -479,7 +479,7 @@
     "productCode": "07502274774111",
     "originalName": "MDR",
     "canonicalName": "Suero",
-    "category": "Household"
+    "category": "Pantry"
   },
   {
     "productCode": "07502281301171",
@@ -496,7 +496,7 @@
   {
     "productCode": "07503017898231",
     "originalName": "ARROZ SANT",
-    "canonicalName": "Arroz arborio",
+    "canonicalName": "Arroz",
     "category": "Pantry"
   },
   {
@@ -604,7 +604,7 @@
   {
     "productCode": "0000000040334",
     "originalName": "LIMON EUREK",
-    "canonicalName": "Limón eureka",
+    "canonicalName": "Limón amarillo",
     "category": "Produce"
   },
   {
@@ -628,7 +628,7 @@
   {
     "productCode": "07501040095160",
     "originalName": "YOPLAIT GR",
-    "canonicalName": "Yogurt",
+    "canonicalName": "Yoghurt",
     "category": "Dairy"
   },
   {
@@ -820,7 +820,7 @@
   {
     "productCode": "07501791667753",
     "originalName": "FLORETES B",
-    "canonicalName": "Brocoli",
+    "canonicalName": "Brócoli",
     "category": "Produce"
   },
   {
@@ -1014,5 +1014,517 @@
     "originalName": "CIEL6PK 1L",
     "canonicalName": "Agua",
     "category": "Beverages"
+  },
+  {
+    "productCode": "07501071308376",
+    "originalName": "ARR SUSHI",
+    "canonicalName": "Arroz",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Tortillas de maíz Ochoa 800 g",
+    "canonicalName": "Tortillas",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Queso manchego NocheBuena rebanadas 400 g",
+    "canonicalName": "Queso manchego",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Penca de plátano orgánico Marketside por kilo",
+    "canonicalName": "Plátano",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Pechuga sin piel por kg peso aprox por charola 600 a 700 g",
+    "canonicalName": "Pechuga de pollo",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Pan Bimbo Multigrano 610 g",
+    "canonicalName": "Pan",
+    "category": "Bakery"
+  },
+  {
+    "originalName": "Molida de res premium 95/5 por kg peso aprox por charola 700 a 800 g",
+    "canonicalName": "Carne molida",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Milanesa de pechuga de pollo por kg peso aprox por charola 700 a 800 g",
+    "canonicalName": "Milanesa de pollo",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Manzana Red Delicious por kilo",
+    "canonicalName": "Manzana",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Mantequilla Lurpak con sal untable 250 g",
+    "canonicalName": "Mantequilla",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Jitomate saladet por kilo",
+    "canonicalName": "Jitomate",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Jamón de pavo FUD virginia 450 g Peso ajustado $35.82",
+    "canonicalName": "Jamón de pavo",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Diente de ajo 200 g",
+    "canonicalName": "Ajo",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Crema ácida Alpura regular 200 ml",
+    "canonicalName": "Crema",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Café puro tostado Extra Special grano entero tueste oscuro 420 g",
+    "canonicalName": "Café en grano",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Brócoli por kilo",
+    "canonicalName": "Brócoli",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Bistec de res por kg peso aproximado por charola 700 a 800 g",
+    "canonicalName": "Bistec de res",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Filete de tilapia Marketside sin piel 500 g congelado",
+    "canonicalName": "Tilapia",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Aceite de oliva Carbonell extra virgen 750 ml",
+    "canonicalName": "Aceite de oliva",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Arroz Verde Valle grano grueso 900 g",
+    "canonicalName": "Arroz",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Huevo blanco San Juan 30 pzas",
+    "canonicalName": "Huevos",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Pimiento rojo por kilo",
+    "canonicalName": "Pimiento",
+    "category": "Produce"
+  },
+  {
+    "productCode": "07501020565249",
+    "originalName": "VOLCA OAXA",
+    "canonicalName": "Queso Oaxaca",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Queso feta Président desmoronado 170 g",
+    "canonicalName": "Queso feta",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Queso cottage Santa Clara bajo en grasa 380 g",
+    "canonicalName": "Queso cottage",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Limón sin Semilla en malla 800 g",
+    "canonicalName": "Limón",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Jamón de pavo FUD virginia 450 g",
+    "canonicalName": "Jamón de pavo",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Elote La Huerta congelados en grano 500 g",
+    "canonicalName": "Elote",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Bits de coliflor La Huerta congelados cuídate 500 g",
+    "canonicalName": "Coliflor",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Col morada por kilo",
+    "canonicalName": "Col",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Corazones de apio orgánicos Marketside 454 g",
+    "canonicalName": "Apio",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Edamame Extra Special congelados sin vaina 454 g",
+    "canonicalName": "Edamame",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Té de manzanilla La Pastora 20 sobres",
+    "canonicalName": "Té",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Pan integral Wonder con ajonjolí 567 g",
+    "canonicalName": "Pan",
+    "category": "Bakery"
+  },
+  {
+    "originalName": "Arroz Santina arborio especializado 500 g",
+    "canonicalName": "Arroz",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Alliviax Naproxeno Sódico 6 tabletas",
+    "canonicalName": "Farmácia",
+    "category": "Household"
+  },
+  {
+    "originalName": "Jocoque seco Libanius con ajo y hierbas 250 g",
+    "canonicalName": "Jocoque",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Hummus Libanius garbanzo y ajonjolí 280 g",
+    "canonicalName": "Hummus",
+    "category": "Other"
+  },
+  {
+    "originalName": "Graneodín F Flurbiprofeno 8.75 mg doble acción sabor miel limón 16 pastillas",
+    "canonicalName": "Farmacía",
+    "category": "Household"
+  },
+  {
+    "originalName": "Filete de tilapia por kg peso aprox por charola 800 a 900 g",
+    "canonicalName": "Tilapia",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Garbanzo Great Value 500 g",
+    "canonicalName": "Garbanzo",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Limón sin semilla por kilo",
+    "canonicalName": "Limón",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Leche Alpura clásica caja con 6 pzas de 1 l c/u",
+    "canonicalName": "Leche",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Carne molida de pollo por kilo peso aprox por charola 600 g",
+    "canonicalName": "Carne molida de pollo",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Camarón crudo grande Marketside 454 g congelado",
+    "canonicalName": "Camarón",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Pera bosc por kilo",
+    "canonicalName": "Pera",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Soya Maggi tradicional 290 ml",
+    "canonicalName": "Salsa de soya",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Salsa de soya Kikkoman 296 ml",
+    "canonicalName": "Salsa de soya",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Mermelada de melocotón Helios Diet diet 280 g",
+    "canonicalName": "Mermelada",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Graneodín F Flurbiprofeno 8.75 mg sabor naranja 16 tabletas",
+    "canonicalName": "Farmacía",
+    "category": "Household"
+  },
+  {
+    "originalName": "Cebollas crujientes Fresh Gourmet ligeramente saladas 99 g",
+    "canonicalName": "Cebollas crujientes",
+    "category": "Snacks"
+  },
+  {
+    "originalName": "Canela molida McCormick 63 g",
+    "canonicalName": "Canela molida",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Aceite de ajonjolí Kaporo 190 ml",
+    "canonicalName": "Aceite de ajonjolí",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Queso cottage Lyncott 1% grasa 380 g",
+    "canonicalName": "Queso cottage",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Penca de plátano Chiapas por kilo",
+    "canonicalName": "Plátano",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Manzana granny smith por kilo",
+    "canonicalName": "Manzana",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Detergente Líquido Ariel Revitacolor Limpieza a la Primera en Colores 4.8 l",
+    "canonicalName": "Detergente para ropa",
+    "category": "Household"
+  },
+  {
+    "originalName": "Detergente en polvo Finish power powder para máquina lavavajillas 1 kg",
+    "canonicalName": "Detergente para lavavajillas",
+    "category": "Household"
+  },
+  {
+    "originalName": "Corazones de lechuga Marketside orejona 3 piezas",
+    "canonicalName": "Lechuga",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Queso parmesano Parma 227 g",
+    "canonicalName": "Queso parmesano",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Queso manchego Lala Rallado 250 g",
+    "canonicalName": "Queso manchego",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Pimiento morrón Marketside semáforo 3 pzas",
+    "canonicalName": "Pimiento",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Palitos de apio orgánico Marketside 400 g",
+    "canonicalName": "Apio",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Floretes de brócoli Marketside 454 g",
+    "canonicalName": "Brócoli",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Filete de salmón Hofseth noruego por kg peso aprox por charola 400 g",
+    "canonicalName": "Salmón",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Crema ácida Alpura regular 450 ml",
+    "canonicalName": "Crema",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Mostaza Maille dijon originale 215 g",
+    "canonicalName": "Mostaza",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Crema de cacahuate Mister 100% natural 320 g",
+    "canonicalName": "Crema de cacahuate",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Salsa macha Don Emilio cacahuate y semillas selectas 250 g",
+    "canonicalName": "Salsa macha",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Sal La Fina de grano, yodada fluorurada 750 g",
+    "canonicalName": "Sal",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Pepino por kilo",
+    "canonicalName": "Pepino",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Miel de abeja Nattura Miel 730 g",
+    "canonicalName": "Miel",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Mezcla de moras Great Value congeladas 907 g",
+    "canonicalName": "Frutos rojos congelados",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Limón eureka por kilo",
+    "canonicalName": "Limón amarillo",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Limón agrio Marketside extra en malla 1.3 kg",
+    "canonicalName": "Limón",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Hongos portabella enteros Monte Blanco 500 g",
+    "canonicalName": "Hongos",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Cacahuates Mafer Salado 240 g",
+    "canonicalName": "Cacahuates",
+    "category": "Snacks"
+  },
+  {
+    "originalName": "Aderezo Hellmann's light 395 g",
+    "canonicalName": "Mayonesa",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Refresco Coca Cola zero 6 latas de 355 ml c/u",
+    "canonicalName": "Coca Cola",
+    "category": "Beverages"
+  },
+  {
+    "originalName": "Rajas de jalapeño La Costeña en escabeche 220 g",
+    "canonicalName": "Jalapeño en lata",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Queso Oaxaca Los Volcanes 400 g",
+    "canonicalName": "Queso Oaxaca",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Papas fritas Sabritas Receta Crujiente sabor jalapeño 160 g",
+    "canonicalName": "Papas fritas",
+    "category": "Snacks"
+  },
+  {
+    "originalName": "Molido Pan'Ko 300g",
+    "canonicalName": "Pan'ko",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Mermelada de mora azul Helios extra 340 g",
+    "canonicalName": "Mermelada",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Mantequilla Alpura pasteurizada sin sal 220 g",
+    "canonicalName": "Mantequilla",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Laurel Sassón entero 10 g",
+    "canonicalName": "Laurel",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Jabón líquido corporal Grisi Neutro exfoliante coco 450 ml",
+    "canonicalName": "Jabón líquido corporal",
+    "category": "Household"
+  },
+  {
+    "originalName": "Jabón líquido corporal Grisi leche de burra hidratante 450 ml",
+    "canonicalName": "Jabón líquido corporal",
+    "category": "Household"
+  },
+  {
+    "originalName": "Falda de res para deshebrar por kilo peso aprox por charola 700 a 800 g",
+    "canonicalName": "Falda de res",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Escoba Reynera doble angular",
+    "canonicalName": "Limpieza del hogar",
+    "category": "Household"
+  },
+  {
+    "originalName": "Chile guajillo Great Value 100 g",
+    "canonicalName": "Chile guajillo",
+    "category": "Produce"
+  },
+  {
+    "originalName": "Agua mineral Topo Chico 1.5 l",
+    "canonicalName": "Agua",
+    "category": "Beverages"
+  },
+  {
+    "originalName": "Baguette grande por pza Baguette grande por pza Mango manila por kilo Baguette grande por pza",
+    "canonicalName": "Pan",
+    "category": "Bakery"
+  },
+  {
+    "originalName": "Caldo de vegetales Knorr 100% natural en polvo 200 g",
+    "canonicalName": "Caldo",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Queso manchego NocheBuena rallado 250 g",
+    "canonicalName": "Queso manchego",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Toalla de papel Elite 1 rollo de 180 hojas dobles",
+    "canonicalName": "Toallas de papel",
+    "category": "Household"
+  },
+  {
+    "originalName": "Toallitas húmedas Parent´ s Choice para bebé 80 pzas",
+    "canonicalName": "Toallitas húmedas",
+    "category": "Household"
+  },
+  {
+    "originalName": "Vinagre blanco Clemente Jacques de alcohol de caña 1 l",
+    "canonicalName": "Vinagre",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Articulos agregados",
+    "canonicalName": "Pan",
+    "category": "Bakery"
+  },
+  {
+    "originalName": "Bebida a base de avena Oatly barista sin azúcar añadida 1 l",
+    "canonicalName": "Leche Oatly",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Yoghurt Yoplait Griego natural sin azúcar añadida 750 g",
+    "canonicalName": "Yoghurt",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "AGUACATE HASS POR KILO",
+    "canonicalName": "Aguacate",
+    "category": "Produce"
   }
 ]

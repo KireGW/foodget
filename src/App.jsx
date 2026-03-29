@@ -14,6 +14,12 @@ function App() {
     availableMonths,
     selectedMonth,
     setSelectedMonth,
+    itemizedRangeMode,
+    setItemizedRangeMode,
+    itemizedRangeStart,
+    setItemizedRangeStart,
+    itemizedRangeEnd,
+    setItemizedRangeEnd,
     metrics,
     categoryChart,
     categoryChartsByMonth,
@@ -127,6 +133,12 @@ function App() {
         availableMonths={availableMonths}
         selectedMonth={selectedMonth}
         onMonthChange={setSelectedMonth}
+        itemizedRangeMode={itemizedRangeMode}
+        onItemizedRangeModeChange={setItemizedRangeMode}
+        itemizedRangeStart={itemizedRangeStart}
+        onItemizedRangeStartChange={setItemizedRangeStart}
+        itemizedRangeEnd={itemizedRangeEnd}
+        onItemizedRangeEndChange={setItemizedRangeEnd}
       />
     </main>
   )

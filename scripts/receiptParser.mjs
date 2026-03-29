@@ -256,7 +256,7 @@ function parseReceiptText(text, fallbackDate) {
 }
 
 function parseWalmartOrder(text) {
-  const totalMxnValue = extractCurrencyValue(text, [/Total\s+\$\s*([\d.\s,]+)/i])
+  const totalMxnValue = extractWalmartOrderTotal(text)
   const { items, ignoredAdjustmentTotalMxn } = parseWalmartOrderItems(text)
 
   return buildParseResult({
@@ -738,6 +738,70 @@ function extractProductSegments(line) {
 }
 
 function parseWalmartOrderItems(text) {
+  const orderBlock = extractWalmartOrderItemBlock(text)
+  const weightLines = extractWalmartOrderWeightLines(text).map((value) => [null, value])
+  const pieceLines = [
+    ...text.matchAll(/Comprado pieza\s+([\d.]+)\s+\$\s*([\d.\s,]+)/gi),
+  ]
+  const addedArticleLines = [
+    ...text.matchAll(/Art[ií]culos agregados\s+\$\s*([\d.\s,]+)/gi),
+  ]
+  const discountLines = [...text.matchAll(/Descuento(?: en env[ií]o)?\s*-\$\s*([\d.\s,]+)/gi)]
+  const returnLines = [
+    ...text.matchAll(/([^\n]+?)\s+Devoluci[oó]n completada\s+\$\s*([\d.\s,]+)/gi),
+  ]
+
+  if (orderBlock && weightLines.length + pieceLines.length > 0) {
+    const expectedItemCount = weightLines.length + pieceLines.length
+    const weightedNames = splitWalmartOrderProductBlock(orderBlock, expectedItemCount)
+    const weightedCount = weightLines.length
+    const itemNames = weightedNames.slice(0, expectedItemCount)
+
+    if (itemNames.length === expectedItemCount) {
+      const items = []
+
+      weightLines.forEach((match, index) => {
+        const draft = createItemDraft(itemNames[index])
+        draft.unitType = 'weight'
+        draft.quantity = 1
+        draft.totalMxnValue = parseMoney(match[1])
+        pushCurrentItem(items, draft, { ignoredAdjustmentTotalMxn: 0 })
+      })
+
+      pieceLines.forEach((match, index) => {
+        const draft = createItemDraft(itemNames[weightedCount + index])
+        draft.unitType = 'count'
+        draft.quantity = Number(match[1])
+        draft.totalMxnValue = draft.quantity * parseMoney(match[2])
+        pushCurrentItem(items, draft, { ignoredAdjustmentTotalMxn: 0 })
+      })
+
+      addedArticleLines.forEach((match) => {
+        const draft = createItemDraft('Articulos agregados')
+        draft.unitType = 'count'
+        draft.quantity = 1
+        draft.totalMxnValue = parseMoney(match[1])
+        pushCurrentItem(items, draft, { ignoredAdjustmentTotalMxn: 0 })
+      })
+
+      returnLines.forEach((match) => {
+        const draft = createItemDraft(match[1])
+        draft.unitType = 'count'
+        draft.quantity = 1
+        draft.totalMxnValue = parseMoney(match[2])
+        pushCurrentItem(items, draft, { ignoredAdjustmentTotalMxn: 0 })
+      })
+
+      return {
+        items,
+        ignoredAdjustmentTotalMxn: -discountLines.reduce(
+          (sum, match) => sum + parseMoney(match[1]),
+          0,
+        ),
+      }
+    }
+  }
+
   const items = []
   const parsingSummary = {
     ignoredAdjustmentTotalMxn: 0,
@@ -804,6 +868,164 @@ function parseWalmartOrderItems(text) {
     items: items.filter(Boolean),
     ignoredAdjustmentTotalMxn: parsingSummary.ignoredAdjustmentTotalMxn,
   }
+}
+
+function extractWalmartOrderItemBlock(text) {
+  const blockMatch = text.match(
+    /Pedido#.+?\n([\s\S]+?)\n(?:Peso ajustado|Comprado pieza|Subtotal\s+\$)/i,
+  )
+
+  if (!blockMatch) {
+    return ''
+  }
+
+  return blockMatch[1]
+    .replace(/C[oó]digo de barras/gi, ' ')
+    .replace(/No disponible pieza\s+\d+\s+\$\s*[\d.\s,]+(?:\s*c\/u)?/gi, ' ')
+    .replace(/No disponible\s+\$\s*[\d.\s,]+/gi, ' ')
+    .replace(/Art[ií]culos agregados\s+\$\s*[\d.\s,]+/gi, ' ')
+    .replace(/Peso ajustado\s*\$\s*[\d.\s,]+/gi, ' ')
+    .replace(/(?:Peso ajustado\s*)+(?:\$\s*[\d.\s,]+\s*)*$/i, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function splitWalmartOrderProductBlock(text, expectedCount = null) {
+  const splitPattern =
+    /(?=Mandarina por kg|Pera bosc por kilo|Guayaba por kilo|Jengibre por kilo|Hummus Libanius|Jocoque seco Libanius|Graneod[ií]n F|Garbanzo Great Value|Penca de pl[aá]tano Chiapas|Penca de pl[aá]tano org[aá]nico Marketside por kilo|Penca de|Milanesa de|Molida de|Carne molida de pollo|Falda de res para deshebrar|Pechuga sin|Pimiento rojo|Pimiento morr[oó]n Marketside|Cebolla Blanca|Cebolla morada|Col morada|Pepino por kilo|Br[oó]coli|Floretes de br[oó]coli Marketside|Jitomate saladet|Bistec de|Manzana Red Delicious|Manzana granny smith|Papa blanca alfa por kilo|Arroz Santina arborio|Arroz Verde Valle|Aceite de oliva|Aceite de oliva Carbonell|Aceite de ajonjol[ií]|Filete de tilapia|Filete de salm[oó]n Hofseth|Camar[oó]n crudo grande|Diente de ajo|Caf[eé] puro tostado|Bebida a base de avena Oatly|Crema de cacahuate Mister|Crema [aá]cida Alpura regular|Crema [aá]cida|Pasta Barilla penne|Pasta Barilla tortiglioni|Tortillas de ma[ií]z|Tortillas de harina de trigo Mission carb balance|Tortilla Mission|Huevo blanco|ZANAHORIA POR KILO|Zanahoria por kilo|AGUACATE HASS POR KILO|Elote La Huerta|Bits de coliflor|Corazones de apio|Palitos de apio org[aá]nico Marketside|Corazones de lechuga|Queso feta|Queso manchego NocheBuena|Queso manchego NocheBuena rallado|Queso manchego Lala Rallado|Queso parmesano Parma|Queso Oaxaca Los Volcanes|Lim[oó]n eureka por kilo|Lim[oó]n sin semilla|Lim[oó]n sin Semilla|Edamame Extra Special|Queso cottage Lyncott|Queso cottage|Cilantro por pieza|T[eé] de manzanilla|Alliviax Naproxeno|Soya Maggi|Salsa de soya Kikkoman|Cebollas crujientes Fresh Gourmet|Cacahuates Mafer|Canela molida McCormick|Chile guajillo Great Value|Detergente en polvo Finish|Detergente L[ií]quido Ariel|Pan integral Wonder|Mantequilla Lurpak|Mantequilla Alpura pasteurizada sin sal|Mermelada de melocot[oó]n|Mermelada de mora azul Helios extra|Miel de abeja Nattura Miel|Mostaza Maille|Pan Bimbo Multigrano|Pan Bimbo|Leche Alpura cl[aá]sica|Yoghurt Yoplait Griego|Yoghurt Yoplait|Queso manchego|Jam[oó]n de pavo FUD virginia|Jam[oó]n de pavo|Aderezo Hellmann's light|Salsa macha Don Emilio|Jarabe puro de maple Extra Special|Sal La Fina|Laurel Sass[oó]n entero|Caldo de vegetales Knorr|Toalla de papel Elite|Rajas de jalape[nñ]o La Coste[nñ]a|Molido Pan'?Ko|Vinagre blanco Clemente Jacques|Agua mineral Topo Chico|Toallitas h[úu]medas Parent|Escoba Reynera doble angular|XL-3 Xtra Gripe y Tos)/g
+
+  const seededParts = normalizeWalmartOrderParts(
+    text
+    .split(splitPattern)
+    .map((entry) => entry.trim())
+    .filter(Boolean),
+  )
+
+  if (!expectedCount || seededParts.length === expectedCount) {
+    return seededParts
+  }
+
+  const heuristicParts = normalizeWalmartOrderParts(
+    splitWalmartOrderProductBlockBySuffix(text, expectedCount),
+  )
+
+  if (heuristicParts.length === expectedCount) {
+    return heuristicParts
+  }
+
+  return seededParts
+}
+
+function normalizeWalmartOrderParts(parts) {
+  const normalized = []
+
+  for (const part of parts) {
+    const cleanPart = part.replace(/\s+/g, ' ').trim()
+    if (!cleanPart) {
+      continue
+    }
+
+    if (/^peso aprox por charola/i.test(cleanPart) && normalized.length > 0) {
+      normalized[normalized.length - 1] = `${normalized.at(-1)} ${cleanPart}`.trim()
+      continue
+    }
+
+    normalized.push(cleanPart)
+  }
+
+  return normalized
+}
+
+function splitWalmartOrderProductBlockBySuffix(text, expectedCount) {
+  const tokens = text.trim().split(/\s+/).filter(Boolean)
+  const memo = new Map()
+
+  function canSplit(index, remaining) {
+    const key = `${index}:${remaining}`
+    if (memo.has(key)) {
+      return memo.get(key)
+    }
+
+    if (remaining === 1) {
+      const phrase = tokens.slice(index).join(' ')
+      const result = isLikelyWalmartOrderProductPhrase(phrase)
+        ? [phrase]
+        : null
+      memo.set(key, result)
+      return result
+    }
+
+    const maxEnd = tokens.length - (remaining - 1)
+    for (let end = index + 1; end <= maxEnd; end += 1) {
+      const phrase = tokens.slice(index, end).join(' ')
+      if (!isLikelyWalmartOrderProductPhrase(phrase)) {
+        continue
+      }
+
+      const rest = canSplit(end, remaining - 1)
+      if (rest) {
+        const result = [phrase, ...rest]
+        memo.set(key, result)
+        return result
+      }
+    }
+
+    memo.set(key, null)
+    return null
+  }
+
+  return canSplit(0, expectedCount) ?? []
+}
+
+function isLikelyWalmartOrderProductPhrase(phrase) {
+  const normalized = phrase.replace(/\s+/g, ' ').trim()
+
+  return [
+    /por kilo$/i,
+    /por kg$/i,
+    /por pieza$/i,
+    /\b\d+(?:\.\d+)?\s*(?:g|kg|ml|l)$/i,
+    /\b\d+\s*(?:pzas?|piezas|sobres|tabletas)$/i,
+    /\bcaja con \d+\s+pzas?\s+de\s+\d+(?:\.\d+)?\s*l\s+c\/u$/i,
+    /\bsem[aá]foro\s+\d+\s+pzas$/i,
+    /\borejona\s+\d+\s+piezas$/i,
+    /\bcharola\s+\d+\s+a\s+\d+\s+g$/i,
+    /\bc\/u$/i,
+  ].some((pattern) => pattern.test(normalized))
+}
+
+function extractWalmartOrderWeightLines(text) {
+  const directMatches = [...text.matchAll(/Peso ajustado\s*\$\s*([\d.\s,]+)/gi)].map((match) => match[1])
+  const weightTokenCount = [...text.matchAll(/Peso ajustado/gi)].length
+
+  if (weightTokenCount > directMatches.length) {
+    const groupedMatch = text.match(
+      /((?:Peso ajustado\s*)+)((?:\$\s*[\d.\s,]+\s*)+)(?=(?:Comprado pieza|Subtotal))/i,
+    )
+
+    if (groupedMatch) {
+      const groupedValues = [...groupedMatch[2].matchAll(/\$\s*([\d.\s,]+)/g)].map(
+        (match) => match[1],
+      )
+
+      if (groupedValues.length >= weightTokenCount) {
+        return groupedValues.slice(0, weightTokenCount)
+      }
+    }
+  }
+
+  return directMatches
+}
+
+function extractWalmartOrderTotal(text) {
+  const totalMatches = [...text.matchAll(/(?:^|\n)Total\s+\$\s*([\d.\s,]+)/gi)]
+  const lastTotal = totalMatches.at(-1)?.[1]
+
+  if (lastTotal) {
+    return parseMoney(lastTotal)
+  }
+
+  return extractCurrencyValue(text, [/Total\s+\$\s*([\d.\s,]+)/i])
 }
 
 function buildParseResult(result) {

@@ -10,6 +10,12 @@ export function MonthlyOverview({
   availableMonths,
   selectedMonth,
   onMonthChange,
+  itemizedRangeMode,
+  onItemizedRangeModeChange,
+  itemizedRangeStart,
+  onItemizedRangeStartChange,
+  itemizedRangeEnd,
+  onItemizedRangeEndChange,
 }) {
   const [sortConfig, setSortConfig] = useState(defaultSort)
   const [isOpen, setIsOpen] = useState(true)
@@ -43,16 +49,55 @@ export function MonthlyOverview({
           <label className="month-select">
             <span>Item month</span>
             <select
-              value={selectedMonth}
-              onChange={(event) => onMonthChange(event.target.value)}
+              value={itemizedRangeMode === 'custom' ? 'custom' : selectedMonth}
+              onChange={(event) => {
+                if (event.target.value === 'custom') {
+                  onItemizedRangeModeChange('custom')
+                  return
+                }
+
+                onItemizedRangeModeChange('month')
+                onMonthChange(event.target.value)
+              }}
             >
               {availableMonths.map((month) => (
                 <option key={month.value} value={month.value}>
                   {month.label}
                 </option>
               ))}
+              <option value="custom">Custom range</option>
             </select>
           </label>
+          {itemizedRangeMode === 'custom' ? (
+            <>
+              <label className="month-select">
+                <span>From</span>
+                <select
+                  value={itemizedRangeStart}
+                  onChange={(event) => onItemizedRangeStartChange(event.target.value)}
+                >
+                  {availableMonths.map((month) => (
+                    <option key={`start-${month.value}`} value={month.value}>
+                      {month.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="month-select">
+                <span>To</span>
+                <select
+                  value={itemizedRangeEnd}
+                  onChange={(event) => onItemizedRangeEndChange(event.target.value)}
+                >
+                  {availableMonths.map((month) => (
+                    <option key={`end-${month.value}`} value={month.value}>
+                      {month.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          ) : null}
           <button
             type="button"
             className="trend-panel__toggle"
@@ -75,7 +120,7 @@ export function MonthlyOverview({
         <div className="table-wrap">
           {monthlyItems.length === 0 ? (
           <p className="table-empty">
-            No items available for this month yet. Upload a PDF receipt to start
+            No items available for this selection yet. Upload a PDF receipt to start
             building the report.
           </p>
           ) : (
