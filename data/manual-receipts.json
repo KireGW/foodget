@@ -1,0 +1,33 @@
+[
+  {
+    "id": "manual-2026-03-19-toallitas-humedas",
+    "fileName": "Manual - Toallitas húmedas",
+    "relativePath": null,
+    "purchasedAt": "2026-03-19",
+    "monthKey": "2026-03",
+    "url": null,
+    "parseStatus": "manual_entry",
+    "parseNotes": "Manual entry added in the app.",
+    "textPreview": "",
+    "store": "Manual entry",
+    "sourceType": "manual",
+    "totalMxnValue": 329,
+    "soldItemsCount": 1,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$329.00",
+    "items": [
+      {
+        "name": "Toallitas húmedas",
+        "productCode": null,
+        "originalName": "Toallitas húmedas",
+        "category": "Household",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 329,
+        "totalMxn": 329,
+        "swedenAverageSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
+  }
+]

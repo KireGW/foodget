@@ -1,0 +1,471 @@
+import { useEffect, useMemo, useState } from 'react'
+import { receipts } from 'virtual:receipts'
+import {
+  buildAvailableMonths,
+  buildCategoryChart,
+  buildCategoryChartForMonth,
+  buildMonthComparison,
+  buildMetrics,
+  buildMonthlyItems,
+  buildProductMovers,
+  buildReceiptAuditItems,
+  buildReceiptCalendar,
+  buildReceiptEntries,
+  buildReceiptReviewItems,
+  buildCategoryTrends,
+} from '../lib/receiptAnalytics.js'
+import {
+  applyProductOverrides,
+  buildProductMappings,
+  fetchProductOverrides,
+  saveProductOverride,
+} from '../lib/productOverrides.js'
+import {
+  fetchReceiptReviews,
+  saveReceiptReview,
+} from '../lib/receiptReviews.js'
+import {
+  applyReceiptItemOverrides,
+  fetchReceiptItemOverrides,
+  saveReceiptItemOverride,
+} from '../lib/receiptItemOverrides.js'
+import { buildLearningSuggestions } from '../lib/learningSuggestions.js'
+import { readJsonOrThrow } from '../lib/apiClient.js'
+import {
+  deleteManualReceipt,
+  fetchManualReceipts,
+  saveManualReceipt,
+} from '../lib/manualReceipts.js'
+import { uploadReceiptFiles } from '../lib/receiptUpload.js'
+
+export function useBudgetApp() {
+  const [manualReceipts, setManualReceipts] = useState([])
+  const sourceReceipts = useMemo(
+    () => [...receipts, ...manualReceipts],
+    [manualReceipts],
+  )
+  const [deletedReceiptIds, setDeletedReceiptIds] = useState([])
+  const [uploadStatus, setUploadStatus] = useState(
+    'Drop PDF receipts here to import them.',
+  )
+  const [isUploading, setIsUploading] = useState(false)
+  const [productOverrides, setProductOverrides] = useState([])
+  const [receiptReviews, setReceiptReviews] = useState([])
+  const [receiptItemOverrides, setReceiptItemOverrides] = useState([])
+  const [learningSuggestions, setLearningSuggestions] = useState([])
+  const [overrideStatus, setOverrideStatus] = useState(
+    'Auto-categorized products can stay as they are, and you can correct anything that looks off.',
+  )
+  const [reviewStatus, setReviewStatus] = useState(
+    'Receipts with bigger total differences will land here so you can confirm which total to trust.',
+  )
+  const receiptsWithOverrides = useMemo(
+    () =>
+      applyProductOverrides(
+        sourceReceipts.filter((receipt) => !deletedReceiptIds.includes(receipt.id)),
+        productOverrides,
+      ),
+    [sourceReceipts, productOverrides, deletedReceiptIds],
+  )
+  const receiptsWithManualCorrections = useMemo(
+    () => applyReceiptItemOverrides(receiptsWithOverrides, receiptItemOverrides),
+    [receiptsWithOverrides, receiptItemOverrides],
+  )
+  const availableMonths = useMemo(
+    () => buildAvailableMonths(receiptsWithManualCorrections),
+    [receiptsWithManualCorrections],
+  )
+  const [selectedMonth, setSelectedMonth] = useState(
+    availableMonths[availableMonths.length - 1]?.value ?? '',
+  )
+
+  useEffect(() => {
+    if (
+      availableMonths.length > 0 &&
+      !availableMonths.some((month) => month.value === selectedMonth)
+    ) {
+      setSelectedMonth(availableMonths[availableMonths.length - 1].value)
+    }
+  }, [availableMonths, selectedMonth])
+
+  useEffect(() => {
+    async function loadProductOverrides() {
+      try {
+        const loadedOverrides = await fetchProductOverrides()
+        setProductOverrides(loadedOverrides)
+      } catch (error) {
+        setOverrideStatus(
+          error instanceof Error
+            ? error.message
+            : 'Could not load product overrides.',
+        )
+      }
+    }
+
+    loadProductOverrides()
+  }, [])
+
+  useEffect(() => {
+    async function loadReceiptReviews() {
+      try {
+        const loadedReviews = await fetchReceiptReviews()
+        setReceiptReviews(loadedReviews)
+      } catch (error) {
+        setReviewStatus(
+          error instanceof Error
+            ? error.message
+            : 'Could not load receipt reviews.',
+        )
+      }
+    }
+
+    loadReceiptReviews()
+  }, [])
+
+  useEffect(() => {
+    async function loadManualReceipts() {
+      try {
+        const loadedReceipts = await fetchManualReceipts()
+        setManualReceipts(loadedReceipts)
+      } catch (error) {
+        setUploadStatus(
+          error instanceof Error
+            ? error.message
+            : 'Could not load manual receipts.',
+        )
+      }
+    }
+
+    loadManualReceipts()
+  }, [])
+
+  useEffect(() => {
+    async function loadReceiptItemOverrides() {
+      try {
+        const loadedOverrides = await fetchReceiptItemOverrides()
+        setReceiptItemOverrides(loadedOverrides)
+      } catch (error) {
+        setReviewStatus(
+          error instanceof Error
+            ? error.message
+            : 'Could not load receipt item overrides.',
+        )
+      }
+    }
+
+    loadReceiptItemOverrides()
+  }, [])
+
+  const monthReceipts = useMemo(
+    () =>
+      receiptsWithManualCorrections.filter((receipt) =>
+        receipt.purchasedAt.startsWith(selectedMonth),
+      ),
+    [receiptsWithManualCorrections, selectedMonth],
+  )
+
+  const monthlyItems = useMemo(
+    () => buildMonthlyItems(monthReceipts),
+    [monthReceipts],
+  )
+
+  const metrics = useMemo(
+    () => buildMetrics(selectedMonth, monthReceipts, monthlyItems, receiptReviews),
+    [selectedMonth, monthReceipts, monthlyItems, receiptReviews],
+  )
+
+  const categoryChart = useMemo(
+    () => buildCategoryChart(monthlyItems),
+    [monthlyItems],
+  )
+  const categoryChartsByMonth = useMemo(
+    () =>
+      Object.fromEntries(
+        availableMonths.map((month) => [
+          month.value,
+          buildCategoryChartForMonth(month.value, receiptsWithManualCorrections),
+        ]),
+      ),
+    [availableMonths, receiptsWithManualCorrections],
+  )
+  const monthComparison = useMemo(
+    () =>
+      buildMonthComparison(
+        selectedMonth,
+        availableMonths,
+        receiptsWithManualCorrections,
+        receiptReviews,
+      ),
+    [selectedMonth, availableMonths, receiptsWithManualCorrections, receiptReviews],
+  )
+  const categoryTrends = useMemo(
+    () =>
+      buildCategoryTrends(
+        selectedMonth,
+        availableMonths,
+        receiptsWithManualCorrections,
+      ),
+    [selectedMonth, availableMonths, receiptsWithManualCorrections],
+  )
+  const productMovers = useMemo(
+    () =>
+      buildProductMovers(
+        selectedMonth,
+        availableMonths,
+        receiptsWithManualCorrections,
+      ),
+    [selectedMonth, availableMonths, receiptsWithManualCorrections],
+  )
+
+  const receiptEntries = useMemo(
+    () => buildReceiptEntries(receiptsWithManualCorrections, receiptReviews),
+    [receiptsWithManualCorrections, receiptReviews],
+  )
+  const receiptCalendar = useMemo(
+    () => buildReceiptCalendar(receiptEntries),
+    [receiptEntries],
+  )
+  const receiptReviewItems = useMemo(
+    () => buildReceiptReviewItems(receiptEntries),
+    [receiptEntries],
+  )
+  const receiptAuditItems = useMemo(
+    () => buildReceiptAuditItems(receiptEntries),
+    [receiptEntries],
+  )
+  const productMappings = useMemo(
+    () =>
+      buildProductMappings(
+        sourceReceipts.filter((receipt) => receipt.sourceType !== 'manual'),
+        productOverrides,
+      ),
+    [sourceReceipts, productOverrides],
+  )
+
+  const parsedCount = receiptsWithManualCorrections.filter(
+    (receipt) => receipt.parseStatus === 'parsed_items' || receipt.parseStatus === 'parsed_total',
+  ).length
+
+  const syncStatus =
+    receiptsWithManualCorrections.length === 0
+      ? 'No receipts found yet.'
+      : `${receiptsWithManualCorrections.length} receipt${receiptsWithManualCorrections.length === 1 ? '' : 's'} loaded, ${parsedCount} interpreted PDF${parsedCount === 1 ? '' : 's'} so far.`
+
+  async function importReceipts(fileList) {
+    const files = Array.from(fileList ?? []).filter((file) =>
+      file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'),
+    )
+
+    if (files.length === 0 || isUploading) {
+      return
+    }
+
+    setIsUploading(true)
+    setUploadStatus(`Importing ${files.length} receipt${files.length === 1 ? '' : 's'}...`)
+
+    try {
+      const result = await uploadReceiptFiles(files)
+      setUploadStatus(result.message)
+
+      window.setTimeout(() => {
+        window.location.reload()
+      }, 450)
+    } catch (error) {
+      setUploadStatus(
+        error instanceof Error ? error.message : 'Receipt upload failed.',
+      )
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  async function deleteReceipt(receipt) {
+    if (isUploading) {
+      return
+    }
+
+    setUploadStatus(`Deleting ${receipt.fileName}...`)
+
+    try {
+      if (receipt.sourceType === 'manual') {
+        await deleteManualReceipt(receipt.id)
+        setManualReceipts((currentReceipts) =>
+          currentReceipts.filter((entry) => entry.id !== receipt.id),
+        )
+      } else {
+        const response = await fetch('/api/receipts', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            receiptId: receipt.id,
+            relativePath: receipt.relativePath,
+          }),
+        })
+
+        await readJsonOrThrow(response, 'Could not delete receipt.')
+      }
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        /Receipt file was not found\./i.test(error.message)
+      ) {
+        finalizeDeletedReceipt(receipt)
+        setUploadStatus(
+          `${receipt.fileName} was already gone on disk, so it was cleared from the app.`,
+        )
+        return
+      }
+
+      setUploadStatus(
+        error instanceof Error ? error.message : 'Could not delete receipt.',
+      )
+      return
+    }
+
+    finalizeDeletedReceipt(receipt)
+    setUploadStatus(`Deleted ${receipt.fileName}.`)
+  }
+
+  async function createManualReceipt(manualReceipt) {
+    if (isUploading) {
+      return
+    }
+
+    setIsUploading(true)
+    setUploadStatus(`Saving manual receipt for ${manualReceipt.title}...`)
+
+    try {
+      const savedReceipt = await saveManualReceipt(manualReceipt)
+      setManualReceipts((currentReceipts) => [...currentReceipts, savedReceipt])
+      setUploadStatus(`Saved manual receipt for ${savedReceipt.fileName}.`)
+    } catch (error) {
+      setUploadStatus(
+        error instanceof Error ? error.message : 'Could not save manual receipt.',
+      )
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  function finalizeDeletedReceipt(receipt) {
+    setDeletedReceiptIds((currentIds) => [...new Set([...currentIds, receipt.id])])
+    setReceiptReviews((currentReviews) =>
+      currentReviews.filter((entry) => entry.receiptId !== receipt.id),
+    )
+    setReceiptItemOverrides((currentOverrides) =>
+      currentOverrides.filter((entry) => entry.receiptId !== receipt.id),
+    )
+    setLearningSuggestions((currentSuggestions) =>
+      currentSuggestions.filter((entry) => entry.receiptId !== receipt.id),
+    )
+  }
+
+  async function saveProductMappingOverride(override) {
+    const mappingLabel = override.productCode || override.originalName
+    setOverrideStatus(`Saving mapping for ${mappingLabel}...`)
+
+    try {
+      const savedOverride = await saveProductOverride(override)
+      setProductOverrides((currentOverrides) => {
+        const nextOverrides = currentOverrides.filter(
+          (entry) =>
+            (savedOverride.productCode && entry.productCode !== savedOverride.productCode) ||
+            (!savedOverride.productCode && entry.originalName !== savedOverride.originalName),
+        )
+        nextOverrides.push(savedOverride)
+        return nextOverrides
+      })
+      setOverrideStatus(
+        `Saved mapping for ${savedOverride.productCode || savedOverride.originalName}.`,
+      )
+    } catch (error) {
+      setOverrideStatus(
+        error instanceof Error ? error.message : 'Could not save mapping.',
+      )
+    }
+  }
+
+  async function saveReceiptReviewDecision(review) {
+    setReviewStatus('Saving receipt review...')
+
+    try {
+      const savedReview = await saveReceiptReview(review)
+      setReceiptReviews((currentReviews) => {
+        const nextReviews = currentReviews.filter(
+          (entry) => entry.receiptId !== savedReview.receiptId,
+        )
+        nextReviews.push(savedReview)
+        return nextReviews
+      })
+      setReviewStatus(
+        savedReview.decision === 'use_official_total'
+          ? 'Saved: the receipt now uses the printed total.'
+          : 'Saved: the receipt will keep using parsed items.',
+      )
+    } catch (error) {
+      setReviewStatus(
+        error instanceof Error ? error.message : 'Could not save receipt review.',
+      )
+    }
+  }
+
+  async function saveReceiptItems(receiptId, items) {
+    setReviewStatus('Saving corrected receipt items...')
+
+    try {
+      const originalReceipt = receiptReviewItems.find((receipt) => receipt.id === receiptId)
+      const savedOverride = await saveReceiptItemOverride({
+        receiptId,
+        items,
+      })
+      setReceiptItemOverrides((currentOverrides) => {
+        const nextOverrides = currentOverrides.filter(
+          (entry) => entry.receiptId !== savedOverride.receiptId,
+        )
+        nextOverrides.push(savedOverride)
+        return nextOverrides
+      })
+      setLearningSuggestions(buildLearningSuggestions(originalReceipt, items))
+      setReviewStatus('Saved the edited parsed items for this receipt.')
+    } catch (error) {
+      setReviewStatus(
+        error instanceof Error
+          ? error.message
+          : 'Could not save corrected receipt items.',
+      )
+    }
+  }
+
+  return {
+    availableMonths,
+    selectedMonth,
+    setSelectedMonth,
+    metrics,
+    categoryChart,
+    categoryChartsByMonth,
+    monthComparison,
+    categoryTrends,
+    productMovers,
+    monthlyItems,
+    receiptEntries,
+    receiptCalendar,
+    receiptReviewItems,
+    receiptAuditItems,
+    productMappings,
+    syncStatus,
+    uploadStatus,
+    isUploading,
+    importReceipts,
+    createManualReceipt,
+    deleteReceipt,
+    overrideStatus,
+    reviewStatus,
+    learningSuggestions,
+    saveProductMappingOverride,
+    saveReceiptReviewDecision,
+    saveReceiptItems,
+    setLearningSuggestions,
+  }
+}

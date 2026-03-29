@@ -1,0 +1,47 @@
+:root {
+  font-family: 'Avenir Next', 'Nunito Sans', 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #21404a;
+  background:
+    radial-gradient(circle at top left, rgba(244, 182, 97, 0.24), transparent 30%),
+    linear-gradient(180deg, #fff8eb 0%, #f4efe6 42%, #e8f0ec 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --border: rgba(38, 64, 74, 0.14);
+  --heading-color: #17313a;
+  --muted: #58717b;
+  --panel-tint: rgba(219, 241, 244, 0.45);
+  --shadow-soft: 0 18px 55px rgba(27, 47, 52, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
