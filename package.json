@@ -9,6 +9,7 @@
     "dev:server": "node server/uploadServer.mjs",
     "build": "vite build",
     "lint": "eslint .",
+    "refresh-snapshot": "node scripts/write-receipt-snapshot.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
