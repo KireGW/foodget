@@ -97,19 +97,138 @@ export function UnknownProductsPanel({
 
       {isOpen ? (
         <div className="table-wrap">
-        <table className="mapping-table">
-          <thead>
-            <tr>
-              <th>Receipt text</th>
-              <th></th>
-              <th>Status</th>
-              <th>Seen</th>
-              <th>Product name</th>
-              <th>Category</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
+          <table className="mapping-table desktop-table">
+            <thead>
+              <tr>
+                <th>Receipt text</th>
+                <th></th>
+                <th>Status</th>
+                <th>Seen</th>
+                <th>Product name</th>
+                <th>Category</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {unknownProducts.map((product) => {
+                const draft = drafts[product.overrideKey] ?? {
+                  canonicalName: product.currentName,
+                  category: product.currentCategory,
+                }
+                const needsMapping = product.normalizationStatus === 'unmatched' || product.normalizationStatus === 'needs_mapping'
+                const hasChanges =
+                  draft.canonicalName.trim() !== product.currentName ||
+                  draft.category !== product.currentCategory
+
+                return (
+                  <tr key={product.overrideKey}>
+                    <td>
+                      <div className="mapping-code">
+                        <strong>{product.originalName}</strong>
+                        {product.productCode ? (
+                          <small>
+                            <button
+                              className="mapping-code__link"
+                              type="button"
+                              onClick={() =>
+                                openProductSearchWindow(product)
+                              }
+                              title={buildProductSearchTitle(product)}
+                            >
+                              {product.productCode}
+                            </button>
+                          </small>
+                        ) : null}
+                      </div>
+                    </td>
+                    <td>
+                      {product.latestReceiptUrl ? (
+                        <a
+                          className="mapping-receipt-link"
+                          href={product.latestReceiptUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={`Open latest receipt for ${product.productCode ?? product.originalName}`}
+                          title={`Open ${product.latestReceiptFileName}`}
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M7 3.75h7.8L19.25 8.2v11.05a1 1 0 0 1-1 1H15.5a1 1 0 0 1-.85-.47L13 17.25l-1.65 2.53a1 1 0 0 1-1.67 0L8 17.25l-1.65 2.53a1 1 0 0 1-1.67 0L3 17.25l-1.65 2.53A1 1 0 0 1 .5 19.25V4.75a1 1 0 0 1 1-1H7Zm.5 1.5H2v12.35l1.65-2.53a1 1 0 0 1 1.67 0L7 17.6l1.65-2.53a1 1 0 0 1 1.67 0L12 17.6l1.65-2.53a1 1 0 0 1 1.67 0L17 17.6V8.82L14.18 6H7.5v-.75Zm1.25 4h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm0 3.5h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Z" />
+                          </svg>
+                        </a>
+                      ) : null}
+                    </td>
+                    <td>
+                      <span
+                        className={`mapping-status mapping-status--${product.normalizationStatus}`}
+                      >
+                        {formatMappingStatus(product.normalizationStatus)}
+                      </span>
+                    </td>
+                    <td>{product.timesSeen}</td>
+                    <td>
+                      <input
+                        className="mapping-input"
+                        value={draft.canonicalName}
+                        onChange={(event) =>
+                          setDrafts((currentDrafts) => ({
+                            ...currentDrafts,
+                            [product.overrideKey]: {
+                              ...draft,
+                              canonicalName: event.target.value,
+                            },
+                          }))
+                        }
+                      />
+                    </td>
+                    <td>
+                      <select
+                        className="mapping-select"
+                        value={draft.category}
+                        onChange={(event) =>
+                          setDrafts((currentDrafts) => ({
+                            ...currentDrafts,
+                            [product.overrideKey]: {
+                              ...draft,
+                              category: event.target.value,
+                            },
+                          }))
+                        }
+                      >
+                        {categoryOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      {hasChanges || needsMapping ? (
+                        <button
+                          className="mapping-save"
+                          type="button"
+                          onClick={() =>
+                            onSaveOverride({
+                              productCode: product.productCode,
+                              originalName: product.originalName,
+                              canonicalName:
+                                draft.canonicalName.trim() || product.currentName,
+                              category: draft.category,
+                            })
+                          }
+                        >
+                          Save
+                        </button>
+                      ) : (
+                        <span className="mapping-saved">Saved</span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+
+          <div className="mobile-mapping-cards">
             {unknownProducts.map((product) => {
               const draft = drafts[product.overrideKey] ?? {
                 canonicalName: product.currentName,
@@ -121,8 +240,8 @@ export function UnknownProductsPanel({
                 draft.category !== product.currentCategory
 
               return (
-                <tr key={product.overrideKey}>
-                  <td>
+                <article key={product.overrideKey} className="mobile-mapping-card">
+                  <div className="mobile-mapping-card__header">
                     <div className="mapping-code">
                       <strong>{product.originalName}</strong>
                       {product.productCode ? (
@@ -130,9 +249,7 @@ export function UnknownProductsPanel({
                           <button
                             className="mapping-code__link"
                             type="button"
-                            onClick={() =>
-                              openProductSearchWindow(product)
-                            }
+                            onClick={() => openProductSearchWindow(product)}
                             title={buildProductSearchTitle(product)}
                           >
                             {product.productCode}
@@ -140,8 +257,14 @@ export function UnknownProductsPanel({
                         </small>
                       ) : null}
                     </div>
-                  </td>
-                  <td>
+                    <span
+                      className={`mapping-status mapping-status--${product.normalizationStatus}`}
+                    >
+                      {formatMappingStatus(product.normalizationStatus)}
+                    </span>
+                  </div>
+                  <div className="mobile-mapping-card__meta">
+                    <span>Seen {product.timesSeen} times</span>
                     {product.latestReceiptUrl ? (
                       <a
                         className="mapping-receipt-link"
@@ -156,77 +279,62 @@ export function UnknownProductsPanel({
                         </svg>
                       </a>
                     ) : null}
-                  </td>
-                  <td>
-                    <span
-                      className={`mapping-status mapping-status--${product.normalizationStatus}`}
-                    >
-                      {formatMappingStatus(product.normalizationStatus)}
-                    </span>
-                  </td>
-                  <td>{product.timesSeen}</td>
-                  <td>
-                    <input
-                      className="mapping-input"
-                      value={draft.canonicalName}
-                      onChange={(event) =>
-                        setDrafts((currentDrafts) => ({
-                          ...currentDrafts,
-                          [product.overrideKey]: {
-                            ...draft,
-                            canonicalName: event.target.value,
-                          },
-                        }))
+                  </div>
+                  <input
+                    className="mapping-input"
+                    value={draft.canonicalName}
+                    onChange={(event) =>
+                      setDrafts((currentDrafts) => ({
+                        ...currentDrafts,
+                        [product.overrideKey]: {
+                          ...draft,
+                          canonicalName: event.target.value,
+                        },
+                      }))
+                    }
+                  />
+                  <select
+                    className="mapping-select"
+                    value={draft.category}
+                    onChange={(event) =>
+                      setDrafts((currentDrafts) => ({
+                        ...currentDrafts,
+                        [product.overrideKey]: {
+                          ...draft,
+                          category: event.target.value,
+                        },
+                      }))
+                    }
+                  >
+                    {categoryOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  {hasChanges || needsMapping ? (
+                    <button
+                      className="mapping-save"
+                      type="button"
+                      onClick={() =>
+                        onSaveOverride({
+                          productCode: product.productCode,
+                          originalName: product.originalName,
+                          canonicalName:
+                            draft.canonicalName.trim() || product.currentName,
+                          category: draft.category,
+                        })
                       }
-                    />
-                  </td>
-                  <td>
-                    <select
-                      className="mapping-select"
-                      value={draft.category}
-                      onChange={(event) =>
-                        setDrafts((currentDrafts) => ({
-                          ...currentDrafts,
-                          [product.overrideKey]: {
-                            ...draft,
-                            category: event.target.value,
-                          },
-                        }))
-                      }
                     >
-                      {categoryOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    {hasChanges || needsMapping ? (
-                      <button
-                        className="mapping-save"
-                        type="button"
-                        onClick={() =>
-                          onSaveOverride({
-                            productCode: product.productCode,
-                            originalName: product.originalName,
-                            canonicalName:
-                              draft.canonicalName.trim() || product.currentName,
-                            category: draft.category,
-                          })
-                        }
-                      >
-                        Save
-                      </button>
-                    ) : (
-                      <span className="mapping-saved">Saved</span>
-                    )}
-                  </td>
-                </tr>
+                      Save
+                    </button>
+                  ) : (
+                    <span className="mapping-saved">Saved</span>
+                  )}
+                </article>
               )
             })}
-          </tbody>
-        </table>
+          </div>
         </div>
       ) : (
         <p className="table-empty">

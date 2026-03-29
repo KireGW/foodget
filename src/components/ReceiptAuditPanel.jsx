@@ -71,7 +71,7 @@ export function ReceiptAuditPanel({ auditItems, availableMonths, selectedMonth }
           <p className="table-empty">No receipts available to audit for this month yet.</p>
         ) : (
           <div className="table-wrap">
-            <table className="overview-table">
+            <table className="overview-table desktop-table">
               <thead>
                 <tr>
                   <th>Receipt</th>
@@ -120,6 +120,40 @@ export function ReceiptAuditPanel({ auditItems, availableMonths, selectedMonth }
                 ))}
               </tbody>
             </table>
+
+            <div className="mobile-audit-cards">
+              {visibleAuditItems.map((receipt) => (
+                <article key={receipt.id} className="mobile-audit-card">
+                  <div className="item-cell">
+                    <button
+                      className="upload-list__link upload-list__link--panel"
+                      type="button"
+                      onClick={() => openReceiptWindow(receipt.url, receipt.fileName)}
+                    >
+                      {receipt.fileName}
+                    </button>
+                    <small>{receipt.parseNotes}</small>
+                  </div>
+                  <div className="mobile-audit-card__row">
+                    <span className={`audit-badge audit-badge--${receipt.auditStatus}`}>
+                      {receipt.auditLabel}
+                    </span>
+                    <strong>{receipt.parsedItemsCount} parsed items</strong>
+                  </div>
+                  <small className="mobile-audit-card__detail">{receipt.auditDetail}</small>
+                  <button
+                    className="receipt-review-link"
+                    type="button"
+                    disabled={receipt.parsedItemDetails.length === 0}
+                    onClick={() => setOpenReceiptId(receipt.id)}
+                  >
+                    {receipt.parsedItemDetails.length === 0
+                      ? 'No items'
+                      : `Open ${receipt.parsedItemDetails.length} parsed ${receipt.parsedItemDetails.length === 1 ? 'line' : 'lines'}`}
+                  </button>
+                </article>
+              ))}
+            </div>
           </div>
         )}
       </section>
