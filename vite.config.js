@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -8,6 +9,18 @@ import { readReceiptCatalog } from './scripts/receiptParser.mjs'
 const virtualReceiptsModuleId = 'virtual:receipts'
 const resolvedVirtualReceiptsModuleId = '\0virtual:receipts'
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
+const receiptSnapshotPath = path.resolve(rootDir, 'data', 'receipt-catalog.json')
+
+function loadReceiptsForBuild(receiptsDir) {
+  const shouldUseSnapshot =
+    process.env.VERCEL === '1' || process.env.VERCEL === 'true'
+
+  if (shouldUseSnapshot && fs.existsSync(receiptSnapshotPath)) {
+    return JSON.parse(fs.readFileSync(receiptSnapshotPath, 'utf8'))
+  }
+
+  return readReceiptCatalog(receiptsDir)
+}
 
 function receiptsPlugin() {
   const receiptsDir = path.resolve(rootDir, 'receipts')
@@ -27,7 +40,7 @@ function receiptsPlugin() {
       }
 
       return `export const receipts = ${JSON.stringify(
-        readReceiptCatalog(receiptsDir),
+        loadReceiptsForBuild(receiptsDir),
         null,
         2,
       )}`
@@ -66,7 +79,7 @@ function receiptsPlugin() {
       return
     },
     generateBundle() {
-      for (const receipt of readReceiptCatalog(receiptsDir)) {
+      for (const receipt of loadReceiptsForBuild(receiptsDir)) {
         this.emitFile({
           type: 'asset',
           fileName: receipt.url.replace(/^\//, ''),
