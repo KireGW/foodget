@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 export function CategorySpendChart({
   categoryChartsByMonth,
@@ -10,6 +10,7 @@ export function CategorySpendChart({
   const [comparisonMonth, setComparisonMonth] = useState('')
   const [hoveredComparisonCategory, setHoveredComparisonCategory] = useState(null)
   const [selectedChartMonth, setSelectedChartMonth] = useState(selectedMonth)
+  const categoryRowRefs = useRef(new Map())
 
   const effectiveSelectedMonth = useMemo(() => {
     if (
@@ -95,6 +96,25 @@ export function CategorySpendChart({
     )
   }
 
+  useEffect(() => {
+    if (!isOpen || !openCategory) {
+      return
+    }
+
+    const row = categoryRowRefs.current.get(openCategory)
+
+    if (!row) {
+      return
+    }
+
+    window.requestAnimationFrame(() => {
+      row.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+  }, [isOpen, openCategory])
+
   return (
     <section className="panel">
       <div className="panel__header">
@@ -162,7 +182,17 @@ export function CategorySpendChart({
       ) : (
         <div className="category-chart" role="img" aria-label="Bar chart of monthly spend by category">
           {mergedChart.map((entry) => (
-            <article key={entry.category} className="category-chart__row">
+            <article
+              key={entry.category}
+              className="category-chart__row"
+              ref={(node) => {
+                if (node) {
+                  categoryRowRefs.current.set(entry.category, node)
+                } else {
+                  categoryRowRefs.current.delete(entry.category)
+                }
+              }}
+            >
               <button
                 type="button"
                 className={`category-chart__toggle${
@@ -222,8 +252,13 @@ export function CategorySpendChart({
                 </div>
               </button>
 
-              {openCategory === entry.category ? (
-                <div className="category-chart__items">
+              <div
+                className={`category-chart__items${
+                  openCategory === entry.category ? ' category-chart__items--open' : ''
+                }`}
+                aria-hidden={openCategory === entry.category ? 'false' : 'true'}
+              >
+                <div className="category-chart__items-inner">
                   {entry.items.map((item) => (
                     <div key={`${entry.category}-${item.name}`} className="category-chart__item">
                       <div>
@@ -236,7 +271,7 @@ export function CategorySpendChart({
                     </div>
                   ))}
                 </div>
-              ) : null}
+              </div>
             </article>
           ))}
         </div>
