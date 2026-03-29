@@ -898,7 +898,7 @@
   {
     "productCode": "00021136010480",
     "originalName": "TOPOCH MIN",
-    "canonicalName": "Topo Chico",
+    "canonicalName": "Agua",
     "category": "Beverages"
   },
   {
@@ -1008,5 +1008,11 @@
     "originalName": "PIMIENTO RO",
     "canonicalName": "Pimiento",
     "category": "Produce"
+  },
+  {
+    "productCode": "07501055320899",
+    "originalName": "CIEL6PK 1L",
+    "canonicalName": "Agua",
+    "category": "Beverages"
   }
 ]
