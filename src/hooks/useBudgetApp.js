@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { receipts } from 'virtual:receipts'
+import fallbackProductOverrides from '../../data/product-overrides.json'
+import fallbackReceiptReviews from '../../data/receipt-reviews.json'
+import fallbackReceiptItemOverrides from '../../data/receipt-item-overrides.json'
+import fallbackManualReceipts from '../../data/manual-receipts.json'
 import {
   buildAvailableMonths,
   buildCategoryChart,
@@ -40,6 +44,7 @@ import { uploadReceiptFiles } from '../lib/receiptUpload.js'
 
 export function useBudgetApp() {
   const [manualReceipts, setManualReceipts] = useState([])
+  const [isReadOnly, setIsReadOnly] = useState(false)
   const sourceReceipts = useMemo(
     () => [...receipts, ...manualReceipts],
     [manualReceipts],
@@ -93,11 +98,11 @@ export function useBudgetApp() {
       try {
         const loadedOverrides = await fetchProductOverrides()
         setProductOverrides(loadedOverrides)
-      } catch (error) {
+      } catch {
+        setProductOverrides(fallbackProductOverrides)
+        setIsReadOnly(true)
         setOverrideStatus(
-          error instanceof Error
-            ? error.message
-            : 'Could not load product overrides.',
+          'Read-only deployed view: using product mappings bundled with this build.',
         )
       }
     }
@@ -110,11 +115,11 @@ export function useBudgetApp() {
       try {
         const loadedReviews = await fetchReceiptReviews()
         setReceiptReviews(loadedReviews)
-      } catch (error) {
+      } catch {
+        setReceiptReviews(fallbackReceiptReviews)
+        setIsReadOnly(true)
         setReviewStatus(
-          error instanceof Error
-            ? error.message
-            : 'Could not load receipt reviews.',
+          'Read-only deployed view: receipt reviews from this build are shown, but edits are disabled.',
         )
       }
     }
@@ -127,11 +132,11 @@ export function useBudgetApp() {
       try {
         const loadedReceipts = await fetchManualReceipts()
         setManualReceipts(loadedReceipts)
-      } catch (error) {
+      } catch {
+        setManualReceipts(fallbackManualReceipts)
+        setIsReadOnly(true)
         setUploadStatus(
-          error instanceof Error
-            ? error.message
-            : 'Could not load manual receipts.',
+          'Read-only deployed view: uploads and manual entries are disabled here.',
         )
       }
     }
@@ -144,11 +149,11 @@ export function useBudgetApp() {
       try {
         const loadedOverrides = await fetchReceiptItemOverrides()
         setReceiptItemOverrides(loadedOverrides)
-      } catch (error) {
+      } catch {
+        setReceiptItemOverrides(fallbackReceiptItemOverrides)
+        setIsReadOnly(true)
         setReviewStatus(
-          error instanceof Error
-            ? error.message
-            : 'Could not load receipt item overrides.',
+          'Read-only deployed view: showing bundled receipt edits only.',
         )
       }
     }
@@ -252,6 +257,13 @@ export function useBudgetApp() {
       : `${receiptsWithManualCorrections.length} receipt${receiptsWithManualCorrections.length === 1 ? '' : 's'} loaded, ${parsedCount} interpreted PDF${parsedCount === 1 ? '' : 's'} so far.`
 
   async function importReceipts(fileList) {
+    if (isReadOnly) {
+      setUploadStatus(
+        'This deployed version is read-only. Upload receipts in your local app.',
+      )
+      return
+    }
+
     const files = Array.from(fileList ?? []).filter((file) =>
       file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'),
     )
@@ -280,6 +292,13 @@ export function useBudgetApp() {
   }
 
   async function deleteReceipt(receipt) {
+    if (isReadOnly) {
+      setUploadStatus(
+        'This deployed version is read-only. Delete receipts in your local app.',
+      )
+      return
+    }
+
     if (isUploading) {
       return
     }
@@ -329,6 +348,13 @@ export function useBudgetApp() {
   }
 
   async function createManualReceipt(manualReceipt) {
+    if (isReadOnly) {
+      setUploadStatus(
+        'This deployed version is read-only. Add manual receipts in your local app.',
+      )
+      return
+    }
+
     if (isUploading) {
       return
     }
@@ -363,6 +389,13 @@ export function useBudgetApp() {
   }
 
   async function saveProductMappingOverride(override) {
+    if (isReadOnly) {
+      setOverrideStatus(
+        'This deployed version is read-only. Save product mappings in your local app.',
+      )
+      return
+    }
+
     const mappingLabel = override.productCode || override.originalName
     setOverrideStatus(`Saving mapping for ${mappingLabel}...`)
 
@@ -388,6 +421,13 @@ export function useBudgetApp() {
   }
 
   async function saveReceiptReviewDecision(review) {
+    if (isReadOnly) {
+      setReviewStatus(
+        'This deployed version is read-only. Save receipt review decisions in your local app.',
+      )
+      return
+    }
+
     setReviewStatus('Saving receipt review...')
 
     try {
@@ -412,6 +452,13 @@ export function useBudgetApp() {
   }
 
   async function saveReceiptItems(receiptId, items) {
+    if (isReadOnly) {
+      setReviewStatus(
+        'This deployed version is read-only. Save receipt item edits in your local app.',
+      )
+      return
+    }
+
     setReviewStatus('Saving corrected receipt items...')
 
     try {
@@ -456,6 +503,7 @@ export function useBudgetApp() {
     productMappings,
     syncStatus,
     uploadStatus,
+    isReadOnly,
     isUploading,
     importReceipts,
     createManualReceipt,

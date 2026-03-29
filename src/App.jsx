@@ -27,6 +27,7 @@ function App() {
     productMappings,
     syncStatus,
     uploadStatus,
+    isReadOnly,
     isUploading,
     importReceipts,
     createManualReceipt,
@@ -56,6 +57,7 @@ function App() {
         <UploadPanel
           syncStatus={syncStatus}
           uploadStatus={uploadStatus}
+          isReadOnly={isReadOnly}
           receiptCalendar={receiptCalendar}
           isUploading={isUploading}
           onImportReceipts={importReceipts}

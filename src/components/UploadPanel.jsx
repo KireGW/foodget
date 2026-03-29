@@ -16,6 +16,7 @@ const categoryOptions = [
 export function UploadPanel({
   syncStatus,
   uploadStatus,
+  isReadOnly = false,
   receiptCalendar,
   isUploading,
   onImportReceipts,
@@ -51,22 +52,30 @@ export function UploadPanel({
       </div>
 
       <div
-        className={`upload-dropzone${isDragActive ? ' upload-dropzone--active' : ''}${isUploading ? ' upload-dropzone--busy' : ''}`}
-        onDragEnter={handleDragStateChange(setIsDragActive, true)}
-        onDragOver={handleDragStateChange(setIsDragActive, true)}
-        onDragLeave={handleDragStateChange(setIsDragActive, false)}
+        className={`upload-dropzone${isDragActive ? ' upload-dropzone--active' : ''}${isUploading || isReadOnly ? ' upload-dropzone--busy' : ''}`}
+        onDragEnter={isReadOnly ? undefined : handleDragStateChange(setIsDragActive, true)}
+        onDragOver={isReadOnly ? undefined : handleDragStateChange(setIsDragActive, true)}
+        onDragLeave={isReadOnly ? undefined : handleDragStateChange(setIsDragActive, false)}
         onDrop={(event) => {
           event.preventDefault()
           setIsDragActive(false)
-          onImportReceipts(event.dataTransfer.files)
+          if (!isReadOnly) {
+            onImportReceipts(event.dataTransfer.files)
+          }
         }}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => {
+          if (!isReadOnly) {
+            fileInputRef.current?.click()
+          }
+        }}
         role="button"
         tabIndex={0}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
-            fileInputRef.current?.click()
+            if (!isReadOnly) {
+              fileInputRef.current?.click()
+            }
           }
         }}
       >
@@ -82,12 +91,16 @@ export function UploadPanel({
           }}
         />
         <span className="upload-dropzone__headline">
-          {isUploading ? 'Importing receipts...' : 'Drop PDF receipts here'}
+          {isReadOnly
+            ? 'Read-only deployed view'
+            : isUploading
+              ? 'Importing receipts...'
+              : 'Drop PDF receipts here'}
         </span>
         <span className="upload-dropzone__copy">
-          The importer first tries to read the purchase date from the receipt
-          text, then falls back to the filename, and finally to the upload date
-          if needed.
+          {isReadOnly
+            ? 'This version shows the receipt data bundled with the latest build. Uploads, deletes, and edits stay in the local app.'
+            : 'The importer first tries to read the purchase date from the receipt text, then falls back to the filename, and finally to the upload date if needed.'}
         </span>
       </div>
 
@@ -103,6 +116,7 @@ export function UploadPanel({
             className="upload-list__toggle"
             type="button"
             onClick={() => setShowManualForm((currentValue) => !currentValue)}
+            disabled={isReadOnly}
           >
             {showManualForm ? 'Hide form' : 'Add manual entry'}
           </button>
@@ -309,6 +323,7 @@ export function UploadPanel({
                         <button
                           className="upload-list__delete"
                           type="button"
+                          disabled={isReadOnly}
                           onClick={() => onDeleteReceipt(receipt)}
                         >
                           Delete
