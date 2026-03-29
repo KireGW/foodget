@@ -48,9 +48,9 @@ function App() {
           <p className="eyebrow">Mexico grocery budget cockpit</p>
           <h1>Read dated receipt PDFs and build a monthly grocery overview.</h1>
           <p className="hero-text">
-            Your PDFs in the root receipts folder are now the app input. The
-            scaffold uses each filename as the purchase date, groups receipts by
-            month, and extracts line items and totals from the PDF contents.
+            {isReadOnly
+              ? 'This deployed version is a read-only dashboard. Receipt PDF parsing and editing happen in the local Mac app, while this web version only shows the latest bundled snapshot.'
+              : 'Your PDFs in the root receipts folder are now the app input. The scaffold uses each filename as the purchase date, groups receipts by month, and extracts line items and totals from the PDF contents.'}
           </p>
         </div>
 

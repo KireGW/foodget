@@ -252,7 +252,9 @@ export function useBudgetApp() {
   ).length
 
   const syncStatus =
-    receiptsWithManualCorrections.length === 0
+    isReadOnly && receipts.length === 0
+      ? 'This deployed view cannot parse receipt PDFs. Open the local Mac app to ingest and parse receipts.'
+      : receiptsWithManualCorrections.length === 0
       ? 'No receipts found yet.'
       : `${receiptsWithManualCorrections.length} receipt${receiptsWithManualCorrections.length === 1 ? '' : 's'} loaded, ${parsedCount} interpreted PDF${parsedCount === 1 ? '' : 's'} so far.`
 
