@@ -1455,6 +1455,15 @@
     text-align: left;
   }
 
+  .category-chart__header,
+  .category-chart__average {
+    display: none;
+  }
+
+  .category-chart__value-group {
+    display: block;
+  }
+
   .receipt-audit__controls {
     flex-direction: column;
     align-items: stretch;
