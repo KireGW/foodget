@@ -187,8 +187,8 @@ export function useBudgetApp() {
   )
 
   const monthlyItems = useMemo(
-    () => buildMonthlyItems(monthReceipts),
-    [monthReceipts],
+    () => buildMonthlyItems(monthReceipts, receiptsWithManualCorrections),
+    [monthReceipts, receiptsWithManualCorrections],
   )
 
   const metrics = useMemo(

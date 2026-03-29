@@ -13,8 +13,23 @@ export function buildAvailableMonths(receipts) {
     }))
 }
 
-export function buildMonthlyItems(receipts) {
+export function buildMonthlyItems(receipts, allReceipts = receipts) {
   const itemsByName = new Map()
+  const totalMonthCount = Math.max(
+    1,
+    new Set(allReceipts.map((receipt) => receipt.purchasedAt.slice(0, 7))).size,
+  )
+  const historicalSpendByItem = allReceipts.reduce((summary, receipt) => {
+    buildReceiptBudgetItems(receipt).forEach((item) => {
+      if (item.category === 'Exclude from budget' || item.isAdjustment) {
+        return
+      }
+
+      summary.set(item.name, (summary.get(item.name) ?? 0) + item.totalMxn)
+    })
+
+    return summary
+  }, new Map())
 
   receipts.forEach((receipt) => {
     buildReceiptBudgetItems(receipt).forEach((item) => {
@@ -58,12 +73,18 @@ export function buildMonthlyItems(receipts) {
       originalNames: [...item.originalNames].sort(),
       totalMxnValue: item.totalMxn,
       swedenAverageSekValue: item.swedenAverageSek,
-      unitMxnValue: item.isAdjustment ? 0 : item.totalMxn / item.quantity,
+      averageMonthlySpendMxnValue:
+        (historicalSpendByItem.get(item.name) ?? item.totalMxn) / totalMonthCount,
       relativeCostIndex:
         item.swedenAverageSek === 0 ? 0 : item.totalMxn / item.swedenAverageSek,
       itemCountLabel: item.isAdjustment ? '—' : formatItemCount(item.itemCount),
       totalMxn: formatCurrency(item.totalMxn, 'MXN'),
-      unitMxn: item.isAdjustment ? '—' : formatCurrency(item.totalMxn / item.quantity, 'MXN'),
+      averageMonthlySpendMxn: item.isAdjustment
+        ? '—'
+        : formatCurrency(
+            (historicalSpendByItem.get(item.name) ?? item.totalMxn) / totalMonthCount,
+            'MXN',
+          ),
       swedenAverageSek: item.isAdjustment ? '—' : formatCurrency(item.swedenAverageSek, 'SEK'),
     }))
 }

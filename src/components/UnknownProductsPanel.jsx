@@ -26,9 +26,7 @@ export function UnknownProductsPanel({
       product.normalizationStatus === 'unmatched' ||
       product.normalizationStatus === 'needs_mapping',
   )
-  const [isOpen, setIsOpen] = useState(
-    hasNeedsMapping || learningSuggestions.length > 0,
-  )
+  const [isOpen, setIsOpen] = useState(hasNeedsMapping)
 
   if (unknownProducts.length === 0) {
     return (

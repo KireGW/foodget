@@ -87,7 +87,7 @@ export function MonthlyOverview({
                     <th>{renderSortButton('Category', 'category', sortConfig, setSortConfig)}</th>
                     <th>{renderSortButton('Items', 'items', sortConfig, setSortConfig)}</th>
                     <th>{renderSortButton('Spent (MXN)', 'spent', sortConfig, setSortConfig)}</th>
-                    <th>{renderSortButton('Avg / item (MXN)', 'unitMxn', sortConfig, setSortConfig)}</th>
+                    <th>{renderSortButton('Avg / month (MXN)', 'averageMonthlySpend', sortConfig, setSortConfig)}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -104,7 +104,7 @@ export function MonthlyOverview({
                       <td>{item.category}</td>
                       <td>{item.itemCountLabel}</td>
                       <td>{item.totalMxn}</td>
-                      <td>{item.unitMxn}</td>
+                      <td>{item.averageMonthlySpendMxn}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -132,8 +132,8 @@ export function MonthlyOverview({
                         <strong>{item.totalMxn}</strong>
                       </div>
                       <div>
-                        <span>Avg / item</span>
-                        <strong>{item.unitMxn}</strong>
+                        <span>Avg / month</span>
+                        <strong>{item.averageMonthlySpendMxn}</strong>
                       </div>
                     </div>
                   </article>
@@ -182,8 +182,8 @@ function getSortValue(item, column) {
       return item.itemCount
     case 'spent':
       return item.totalMxnValue
-    case 'unitMxn':
-      return item.unitMxnValue
+    case 'averageMonthlySpend':
+      return item.averageMonthlySpendMxnValue
     default:
       return item.totalMxnValue
   }
