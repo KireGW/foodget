@@ -99,7 +99,7 @@ export function readReceiptCatalog(receiptsDir) {
     return []
   }
 
-  return listPdfFiles(receiptsDir)
+  return listReceiptFiles(receiptsDir)
     .map((relativePath) => parseReceiptFile(receiptsDir, relativePath))
     .sort((left, right) => left.purchasedAt.localeCompare(right.purchasedAt))
 }
@@ -110,7 +110,7 @@ export function parseReceiptForImport(text, purchasedAt) {
 
 function parseReceiptFile(receiptsDir, relativePath) {
   const fileName = path.basename(relativePath)
-  const stem = fileName.replace(/\.pdf$/i, '')
+  const stem = fileName.replace(/\.(pdf|png|jpe?g)$/i, '')
   const purchasedAt = resolvePurchasedAt(relativePath, stem)
   const filePath = path.join(receiptsDir, relativePath)
   const extractedText = extractPdfText(filePath)
@@ -139,6 +139,8 @@ function parseReceiptFile(receiptsDir, relativePath) {
 }
 
 export function extractPdfText(filePath) {
+  const extension = path.extname(filePath).toLowerCase()
+  const isImageFile = ['.png', '.jpg', '.jpeg'].includes(extension)
   const tempOutputPath = path.join(
     '/tmp',
     `foodget-pdf-text-${process.pid}-${Math.random().toString(36).slice(2)}.txt`,
@@ -149,21 +151,23 @@ export function extractPdfText(filePath) {
   )
 
   try {
-    execFileSync(
-      'osascript',
-      ['-l', 'JavaScript', jxaScriptPath, filePath, tempOutputPath],
-      {
-        encoding: 'utf8',
-        stdio: ['ignore', 'ignore', 'ignore'],
-      },
-    )
+    if (!isImageFile) {
+      execFileSync(
+        'osascript',
+        ['-l', 'JavaScript', jxaScriptPath, filePath, tempOutputPath],
+        {
+          encoding: 'utf8',
+          stdio: ['ignore', 'ignore', 'ignore'],
+        },
+      )
 
-    const extractedText = fs.existsSync(tempOutputPath)
-      ? fs.readFileSync(tempOutputPath, 'utf8').trim()
-      : ''
+      const extractedText = fs.existsSync(tempOutputPath)
+        ? fs.readFileSync(tempOutputPath, 'utf8').trim()
+        : ''
 
-    if (extractedText) {
-      return extractedText
+      if (extractedText) {
+        return extractedText
+      }
     }
 
     execFileSync(
@@ -233,6 +237,10 @@ function parseReceiptText(text, fallbackDate) {
 
   const normalizedText = normalizeText(text)
 
+  if (/Env[ií]o entregado|Detalle de Envio|Resumen de tu pedido/i.test(normalizedText)) {
+    return parseSorianaDeliverySummary(normalizedText, fallbackDate)
+  }
+
   if (/walmart\.com\.mx|pedido#|m[aá]s informaci[oó]n de este pedido/i.test(normalizedText)) {
     return parseWalmartOrder(normalizedText, fallbackDate)
   }
@@ -253,6 +261,82 @@ function parseReceiptText(text, fallbackDate) {
     totalMxnValue: extractCurrencyValue(normalizedText, [/TOTAL\s+\$\s*([\d.,]+)/i]),
     items: [],
   })
+}
+
+function parseSorianaDeliverySummary(text, fallbackDate) {
+  const itemBlockMatch = text.match(/Detalle de Envio\s+([\s\S]+?)\s+Resumen de tu pedido/i)
+  const totalMxnValue = extractSorianaDeliveryTotal(text)
+  const items = itemBlockMatch ? parseSorianaDeliveryItems(itemBlockMatch[1], text) : []
+
+  return buildParseResult({
+    parseStatus:
+      items.length > 0 ? 'parsed_items' : totalMxnValue != null ? 'parsed_total' : 'text_only',
+    parseNotes:
+      items.length > 0
+        ? `Parsed ${items.length} line items from Soriana delivery summary.`
+        : 'Soriana delivery text extracted, but item matching did not complete.',
+    textPreview: text.slice(0, 240),
+    store: 'Soriana',
+    totalMxnValue,
+    items,
+  })
+}
+
+function extractSorianaDeliveryTotal(text) {
+  const summarySection = text.split(/Resumen de tu pedido/i)[1] ?? text
+  const values = [...summarySection.matchAll(/\$?\s*([\d]+\.\d{2})/g)].map((match) =>
+    parseMoney(match[1]),
+  )
+  return values.at(-1) ?? null
+}
+
+function parseSorianaDeliveryItems(itemBlock, fullText) {
+  const lines = itemBlock
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+  const items = []
+  const priceSection = fullText.split(/Resumen de tu pedido/i)[1] ?? ''
+  const summaryMoneyValues = [...priceSection.matchAll(/\$?\s*([\d]+\.\d{2})/g)].map((match) =>
+    parseMoney(match[1]),
+  )
+  const itemPrices = summaryMoneyValues.slice(0, Math.floor(lines.length / 2) + 2)
+
+  let index = 0
+  let priceIndex = 0
+
+  while (index < lines.length) {
+    const nameParts = []
+
+    while (index < lines.length && !/^\d+(?:\.\d+)?\s*(?:pza|pzas?)$/i.test(lines[index])) {
+      nameParts.push(lines[index])
+      index += 1
+    }
+
+    if (nameParts.length === 0 || index >= lines.length) {
+      break
+    }
+
+    const quantityLine = lines[index]
+    index += 1
+
+    const quantityMatch = quantityLine.match(/^(\d+(?:\.\d+)?)\s*(?:pza|pzas?)$/i)
+    const unitPriceValue = itemPrices[priceIndex]
+    priceIndex += 1
+
+    if (!quantityMatch || unitPriceValue == null) {
+      continue
+    }
+
+    const quantity = Number(quantityMatch[1])
+    const draft = createItemDraft(nameParts.join(' '))
+    draft.quantity = quantity
+    draft.unitType = 'count'
+    draft.totalMxnValue = quantity > 1 ? unitPriceValue * quantity : unitPriceValue
+    pushCurrentItem(items, draft, { ignoredAdjustmentTotalMxn: 0 })
+  }
+
+  return items
 }
 
 function parseWalmartOrder(text) {
@@ -418,7 +502,7 @@ function parseLaComerReceipt(text) {
     }
 
     const itemMatch = line.match(
-      /^(\d+)\s+(\d{3,})\s+(.+?)\s+([\d]+\.\d{2})\s+(-?[\d]+\.\d{2})$/,
+      /^(\d+(?:\.\d+)?)\s+(\d{3,})\s+(.+?)\s+([\d]+\.\d{2})\s+(-?[\d]+\.\d{2})$/,
     )
 
     if (!itemMatch) {
@@ -428,10 +512,10 @@ function parseLaComerReceipt(text) {
     const [, quantityValue, sku, rawName, unitPriceValue, totalValue] = itemMatch
     const item = createItemDraft(rawName, sku)
     item.quantity = Number(quantityValue)
-    item.unitType = 'count'
+    item.unitType = isWeightedLaComerQuantity(item.quantity) ? 'weight' : 'count'
     item.totalMxnValue = parseSignedMoney(totalValue)
 
-    if (/CAJA\b/i.test(rawName) && Math.abs(item.totalMxnValue) < 0.001) {
+    if (/(?:CAJA|SIGPACK)\b/i.test(rawName) && Math.abs(item.totalMxnValue) < 0.001) {
       continue
     }
 
@@ -497,7 +581,7 @@ function parseLaComerColumnReceipt(lines) {
   descriptorItems.slice(0, lineCount).forEach((descriptor, index) => {
     const item = createItemDraft(descriptor.name, descriptor.sku)
     item.quantity = descriptor.quantity
-    item.unitType = descriptor.quantity > 0 && descriptor.quantity < 1 ? 'weight' : 'count'
+    item.unitType = isWeightedLaComerQuantity(descriptor.quantity) ? 'weight' : 'count'
     item.totalMxnValue = totalValues[index]
     item.normalizationStatus =
       !descriptor.name || descriptor.name.length < 4 ? 'needs_mapping' : item.normalizationStatus
@@ -506,6 +590,10 @@ function parseLaComerColumnReceipt(lines) {
   })
 
   return finalizedItems
+}
+
+function isWeightedLaComerQuantity(quantity) {
+  return quantity > 0 && !Number.isInteger(quantity)
 }
 
 function extractLaComerColumnDescriptors(lines) {
@@ -1235,7 +1323,7 @@ function normalizeText(text) {
     .trim()
 }
 
-function listPdfFiles(rootDir, currentDir = rootDir) {
+function listReceiptFiles(rootDir, currentDir = rootDir) {
   const entries = fs.readdirSync(currentDir, { withFileTypes: true })
   const files = []
 
@@ -1243,11 +1331,11 @@ function listPdfFiles(rootDir, currentDir = rootDir) {
     const fullPath = path.join(currentDir, entry.name)
 
     if (entry.isDirectory()) {
-      files.push(...listPdfFiles(rootDir, fullPath))
+      files.push(...listReceiptFiles(rootDir, fullPath))
       continue
     }
 
-    if (entry.isFile() && entry.name.toLowerCase().endsWith('.pdf')) {
+    if (entry.isFile() && /\.(pdf|png|jpe?g)$/i.test(entry.name)) {
       files.push(path.relative(rootDir, fullPath))
     }
   }
@@ -1363,6 +1451,17 @@ function toTitleCase(value) {
 }
 
 function extractPurchaseDateFromText(text) {
+  const textualLongYearDate = text.match(
+    /\b(\d{1,2})\/([A-Za-záéíóúñ.]{3,})\/(\d{4})(?:\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:a\.?\s*m\.?|p\.?\s*m\.?)?)?\b/i,
+  )
+  if (textualLongYearDate) {
+    const [, dayValue, monthLabel, year] = textualLongYearDate
+    const monthNumber = lookupMonthNumber(monthLabel)
+    if (monthNumber) {
+      return `${year}-${monthNumber}-${String(dayValue).padStart(2, '0')}`
+    }
+  }
+
   const numericDate = text.match(/\b(\d{2})\/(\d{2})\/(\d{2})\b/)
   if (numericDate) {
     const [, day, month, year] = numericDate
@@ -1394,6 +1493,12 @@ function extractPurchaseDateFromText(text) {
 }
 
 function lookupMonthNumber(label) {
+  const cleanedLabel = label
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z]/g, '')
+
   const months = {
     enero: '01',
     ene: '01',
@@ -1421,7 +1526,7 @@ function lookupMonthNumber(label) {
     dic: '12',
   }
 
-  return months[label.toLowerCase()]
+  return months[cleanedLabel]
 }
 
 function toIsoDate(value) {

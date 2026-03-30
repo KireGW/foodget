@@ -48,7 +48,7 @@ export function UploadPanel({
       <div className="upload-panel__header">
         <p className="upload-panel__title">Receipt intake</p>
         <p className="upload-panel__subtitle">
-          Drag PDFs straight into the app and it will file them into the right
+          Drag receipt PDFs or screenshots straight into the app and it will file them into the right
           <code> /receipts/YYYYMM/ </code>
           folder automatically.
         </p>
@@ -86,7 +86,7 @@ export function UploadPanel({
           ref={fileInputRef}
           className="upload-dropzone__input"
           type="file"
-          accept="application/pdf"
+          accept="application/pdf,image/png,image/jpeg"
           multiple
           onChange={(event) => {
             onImportReceipts(event.target.files)
@@ -98,7 +98,7 @@ export function UploadPanel({
             ? 'Read-only deployed view'
             : isUploading
               ? 'Importing receipts...'
-              : 'Drop PDF receipts here'}
+              : 'Drop receipts or screenshots here'}
         </span>
         <span className="upload-dropzone__copy">
           {isReadOnly

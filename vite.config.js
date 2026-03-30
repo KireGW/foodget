@@ -22,6 +22,20 @@ function loadReceiptsForBuild(receiptsDir) {
   return readReceiptCatalog(receiptsDir)
 }
 
+function getReceiptContentType(filePath) {
+  const extension = path.extname(filePath).toLowerCase()
+
+  if (extension === '.png') {
+    return 'image/png'
+  }
+
+  if (extension === '.jpg' || extension === '.jpeg') {
+    return 'image/jpeg'
+  }
+
+  return 'application/pdf'
+}
+
 function receiptsPlugin() {
   const receiptsDir = path.resolve(rootDir, 'receipts')
 
@@ -58,7 +72,7 @@ function receiptsPlugin() {
           return
         }
 
-        res.setHeader('Content-Type', 'application/pdf')
+        res.setHeader('Content-Type', getReceiptContentType(filePath))
         fs.createReadStream(filePath).pipe(res)
       })
     },

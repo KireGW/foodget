@@ -51,11 +51,16 @@ const upload = multer({
     files: 20,
   },
   fileFilter(_req, file, callback) {
-    const isPdf =
+    const isSupportedReceipt =
       file.mimetype === 'application/pdf' ||
-      file.originalname.toLowerCase().endsWith('.pdf')
+      file.mimetype === 'image/png' ||
+      file.mimetype === 'image/jpeg' ||
+      /\.(pdf|png|jpe?g)$/i.test(file.originalname)
 
-    callback(isPdf ? null : new Error('Only PDF receipts are supported.'), isPdf)
+    callback(
+      isSupportedReceipt ? null : new Error('Only PDF, PNG, and JPEG receipts are supported.'),
+      isSupportedReceipt,
+    )
   },
 })
 
@@ -358,7 +363,7 @@ app.post('/api/receipts/import', upload.array('receipts', 20), (req, res) => {
   const allowDuplicates = String(req.body?.allowDuplicates ?? '').toLowerCase() === 'true'
 
   if (!Array.isArray(files) || files.length === 0) {
-    res.status(400).json({ error: 'No PDF files were uploaded.' })
+    res.status(400).json({ error: 'No supported receipt files were uploaded.' })
     return
   }
 
@@ -401,11 +406,12 @@ app.post('/api/receipts/import', upload.array('receipts', 20), (req, res) => {
       const targetMonthDir = path.join(receiptsDir, importPlan.folderMonth)
 
       fs.mkdirSync(targetMonthDir, { recursive: true })
+      const targetExtension = determineReceiptExtension(file)
 
       const targetFileName = buildUniqueFileName(
         targetMonthDir,
         importPlan.baseName,
-        '.pdf',
+        targetExtension,
       )
       const targetFilePath = path.join(targetMonthDir, targetFileName)
 
@@ -445,6 +451,24 @@ function cleanupTempFiles(files) {
   files.forEach((file) => {
     fs.rmSync(file.path, { force: true })
   })
+}
+
+function determineReceiptExtension(file) {
+  const originalExtension = path.extname(file.originalname ?? '').toLowerCase()
+
+  if (['.pdf', '.png', '.jpg', '.jpeg'].includes(originalExtension)) {
+    return originalExtension
+  }
+
+  if (file.mimetype === 'image/png') {
+    return '.png'
+  }
+
+  if (file.mimetype === 'image/jpeg') {
+    return '.jpg'
+  }
+
+  return '.pdf'
 }
 
 function buildUniqueFileName(directory, baseName, extension) {

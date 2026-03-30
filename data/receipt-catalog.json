@@ -342,6 +342,72 @@
     ]
   },
   {
+    "id": "2026-01-10",
+    "fileName": "2026-01-10.png",
+    "relativePath": "202601/2026-01-10.png",
+    "purchasedAt": "2026-01-10",
+    "monthKey": "2026-01",
+    "url": "/receipts/202601/2026-01-10.png",
+    "parseStatus": "parsed_items",
+    "parseNotes": "Parsed 4 line items from Soriana delivery summary.",
+    "textPreview": "Envío entregado\nLlegó lo que tanto esperabas\nHola Erik Gafvelin Wiss\nTe informamos que tu pedido 0006557432-1-0 ha\nsido entregado el 10/ene./2026 06:19 p. m.\n¡Disfrútalo!\nGenerar factura\nDetalle de Envio\nLeche Alpura Clásica Entera 1 L\n1.00",
+    "store": "Soriana",
+    "totalMxnValue": 435.2,
+    "soldItemsCount": null,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$435.20",
+    "items": [
+      {
+        "name": "Leche Alpura CláSica Entera 1 L",
+        "productCode": null,
+        "originalName": "Leche Alpura Clásica Entera 1 L",
+        "category": "Other",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 37.5,
+        "totalMxn": 37.5,
+        "swedenAverageSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Leche Alpura CláSica 1 Paquete Con 4 Piezas De 1 Lt C/U",
+        "productCode": null,
+        "originalName": "Leche Alpura Clásica 1 Paquete con 4 piezas de 1 lt c/u",
+        "category": "Other",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 120,
+        "totalMxn": 120,
+        "swedenAverageSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Queso Manchego Rebanadas Noche Buena 400 Gr",
+        "productCode": null,
+        "originalName": "Queso Manchego Rebanadas Noche Buena 400 Gr",
+        "category": "Other",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 97.9,
+        "totalMxn": 97.9,
+        "swedenAverageSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Tierra Happy Flower Preparada Bol 2.5",
+        "productCode": null,
+        "originalName": "Tierra Happy Flower Preparada Bol 2.5",
+        "category": "Other",
+        "quantity": 2,
+        "unitType": "count",
+        "totalMxnValue": 179.8,
+        "totalMxn": 179.8,
+        "swedenAverageSek": 68,
+        "normalizationStatus": "unmatched"
+      }
+    ]
+  },
+  {
     "id": "2026-01-11-2",
     "fileName": "2026-01-11-2.pdf",
     "relativePath": "202601/2026-01-11-2.pdf",
@@ -625,6 +691,72 @@
         "totalMxnValue": 69.76,
         "totalMxn": 69.76,
         "swedenAverageSek": 18,
+        "normalizationStatus": "matched"
+      }
+    ]
+  },
+  {
+    "id": "2026-01-12-2",
+    "fileName": "2026-01-12-2.pdf",
+    "relativePath": "202601/2026-01-12-2.pdf",
+    "purchasedAt": "2026-01-12",
+    "monthKey": "2026-01",
+    "url": "/receipts/202601/2026-01-12-2.pdf",
+    "parseStatus": "parsed_items",
+    "parseNotes": "Parsed 4 line items from La Comer receipt text.",
+    "textPreview": "SUC. LOMAS\nMonte Athos y Cerrada Monte Libano No350\nCol. Lomas de Chapultepec C.P 11000\nDel. Miguel Hidalgo Ciudad de Mexico\nComercial City Fresko S. de R.L. de C.V.\nAv. Insurgentes Sur # 1517 Mod 2\nCol. San Jose Insurgentes\nCiudad de Mexic",
+    "store": "La Comer / City Market",
+    "totalMxnValue": 278.34,
+    "soldItemsCount": 6,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$278.34",
+    "items": [
+      {
+        "name": "Pimiento rojo",
+        "productCode": "081",
+        "originalName": "PIMIENTO ROJO",
+        "category": "Produce",
+        "quantity": 0.44,
+        "unitType": "weight",
+        "totalMxnValue": 43.34,
+        "totalMxn": 43.34,
+        "swedenAverageSek": 12,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Brocoli",
+        "productCode": "600",
+        "originalName": "BROCOLI",
+        "category": "Other",
+        "quantity": 1.355,
+        "unitType": "weight",
+        "totalMxnValue": 50,
+        "totalMxn": 50,
+        "swedenAverageSek": 46,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Cacahuates Sabritas",
+        "productCode": "496",
+        "originalName": "CACAHUATES SABRITAS",
+        "category": "Other",
+        "quantity": 2,
+        "unitType": "count",
+        "totalMxnValue": 118,
+        "totalMxn": 118,
+        "swedenAverageSek": 68,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Costo De Envio",
+        "productCode": "608",
+        "originalName": "COSTO DE ENVIO",
+        "category": "Other",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 67,
+        "totalMxn": 67,
+        "swedenAverageSek": 34,
         "normalizationStatus": "matched"
       }
     ]
@@ -1196,6 +1328,72 @@
         "totalMxn": 61,
         "swedenAverageSek": 34,
         "normalizationStatus": "unmatched"
+      }
+    ]
+  },
+  {
+    "id": "2026-01-19-2",
+    "fileName": "2026-01-19-2.pdf",
+    "relativePath": "202601/2026-01-19-2.pdf",
+    "purchasedAt": "2026-01-19",
+    "monthKey": "2026-01",
+    "url": "/receipts/202601/2026-01-19-2.pdf",
+    "parseStatus": "parsed_items",
+    "parseNotes": "Parsed 4 line items from La Comer receipt text.",
+    "textPreview": "SUC. LOMAS\nMonte Athos y Cerrada Monte Libano No350\nCol. Lomas de Chapultepec C.P 11000\nDel. Miguel Hidalgo Ciudad de Mexico\nComercial City Fresko S. de R.L. de C.V.\nAv. Insurgentes Sur # 1517 Mod 2\nCol. San Jose Insurgentes\nCiudad de Mexic",
+    "store": "La Comer / City Market",
+    "totalMxnValue": 738.32,
+    "soldItemsCount": 6,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$738.32",
+    "items": [
+      {
+        "name": "Refresco Coca Cola",
+        "productCode": "913",
+        "originalName": "REFRESCO COCA COLA",
+        "category": "Other",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 133,
+        "totalMxn": 133,
+        "swedenAverageSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Salsa picante",
+        "productCode": "004",
+        "originalName": "SALSA THAI HERITAGE",
+        "category": "Pantry",
+        "quantity": 2,
+        "unitType": "count",
+        "totalMxnValue": 194,
+        "totalMxn": 194,
+        "swedenAverageSek": 48,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Molida Res Extra Fi",
+        "productCode": "005",
+        "originalName": "MOLIDA RES EXTRA FI",
+        "category": "Other",
+        "quantity": 1.034,
+        "unitType": "weight",
+        "totalMxnValue": 344.32,
+        "totalMxn": 344.32,
+        "swedenAverageSek": 35,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Costo De Envio",
+        "productCode": "608",
+        "originalName": "COSTO DE ENVIO",
+        "category": "Other",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 67,
+        "totalMxn": 67,
+        "swedenAverageSek": 34,
+        "normalizationStatus": "matched"
       }
     ]
   },

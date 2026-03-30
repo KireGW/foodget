@@ -54,7 +54,7 @@ export function useBudgetApp() {
   )
   const [deletedReceiptIds, setDeletedReceiptIds] = useState([])
   const [uploadStatus, setUploadStatus] = useState(
-    'Drop PDF receipts here to import them.',
+    'Drop receipt PDFs or screenshots here to import them.',
   )
   const [isUploading, setIsUploading] = useState(false)
   const [productOverrides, setProductOverrides] = useState([])
@@ -394,7 +394,10 @@ export function useBudgetApp() {
     }
 
     const files = Array.from(fileList ?? []).filter((file) =>
-      file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'),
+      file.type === 'application/pdf' ||
+      file.type === 'image/png' ||
+      file.type === 'image/jpeg' ||
+      /\.(pdf|png|jpe?g)$/i.test(file.name),
     )
 
     if (files.length === 0 || isUploading) {

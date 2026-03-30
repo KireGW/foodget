@@ -91,5 +91,129 @@
         "normalizationStatus": "user_override"
       }
     ]
+  },
+  {
+    "id": "manual-2026-03-24-cafe-en-grano",
+    "fileName": "Manual - Café en grano",
+    "relativePath": null,
+    "purchasedAt": "2026-03-24",
+    "monthKey": "2026-03",
+    "url": null,
+    "parseStatus": "manual_entry",
+    "parseNotes": "Manual entry added in the app.",
+    "textPreview": "",
+    "store": "Manual entry",
+    "sourceType": "manual",
+    "totalMxnValue": 379,
+    "soldItemsCount": 1,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$379.00",
+    "items": [
+      {
+        "name": "Café en grano",
+        "productCode": null,
+        "originalName": "Café en grano",
+        "category": "Pantry",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 379,
+        "totalMxn": 379,
+        "swedenAverageSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
+  },
+  {
+    "id": "manual-2026-03-24-pimienta",
+    "fileName": "Manual - Pimienta",
+    "relativePath": null,
+    "purchasedAt": "2026-03-24",
+    "monthKey": "2026-03",
+    "url": null,
+    "parseStatus": "manual_entry",
+    "parseNotes": "Manual entry added in the app.",
+    "textPreview": "",
+    "store": "Manual entry",
+    "sourceType": "manual",
+    "totalMxnValue": 229,
+    "soldItemsCount": 1,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$229.00",
+    "items": [
+      {
+        "name": "Pimienta",
+        "productCode": null,
+        "originalName": "Pimienta",
+        "category": "Pantry",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 229,
+        "totalMxn": 229,
+        "swedenAverageSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
+  },
+  {
+    "id": "manual-2026-03-24-salmon",
+    "fileName": "Manual - Salmón",
+    "relativePath": null,
+    "purchasedAt": "2026-03-24",
+    "monthKey": "2026-03",
+    "url": null,
+    "parseStatus": "manual_entry",
+    "parseNotes": "Manual entry added in the app.",
+    "textPreview": "",
+    "store": "Manual entry",
+    "sourceType": "manual",
+    "totalMxnValue": 300.03,
+    "soldItemsCount": 1,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$300.03",
+    "items": [
+      {
+        "name": "Salmón",
+        "productCode": null,
+        "originalName": "Salmón",
+        "category": "Protein",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 300.03,
+        "totalMxn": 300.03,
+        "swedenAverageSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
+  },
+  {
+    "id": "manual-2026-03-24-granola",
+    "fileName": "Manual - Granola",
+    "relativePath": null,
+    "purchasedAt": "2026-03-24",
+    "monthKey": "2026-03",
+    "url": null,
+    "parseStatus": "manual_entry",
+    "parseNotes": "Manual entry added in the app.",
+    "textPreview": "",
+    "store": "Manual entry",
+    "sourceType": "manual",
+    "totalMxnValue": 279,
+    "soldItemsCount": 1,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$279.00",
+    "items": [
+      {
+        "name": "Granola",
+        "productCode": null,
+        "originalName": "Granola",
+        "category": "Pantry",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 279,
+        "totalMxn": 279,
+        "swedenAverageSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
   }
 ]

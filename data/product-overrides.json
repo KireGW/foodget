@@ -1531,5 +1531,37 @@
     "originalName": "Detergente lavavajillas",
     "canonicalName": "Detergente para lavavajillas",
     "category": "Household"
+  },
+  {
+    "originalName": "Tierra Happy Flower Preparada Bol 2.5",
+    "canonicalName": "Tierra",
+    "category": "Household"
+  },
+  {
+    "originalName": "Queso Manchego Rebanadas Noche Buena 400 Gr",
+    "canonicalName": "Queso manchego",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Leche Alpura Clásica Entera 1 L",
+    "canonicalName": "Leche",
+    "category": "Dairy"
+  },
+  {
+    "originalName": "Leche Alpura Clásica 1 Paquete con 4 piezas de 1 lt c/u",
+    "canonicalName": "Leche",
+    "category": "Dairy"
+  },
+  {
+    "productCode": "496",
+    "originalName": "CACAHUATES SABRITAS",
+    "canonicalName": "Cacahuates",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "005",
+    "originalName": "MOLIDA RES EXTRA FI",
+    "canonicalName": "Carne molida",
+    "category": "Protein"
   }
 ]
