@@ -15,11 +15,12 @@ export function buildAvailableMonths(receipts) {
 
 export function buildMonthlyItems(receipts, allReceipts = receipts) {
   const itemsByName = new Map()
+  const averageReceipts = selectCompleteMonthReceipts(allReceipts)
   const totalMonthCount = Math.max(
     1,
-    new Set(allReceipts.map((receipt) => receipt.purchasedAt.slice(0, 7))).size,
+    new Set(averageReceipts.map((receipt) => receipt.purchasedAt.slice(0, 7))).size,
   )
-  const historicalSpendByItem = allReceipts.reduce((summary, receipt) => {
+  const historicalSpendByItem = averageReceipts.reduce((summary, receipt) => {
     buildReceiptBudgetItems(receipt).forEach((item) => {
       if (item.category === 'Exclude from budget' || item.isAdjustment) {
         return
@@ -311,12 +312,13 @@ export function buildProductMovers(selectedMonth, availableMonths, receipts) {
 }
 
 export function buildCategoryChart(monthlyItems, receiptsForAverage = []) {
+  const averageReceipts = selectCompleteMonthReceipts(receiptsForAverage)
   const averageMonthCount = Math.max(
     1,
-    new Set(receiptsForAverage.map((receipt) => receipt.purchasedAt.slice(0, 7))).size,
+    new Set(averageReceipts.map((receipt) => receipt.purchasedAt.slice(0, 7))).size,
   )
   const averageBudgetTotalPerMonth =
-    receiptsForAverage.reduce((sum, receipt) => {
+    averageReceipts.reduce((sum, receipt) => {
       return (
         sum +
         buildReceiptBudgetItems(receipt)
@@ -324,7 +326,7 @@ export function buildCategoryChart(monthlyItems, receiptsForAverage = []) {
           .reduce((itemSum, item) => itemSum + item.totalMxn, 0)
       )
     }, 0) / averageMonthCount
-  const categoryAverageTotals = receiptsForAverage.reduce((summary, receipt) => {
+  const categoryAverageTotals = averageReceipts.reduce((summary, receipt) => {
     buildReceiptBudgetItems(receipt).forEach((item) => {
       if (item.category === 'Exclude from budget') {
         return
@@ -396,6 +398,25 @@ export function buildCategoryChartForMonth(selectedMonth, receipts) {
     ),
     receipts,
   )
+}
+
+function selectCompleteMonthReceipts(receipts, now = new Date()) {
+  if (!receipts.length) {
+    return receipts
+  }
+
+  const currentMonthKey = getMonthKey(now)
+  const completeMonthReceipts = receipts.filter(
+    (receipt) => receipt.purchasedAt.slice(0, 7) !== currentMonthKey,
+  )
+
+  return completeMonthReceipts.length > 0 ? completeMonthReceipts : receipts
+}
+
+function getMonthKey(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
 }
 
 export function buildReceiptEntries(receipts, receiptReviews = []) {

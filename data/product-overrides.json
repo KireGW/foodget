@@ -549,9 +549,9 @@
   },
   {
     "productCode": "004",
-    "originalName": "PAN DE QUESO PARMES",
-    "canonicalName": "Pan De Queso Parmes",
-    "category": "Bakery"
+    "originalName": "SALSA THAI HERITAGE",
+    "canonicalName": "Salsa Thai Heritage",
+    "category": "Pantry"
   },
   {
     "productCode": "039",
@@ -898,7 +898,7 @@
   {
     "productCode": "00021136010480",
     "originalName": "TOPOCH MIN",
-    "canonicalName": "Agua",
+    "canonicalName": "Topo chico",
     "category": "Beverages"
   },
   {
@@ -1012,7 +1012,7 @@
   {
     "productCode": "07501055320899",
     "originalName": "CIEL6PK 1L",
-    "canonicalName": "Agua",
+    "canonicalName": "Agua natural",
     "category": "Beverages"
   },
   {
@@ -1474,7 +1474,7 @@
   },
   {
     "originalName": "Agua mineral Topo Chico 1.5 l",
-    "canonicalName": "Agua",
+    "canonicalName": "Topo chico",
     "category": "Beverages"
   },
   {
@@ -1562,6 +1562,42 @@
     "productCode": "005",
     "originalName": "MOLIDA RES EXTRA FI",
     "canonicalName": "Carne molida",
+    "category": "Protein"
+  },
+  {
+    "productCode": "07506495014766",
+    "originalName": "ENS COR MK",
+    "canonicalName": "Lechuga",
+    "category": "Produce"
+  },
+  {
+    "productCode": "07501058611062",
+    "originalName": "CARNATION",
+    "canonicalName": "Leche evaporada",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501000633357",
+    "originalName": "GAMESA MAR",
+    "canonicalName": "Galletas María",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "0000000046930",
+    "originalName": "CHILE CUARE",
+    "canonicalName": "Chile Jalapeño",
+    "category": "Produce"
+  },
+  {
+    "productCode": "0000000043137",
+    "originalName": "MANGO MANIL",
+    "canonicalName": "Mango",
+    "category": "Produce"
+  },
+  {
+    "productCode": "0201312000003",
+    "originalName": "PIERNA TROZ",
+    "canonicalName": "Pierna de cerdo",
     "category": "Protein"
   }
 ]

@@ -48,6 +48,14 @@ export function CategorySpendChart({
       : ''
   }, [availableMonths, comparisonMonth, effectiveSelectedMonth])
 
+  const selectedMonthProgress = useMemo(() => {
+    if (categoryRangeMode === 'custom') {
+      return null
+    }
+
+    return buildMonthProgress(effectiveSelectedMonth)
+  }, [categoryRangeMode, effectiveSelectedMonth])
+
   const mergedChart = useMemo(() => {
     const comparisonChart = effectiveComparisonMonth
       ? (categoryChartsByMonth[effectiveComparisonMonth] ?? [])
@@ -57,8 +65,9 @@ export function CategorySpendChart({
     const categories = [...new Set([...currentMap.keys(), ...comparisonMap.keys()])]
     const maxValue = categories.reduce((max, category) => {
       const currentValue = Math.abs(currentMap.get(category)?.totalMxnValue ?? 0)
+      const averageValue = Math.abs(currentMap.get(category)?.averageMonthlySpendMxnValue ?? 0)
       const compareValue = Math.abs(comparisonMap.get(category)?.totalMxnValue ?? 0)
-      return Math.max(max, currentValue, compareValue)
+      return Math.max(max, currentValue, averageValue, compareValue)
     }, 0)
 
     return categories
@@ -73,6 +82,10 @@ export function CategorySpendChart({
           averageMonthlySpendMxnValue: currentEntry?.averageMonthlySpendMxnValue ?? 0,
           averageMonthlySpendMxn: currentEntry?.averageMonthlySpendMxn ?? 'MX$0',
           averageShare: currentEntry?.averageShare ?? 0,
+          averageBarShare:
+            maxValue === 0
+              ? 0
+              : (Math.abs(currentEntry?.averageMonthlySpendMxnValue ?? 0) / maxValue) * 100,
           isNegative: currentEntry?.isNegative ?? false,
           items: currentEntry?.items ?? [],
           share:
@@ -86,6 +99,13 @@ export function CategorySpendChart({
               ? 0
               : (Math.abs(comparisonEntry?.totalMxnValue ?? 0) / maxValue) * 100,
           comparisonIsNegative: comparisonEntry?.isNegative ?? false,
+          paceAssessment: selectedMonthProgress
+            ? assessCategoryPace(
+                currentEntry?.totalMxnValue ?? 0,
+                currentEntry?.averageMonthlySpendMxnValue ?? 0,
+                selectedMonthProgress.ratio,
+              )
+            : null,
         }
       })
       .sort((left, right) => {
@@ -96,7 +116,7 @@ export function CategorySpendChart({
         )
         return rightWeight - leftWeight
       })
-  }, [activeCategoryChart, categoryChartsByMonth, effectiveComparisonMonth])
+  }, [activeCategoryChart, categoryChartsByMonth, effectiveComparisonMonth, selectedMonthProgress])
 
   const currentMonthTotal = useMemo(
     () => activeCategoryChart.reduce((sum, entry) => sum + entry.totalMxnValue, 0),
@@ -121,9 +141,21 @@ export function CategorySpendChart({
     }
 
     window.requestAnimationFrame(() => {
-      row.scrollIntoView({
+      const rect = row.getBoundingClientRect()
+      const viewportHeight = window.innerHeight
+      const fullyVisible = rect.top >= 0 && rect.bottom <= viewportHeight
+      const dropdownFitsWithoutScrolling = rect.bottom <= viewportHeight
+
+      if (fullyVisible && dropdownFitsWithoutScrolling) {
+        return
+      }
+
+      const nextScrollTop =
+        window.scrollY + rect.top - 12
+
+      window.scrollTo({
+        top: Math.max(nextScrollTop, 0),
         behavior: 'smooth',
-        block: 'start',
       })
     })
   }, [isOpen, openCategory])
@@ -239,7 +271,6 @@ export function CategorySpendChart({
             <span className="category-chart__header-spacer" />
             <div className="category-chart__header-values">
               <span>Avg / month</span>
-              <span>Total</span>
             </div>
           </div>
           {mergedChart.map((entry) => (
@@ -273,17 +304,38 @@ export function CategorySpendChart({
                   </div>
                   <div className="category-chart__value-group">
                     <small className="category-chart__average">{entry.averageMonthlySpendMxn}</small>
-                    <strong className="category-chart__total">{entry.totalMxn}</strong>
                   </div>
                 </div>
                 <div className="category-chart__bars" aria-hidden="true">
-                  <div className="category-chart__track">
+                  <div className="category-chart__track category-chart__track--primary">
                     <div
-                      className={`category-chart__bar${
+                      className={`category-chart__bar category-chart__bar--average${
+                        entry.isNegative ? ' category-chart__bar--average-negative' : ''
+                      }`}
+                      style={{ width: `${Math.max(entry.averageBarShare, 0)}%` }}
+                    />
+                    <div
+                      className={`category-chart__bar category-chart__bar--current${
                         entry.isNegative ? ' category-chart__bar--negative' : ''
                       }`}
-                      style={{ width: `${Math.max(entry.share, 6)}%` }}
+                      style={{
+                        width: `${Math.max(
+                          Math.min(entry.share, entry.averageBarShare),
+                          entry.share > 0 ? 6 : 0,
+                        )}%`,
+                      }}
                     />
+                    {entry.share > entry.averageBarShare ? (
+                      <div
+                        className={`category-chart__bar category-chart__bar--overflow${
+                          entry.isNegative ? ' category-chart__bar--overflow-negative' : ''
+                        }`}
+                        style={{
+                          left: `${entry.averageBarShare}%`,
+                          width: `${Math.max(entry.share - entry.averageBarShare, 0)}%`,
+                        }}
+                      />
+                    ) : null}
                   </div>
                   {effectiveComparisonMonth ? (
                     <div
@@ -314,6 +366,27 @@ export function CategorySpendChart({
                     </div>
                   ) : null}
                 </div>
+                {entry.share > 0 ? (
+                  <div
+                    className={`category-chart__pace-row${
+                      entry.paceAssessment ? ` category-chart__pace-row--${entry.paceAssessment.status}` : ''
+                    }`}
+                  >
+                    <div
+                      className="category-chart__pace-anchor"
+                      style={{ left: `${Math.max(entry.share, 6)}%` }}
+                    >
+                      <div className="category-chart__pace-card">
+                        <strong className="category-chart__pace-total">{entry.totalMxn}</strong>
+                        {entry.paceAssessment ? (
+                          <span className="category-chart__pace-caption">
+                            {entry.paceAssessment.label}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
               </button>
 
               <div
@@ -351,4 +424,51 @@ function formatCategoryShare(value, total) {
 
   const share = (value / total) * 100
   return `${share.toFixed(1)}% of total`
+}
+
+function buildMonthProgress(selectedMonth, now = new Date()) {
+  if (!selectedMonth) {
+    return null
+  }
+
+  const [yearValue, monthValue] = selectedMonth.split('-').map(Number)
+  if (!yearValue || !monthValue) {
+    return null
+  }
+
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+
+  if (yearValue < currentYear || (yearValue === currentYear && monthValue < currentMonth)) {
+    return { ratio: 1 }
+  }
+
+  if (yearValue > currentYear || (yearValue === currentYear && monthValue > currentMonth)) {
+    return { ratio: 0 }
+  }
+
+  const daysInMonth = new Date(yearValue, monthValue, 0).getDate()
+  return {
+    ratio: Math.min(now.getDate() / daysInMonth, 1),
+  }
+}
+
+function assessCategoryPace(currentValue, averageValue, monthProgressRatio) {
+  if (averageValue <= 0) {
+    return null
+  }
+
+  const spendRatio = currentValue / averageValue
+  const difference = spendRatio - monthProgressRatio
+  const tolerance = 0.08
+
+  if (difference > tolerance) {
+    return { status: 'over', label: 'Over average' }
+  }
+
+  if (difference < -tolerance) {
+    return { status: 'under', label: 'Under average' }
+  }
+
+  return { status: 'on', label: 'On average' }
 }
