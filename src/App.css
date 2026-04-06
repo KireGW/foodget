@@ -1049,6 +1049,16 @@
   pointer-events: none;
 }
 
+.category-chart__pace-anchor--left {
+  transform: translateX(0);
+  justify-content: flex-start;
+}
+
+.category-chart__pace-anchor--right {
+  transform: translateX(-100%);
+  justify-content: flex-end;
+}
+
 .category-chart__pace-card {
   display: inline-flex;
   align-items: center;
@@ -1660,21 +1670,34 @@
 
   .category-chart__bar-value {
     position: absolute;
-    right: 0.4rem;
     top: 50%;
     z-index: 2;
     display: inline-flex;
     align-items: center;
-    transform: translateY(-50%);
     max-width: calc(100% - 0.8rem);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #6f5400;
     font-size: 0.7rem;
     font-weight: 700;
     line-height: 1;
     pointer-events: none;
+  }
+
+  .category-chart__bar-value--inside {
+    transform: translate(calc(-100% - 0.4rem), -50%);
+  }
+
+  .category-chart__bar-value--outside {
+    transform: translate(0.4rem, -50%);
+  }
+
+  .category-chart__bar-value--current {
+    color: var(--heading-color);
+  }
+
+  .category-chart__bar-value--negative {
+    color: #7a542d;
   }
 
   .category-chart__bar-value--ghost {

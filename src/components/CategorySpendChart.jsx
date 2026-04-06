@@ -92,6 +92,13 @@ export function CategorySpendChart({
             maxValue === 0
               ? 0
               : (Math.abs(currentEntry?.totalMxnValue ?? 0) / maxValue) * 100,
+          renderedShare:
+            maxValue === 0
+              ? 0
+              : Math.max(
+                  (Math.abs(currentEntry?.totalMxnValue ?? 0) / maxValue) * 100,
+                  (currentEntry?.totalMxnValue ?? 0) !== 0 ? 6 : 0,
+                ),
           comparisonTotalMxnValue: comparisonEntry?.totalMxnValue ?? 0,
           comparisonTotalMxn: comparisonEntry?.totalMxn ?? 'MX$0',
           comparisonShare:
@@ -317,30 +324,28 @@ export function CategorySpendChart({
                 </div>
                 <div className="category-chart__bars" aria-hidden="true">
                   <div className="category-chart__track category-chart__track--primary">
-                    <div
-                      className={`category-chart__bar category-chart__bar--average${
-                        entry.isNegative ? ' category-chart__bar--average-negative' : ''
-                      }`}
-                      style={{ width: `${Math.max(entry.averageBarShare, 0)}%` }}
-                    />
+                    {!effectiveComparisonMonth ? (
+                      <div
+                        className={`category-chart__bar category-chart__bar--average${
+                          entry.isNegative ? ' category-chart__bar--average-negative' : ''
+                        }`}
+                        style={{ width: `${Math.max(entry.averageBarShare, 0)}%` }}
+                      />
+                    ) : null}
                     <div
                       className={`category-chart__bar category-chart__bar--current${
                         entry.isNegative ? ' category-chart__bar--negative' : ''
                       }`}
                       style={{
                         width: `${Math.max(
-                          Math.min(entry.share, entry.averageBarShare),
-                          entry.share > 0 ? 6 : 0,
+                          effectiveComparisonMonth
+                            ? entry.renderedShare
+                            : Math.min(entry.share, entry.averageBarShare),
+                          entry.renderedShare > 0 ? 6 : 0,
                         )}%`,
                       }}
-                    >
-                      {entry.share <= entry.averageBarShare ? (
-                        <span className="category-chart__bar-value">
-                          {entry.totalMxn}
-                        </span>
-                      ) : null}
-                    </div>
-                    {entry.share > entry.averageBarShare ? (
+                    />
+                    {entry.share > entry.averageBarShare && !effectiveComparisonMonth ? (
                       <div
                         className={`category-chart__bar category-chart__bar--overflow${
                           entry.isNegative ? ' category-chart__bar--overflow-negative' : ''
@@ -349,11 +354,17 @@ export function CategorySpendChart({
                           left: `${entry.averageBarShare}%`,
                           width: `${Math.max(entry.share - entry.averageBarShare, 0)}%`,
                         }}
+                      />
+                    ) : null}
+                    {effectiveComparisonMonth ? (
+                      <span
+                        className={`category-chart__bar-value category-chart__bar-value--current category-chart__bar-value--${
+                          entry.renderedShare > 50 ? 'inside' : 'outside'
+                        }${entry.isNegative ? ' category-chart__bar-value--negative' : ''}`}
+                        style={{ left: `${Math.max(entry.renderedShare, 0).toFixed(2)}%` }}
                       >
-                        <span className="category-chart__bar-value">
-                          {entry.totalMxn}
-                        </span>
-                      </div>
+                        {entry.totalMxn}
+                      </span>
                     ) : null}
                   </div>
                   {effectiveComparisonMonth ? (
@@ -369,17 +380,19 @@ export function CategorySpendChart({
                           entry.comparisonIsNegative ? ' category-chart__bar--ghost-negative' : ''
                         }`}
                         style={{ width: `${Math.max(entry.comparisonShare, 0)}%` }}
+                      />
+                      <span
+                        className={`category-chart__bar-value category-chart__bar-value--ghost category-chart__bar-value--${
+                          entry.comparisonShare > 50 ? 'inside' : 'outside'
+                        }${
+                          entry.comparisonIsNegative
+                            ? ' category-chart__bar-value--ghost-negative'
+                            : ''
+                        }`}
+                        style={{ left: `${Math.max(entry.comparisonShare, 0).toFixed(2)}%` }}
                       >
-                        <span
-                          className={`category-chart__bar-value category-chart__bar-value--ghost${
-                            entry.comparisonIsNegative
-                              ? ' category-chart__bar-value--ghost-negative'
-                              : ''
-                          }`}
-                        >
-                          {entry.comparisonTotalMxn}
-                        </span>
-                      </div>
+                        {entry.comparisonTotalMxn}
+                      </span>
                       {hoveredComparisonCategory === entry.category ? (
                         <span
                           className={`category-chart__hover-value${
@@ -403,11 +416,13 @@ export function CategorySpendChart({
                   >
                     <div
                       className="category-chart__pace-marker"
-                      style={{ left: `${Math.max(entry.share, 0).toFixed(2)}%` }}
+                      style={{ left: `${Math.max(entry.renderedShare, 0).toFixed(2)}%` }}
                     />
                     <div
-                      className="category-chart__pace-anchor"
-                      style={{ left: buildPaceAnchorPosition(entry.share) }}
+                      className={`category-chart__pace-anchor category-chart__pace-anchor--${buildPaceAnchorAlignment(
+                        entry.renderedShare,
+                      )}`}
+                      style={buildPaceAnchorStyle(entry.renderedShare)}
                     >
                       <div className="category-chart__pace-card">
                         <strong className="category-chart__pace-total">{entry.totalMxn}</strong>
@@ -506,6 +521,29 @@ function assessCategoryPace(currentValue, averageValue, monthProgressRatio) {
   return { status: 'on', label: 'On average' }
 }
 
-function buildPaceAnchorPosition(share) {
-  return `clamp(3.9rem, ${Math.max(share, 0).toFixed(2)}%, calc(100% - 3.9rem))`
+function buildPaceAnchorAlignment(share) {
+  if (share <= 24) {
+    return 'left'
+  }
+
+  if (share >= 76) {
+    return 'right'
+  }
+
+  return 'center'
+}
+
+function buildPaceAnchorStyle(share) {
+  const normalizedShare = Math.max(share, 0).toFixed(2)
+  const alignment = buildPaceAnchorAlignment(share)
+
+  if (alignment === 'left') {
+    return { left: '0%' }
+  }
+
+  if (alignment === 'right') {
+    return { left: '100%' }
+  }
+
+  return { left: `${normalizedShare}%` }
 }
