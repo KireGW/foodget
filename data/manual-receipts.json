@@ -215,5 +215,36 @@
         "normalizationStatus": "user_override"
       }
     ]
+  },
+  {
+    "id": "manual-2026-04-06-detergente-para-lavavajillas",
+    "fileName": "Manual - Detergente para lavavajillas",
+    "relativePath": null,
+    "purchasedAt": "2026-04-06",
+    "monthKey": "2026-04",
+    "url": null,
+    "parseStatus": "manual_entry",
+    "parseNotes": "Manual entry added in the app.",
+    "textPreview": "",
+    "store": "Manual entry",
+    "sourceType": "manual",
+    "totalMxnValue": 285,
+    "soldItemsCount": 1,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$285.00",
+    "items": [
+      {
+        "name": "Detergente para lavavajillas",
+        "productCode": null,
+        "originalName": "Detergente para lavavajillas",
+        "category": "Household",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 285,
+        "totalMxn": 285,
+        "swedenAverageSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
   }
 ]

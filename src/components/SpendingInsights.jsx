@@ -30,7 +30,12 @@ export function SpendingInsights({
       <div className="insight-strip">
         <article className="insight-strip__card insight-strip__card--sand">
           <span>MXN total</span>
-          <strong>{metrics.totalSpentMxn}</strong>
+          <div className="insight-strip__headline">
+            <strong>{metrics.totalSpentMxn}</strong>
+            <small className="insight-strip__value-detail">
+              Avg / month {metrics.averageMonthlyTotalMxn}
+            </small>
+          </div>
         </article>
         <article className="insight-strip__card insight-strip__card--mint">
           <span>Biggest category</span>

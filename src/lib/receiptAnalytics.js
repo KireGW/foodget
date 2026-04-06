@@ -90,11 +90,22 @@ export function buildMonthlyItems(receipts, allReceipts = receipts) {
     }))
 }
 
-export function buildMetrics(selectedMonth, receipts, monthlyItems, receiptReviews = []) {
+export function buildMetrics(
+  selectedMonth,
+  receipts,
+  monthlyItems,
+  receiptReviews = [],
+  allReceipts = receipts,
+) {
   const receiptReviewMap = new Map(
     receiptReviews.map((review) => [review.receiptId, review.decision]),
   )
   const parsedReceiptCount = receipts.filter((receipt) => receipt.items.length > 0).length
+  const averageReceipts = selectCompleteMonthReceipts(allReceipts)
+  const averageMonthCount = Math.max(
+    1,
+    new Set(averageReceipts.map((receipt) => receipt.purchasedAt.slice(0, 7))).size,
+  )
   const totals = receipts.reduce(
     (summary, receipt) => {
       const receiptSummary = summarizeReceiptBudget(
@@ -144,6 +155,15 @@ export function buildMetrics(selectedMonth, receipts, monthlyItems, receiptRevie
       confirmedReceiptCount: 0,
     },
   )
+  const averageMonthlyBudgetTotalMxn =
+    averageReceipts.reduce((sum, receipt) => {
+      const receiptSummary = summarizeReceiptBudget(
+        receipt,
+        receiptReviewMap.get(receipt.id),
+      )
+
+      return sum + receiptSummary.effectiveBudgetTotalMxn
+    }, 0) / averageMonthCount
 
   return {
     monthLabel: selectedMonth
@@ -159,6 +179,10 @@ export function buildMetrics(selectedMonth, receipts, monthlyItems, receiptRevie
       totals.effectiveBudgetTotalMxn === 0
         ? 'Pending PDF parsing'
         : formatCurrency(totals.effectiveBudgetTotalMxn, 'MXN'),
+    averageMonthlyTotalMxn:
+      averageMonthlyBudgetTotalMxn === 0
+        ? 'Pending PDF parsing'
+        : formatCurrency(averageMonthlyBudgetTotalMxn, 'MXN'),
     averageReceiptMxn:
       totals.effectiveBudgetTotalMxn === 0
         ? 'Awaiting totals'
@@ -365,20 +389,20 @@ export function buildCategoryChart(monthlyItems, receiptsForAverage = []) {
 
   return entries.map(([category, details]) => ({
     categoryAverageValue:
-      (categoryAverageTotals.get(category) ?? details.totalMxnValue) / averageMonthCount,
+      (categoryAverageTotals.get(category) ?? 0) / averageMonthCount,
     category,
     totalMxnValue: details.totalMxnValue,
     totalMxn: formatCurrency(details.totalMxnValue, 'MXN'),
     averageMonthlySpendMxnValue:
-      (categoryAverageTotals.get(category) ?? details.totalMxnValue) / averageMonthCount,
+      (categoryAverageTotals.get(category) ?? 0) / averageMonthCount,
     averageMonthlySpendMxn: formatCurrency(
-      (categoryAverageTotals.get(category) ?? details.totalMxnValue) / averageMonthCount,
+      (categoryAverageTotals.get(category) ?? 0) / averageMonthCount,
       'MXN',
     ),
     averageShare:
       averageBudgetTotalPerMonth === 0
         ? 0
-        : (((categoryAverageTotals.get(category) ?? details.totalMxnValue) / averageMonthCount) /
+        : (((categoryAverageTotals.get(category) ?? 0) / averageMonthCount) /
             averageBudgetTotalPerMonth) *
           100,
     share: maxValue === 0 ? 0 : (Math.abs(details.totalMxnValue) / maxValue) * 100,

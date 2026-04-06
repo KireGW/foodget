@@ -290,8 +290,21 @@ export function useBudgetApp() {
   ])
 
   const metrics = useMemo(
-    () => buildMetrics(selectedMonth, monthReceipts, monthlyItems, receiptReviews),
-    [selectedMonth, monthReceipts, monthlyItems, receiptReviews],
+    () =>
+      buildMetrics(
+        selectedMonth,
+        monthReceipts,
+        monthlyItems,
+        receiptReviews,
+        receiptsWithManualCorrections,
+      ),
+    [
+      selectedMonth,
+      monthReceipts,
+      monthlyItems,
+      receiptReviews,
+      receiptsWithManualCorrections,
+    ],
   )
 
   const categoryChart = useMemo(

@@ -109,12 +109,14 @@ export function CategorySpendChart({
         }
       })
       .sort((left, right) => {
-        const leftWeight = Math.max(Math.abs(left.totalMxnValue), Math.abs(left.comparisonTotalMxnValue))
-        const rightWeight = Math.max(
-          Math.abs(right.totalMxnValue),
-          Math.abs(right.comparisonTotalMxnValue),
-        )
-        return rightWeight - leftWeight
+        const averageDifference =
+          Math.abs(right.averageMonthlySpendMxnValue) - Math.abs(left.averageMonthlySpendMxnValue)
+
+        if (Math.abs(averageDifference) > 0.009) {
+          return averageDifference
+        }
+
+        return left.category.localeCompare(right.category)
       })
   }, [activeCategoryChart, categoryChartsByMonth, effectiveComparisonMonth, selectedMonthProgress])
 
@@ -366,7 +368,7 @@ export function CategorySpendChart({
                     </div>
                   ) : null}
                 </div>
-                {entry.share > 0 ? (
+                {entry.share > 0 && !effectiveComparisonMonth ? (
                   <div
                     className={`category-chart__pace-row${
                       entry.paceAssessment ? ` category-chart__pace-row--${entry.paceAssessment.status}` : ''

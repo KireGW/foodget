@@ -730,6 +730,15 @@
   margin-top: 0;
 }
 
+.insight-strip__card--sand .insight-strip__headline {
+  justify-content: space-between;
+}
+
+.insight-strip__card--sand .insight-strip__value-detail {
+  margin-left: auto;
+  text-align: right;
+}
+
 .trend-summary small {
   display: block;
   margin-top: 0.35rem;
@@ -957,20 +966,26 @@
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   background:
-    linear-gradient(90deg, rgba(31, 90, 97, 0.92), rgba(235, 122, 87, 0.96)),
-    radial-gradient(circle, rgba(255, 250, 239, 0.75) 22%, transparent 23%);
-  background-size: auto, 10px 10px;
+    linear-gradient(90deg, rgba(31, 90, 97, 0.34), rgba(235, 122, 87, 0.42)),
+    radial-gradient(circle, rgba(255, 250, 239, 0.42) 20%, transparent 21%);
+  background-size: auto, 11px 11px;
   background-position: 0 0, 2px 50%;
   box-shadow: inset 0 0 0 1px rgba(255, 248, 235, 0.18);
+  border: 1px dashed rgba(190, 112, 82, 0.72);
+  border-left: 0;
+  box-sizing: border-box;
 }
 
 .category-chart__bar--overflow-negative {
   background:
-    linear-gradient(90deg, rgba(155, 77, 47, 0.92), rgba(229, 160, 110, 0.96)),
-    radial-gradient(circle, rgba(255, 248, 235, 0.72) 22%, transparent 23%);
-  background-size: auto, 10px 10px;
+    linear-gradient(90deg, rgba(155, 77, 47, 0.34), rgba(229, 160, 110, 0.42)),
+    radial-gradient(circle, rgba(255, 248, 235, 0.42) 20%, transparent 21%);
+  background-size: auto, 11px 11px;
   background-position: 0 0, 2px 50%;
   box-shadow: inset 0 0 0 1px rgba(255, 248, 235, 0.18);
+  border: 1px dashed rgba(171, 109, 73, 0.72);
+  border-left: 0;
+  box-sizing: border-box;
 }
 
 .category-chart__bar--ghost {
