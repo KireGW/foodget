@@ -1024,17 +1024,7 @@
   margin-top: 0.02rem;
 }
 
-.category-chart__pace-anchor {
-  position: absolute;
-  top: 0;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.category-chart__pace-anchor::before {
-  content: '';
+.category-chart__pace-marker {
   position: absolute;
   top: -0.4rem;
   width: 2px;
@@ -1042,6 +1032,16 @@
   border-radius: 999px;
   background: currentColor;
   opacity: 0.55;
+  transform: translateX(-50%);
+}
+
+.category-chart__pace-anchor {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .category-chart__pace-card {
@@ -1590,13 +1590,19 @@
     text-align: left;
   }
 
-  .category-chart__header,
-  .category-chart__average {
+  .category-chart__header {
     display: none;
   }
 
   .category-chart__value-group {
     display: block;
+    width: 100%;
+  }
+
+  .category-chart__average {
+    display: block;
+    width: 100%;
+    text-align: right;
   }
 
   .receipt-audit__controls {

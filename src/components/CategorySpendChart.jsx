@@ -375,8 +375,12 @@ export function CategorySpendChart({
                     }`}
                   >
                     <div
+                      className="category-chart__pace-marker"
+                      style={{ left: `${Math.max(entry.share, 0).toFixed(2)}%` }}
+                    />
+                    <div
                       className="category-chart__pace-anchor"
-                      style={{ left: `${Math.max(entry.share, 6)}%` }}
+                      style={{ left: buildPaceAnchorPosition(entry.share) }}
                     >
                       <div className="category-chart__pace-card">
                         <strong className="category-chart__pace-total">{entry.totalMxn}</strong>
@@ -473,4 +477,8 @@ function assessCategoryPace(currentValue, averageValue, monthProgressRatio) {
   }
 
   return { status: 'on', label: 'On average' }
+}
+
+function buildPaceAnchorPosition(share) {
+  return `clamp(3.9rem, ${Math.max(share, 0).toFixed(2)}%, calc(100% - 3.9rem))`
 }
