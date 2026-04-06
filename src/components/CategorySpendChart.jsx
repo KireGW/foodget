@@ -109,6 +109,13 @@ export function CategorySpendChart({
         }
       })
       .sort((left, right) => {
+        const leftNegativeWeight = left.totalMxnValue < 0 ? 1 : 0
+        const rightNegativeWeight = right.totalMxnValue < 0 ? 1 : 0
+
+        if (leftNegativeWeight !== rightNegativeWeight) {
+          return leftNegativeWeight - rightNegativeWeight
+        }
+
         const averageDifference =
           Math.abs(right.averageMonthlySpendMxnValue) - Math.abs(left.averageMonthlySpendMxnValue)
 
@@ -326,7 +333,13 @@ export function CategorySpendChart({
                           entry.share > 0 ? 6 : 0,
                         )}%`,
                       }}
-                    />
+                    >
+                      {entry.share <= entry.averageBarShare ? (
+                        <span className="category-chart__bar-value">
+                          {entry.totalMxn}
+                        </span>
+                      ) : null}
+                    </div>
                     {entry.share > entry.averageBarShare ? (
                       <div
                         className={`category-chart__bar category-chart__bar--overflow${
@@ -336,7 +349,11 @@ export function CategorySpendChart({
                           left: `${entry.averageBarShare}%`,
                           width: `${Math.max(entry.share - entry.averageBarShare, 0)}%`,
                         }}
-                      />
+                      >
+                        <span className="category-chart__bar-value">
+                          {entry.totalMxn}
+                        </span>
+                      </div>
                     ) : null}
                   </div>
                   {effectiveComparisonMonth ? (
@@ -352,7 +369,17 @@ export function CategorySpendChart({
                           entry.comparisonIsNegative ? ' category-chart__bar--ghost-negative' : ''
                         }`}
                         style={{ width: `${Math.max(entry.comparisonShare, 0)}%` }}
-                      />
+                      >
+                        <span
+                          className={`category-chart__bar-value category-chart__bar-value--ghost${
+                            entry.comparisonIsNegative
+                              ? ' category-chart__bar-value--ghost-negative'
+                              : ''
+                          }`}
+                        >
+                          {entry.comparisonTotalMxn}
+                        </span>
+                      </div>
                       {hoveredComparisonCategory === entry.category ? (
                         <span
                           className={`category-chart__hover-value${
