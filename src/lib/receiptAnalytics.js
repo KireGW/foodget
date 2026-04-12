@@ -164,6 +164,11 @@ export function buildMetrics(
 
       return sum + receiptSummary.effectiveBudgetTotalMxn
     }, 0) / averageMonthCount
+  const totalPaceAssessment = assessSpendPace(
+    totals.effectiveBudgetTotalMxn,
+    averageMonthlyBudgetTotalMxn,
+    buildMonthProgress(selectedMonth)?.ratio ?? 1,
+  )
 
   return {
     monthLabel: selectedMonth
@@ -183,6 +188,8 @@ export function buildMetrics(
       averageMonthlyBudgetTotalMxn === 0
         ? 'Pending PDF parsing'
         : formatCurrency(averageMonthlyBudgetTotalMxn, 'MXN'),
+    totalPaceStatus: totalPaceAssessment?.status ?? null,
+    totalPaceLabel: totalPaceAssessment?.label ?? null,
     averageReceiptMxn:
       totals.effectiveBudgetTotalMxn === 0
         ? 'Awaiting totals'
@@ -205,6 +212,53 @@ export function buildMetrics(
     autoAlignedReceiptCount: totals.autoAlignedReceiptCount,
     confirmedReceiptCount: totals.confirmedReceiptCount,
   }
+}
+
+function buildMonthProgress(selectedMonth, now = new Date()) {
+  if (!selectedMonth) {
+    return null
+  }
+
+  const [yearValue, monthValue] = selectedMonth.split('-').map(Number)
+  if (!yearValue || !monthValue) {
+    return null
+  }
+
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+
+  if (yearValue < currentYear || (yearValue === currentYear && monthValue < currentMonth)) {
+    return { ratio: 1 }
+  }
+
+  if (yearValue > currentYear || (yearValue === currentYear && monthValue > currentMonth)) {
+    return { ratio: 0 }
+  }
+
+  const daysInMonth = new Date(yearValue, monthValue, 0).getDate()
+  return {
+    ratio: Math.min(now.getDate() / daysInMonth, 1),
+  }
+}
+
+function assessSpendPace(currentValue, averageValue, monthProgressRatio) {
+  if (averageValue <= 0) {
+    return null
+  }
+
+  const spendRatio = currentValue / averageValue
+  const difference = spendRatio - monthProgressRatio
+  const tolerance = 0.08
+
+  if (difference > tolerance) {
+    return { status: 'over', label: 'Over average' }
+  }
+
+  if (difference < -tolerance) {
+    return { status: 'under', label: 'Under average' }
+  }
+
+  return { status: 'on', label: 'On average' }
 }
 
 export function buildMonthComparison(selectedMonth, availableMonths, receipts, receiptReviews = []) {
@@ -538,7 +592,15 @@ export function buildReceiptAuditItems(receiptEntries) {
       let auditLabel = 'Looks complete'
       let auditDetail = `Parser currently sees ${formatQuantity(receipt.parsedItemsCountValue)} items across ${receipt.parsedItemDetails.length} parsed ${receipt.parsedItemDetails.length === 1 ? 'line' : 'lines'}.`
 
-      if (!hasParsedItems) {
+      if (receipt.totalCheckStatus === 'needs_review') {
+        auditStatus = 'review'
+        auditLabel = 'Needs total review'
+        auditDetail = receipt.totalCheckDetail
+      } else if (receipt.totalCheckStatus === 'items_only') {
+        auditStatus = 'review'
+        auditLabel = 'Needs total extraction'
+        auditDetail = receipt.totalCheckDetail
+      } else if (!hasParsedItems) {
         auditStatus = 'missing'
         auditLabel = 'No parsed items'
         auditDetail = receipt.parseNotes
@@ -556,7 +618,7 @@ export function buildReceiptAuditItems(receiptEntries) {
       }
     })
     .sort((left, right) => {
-      const statusOrder = { warning: 0, missing: 1, unknown: 2, ok: 3 }
+      const statusOrder = { review: 0, warning: 1, missing: 2, unknown: 3, ok: 4 }
       const leftRank = statusOrder[left.auditStatus] ?? 99
       const rightRank = statusOrder[right.auditStatus] ?? 99
 

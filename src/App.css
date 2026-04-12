@@ -727,7 +727,38 @@
 }
 
 .insight-strip__value-detail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
   margin-top: 0;
+}
+
+.insight-strip__value-detail span {
+  display: inline-flex;
+  margin: 0;
+}
+
+.insight-strip__pace {
+  border-radius: 999px;
+  padding: 0.16rem 0.38rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.insight-strip__pace--under {
+  color: #235f55;
+  background: rgba(213, 242, 223, 0.88);
+}
+
+.insight-strip__pace--on {
+  color: #6a5200;
+  background: rgba(255, 238, 170, 0.9);
+}
+
+.insight-strip__pace--over {
+  color: #8f321f;
+  background: rgba(255, 216, 201, 0.9);
 }
 
 .insight-strip__card--sand .insight-strip__headline {
@@ -1332,6 +1363,7 @@
 }
 
 .audit-badge--warning,
+.audit-badge--review,
 .audit-badge--missing {
   color: #8a4b00;
   background: #fff1d6;

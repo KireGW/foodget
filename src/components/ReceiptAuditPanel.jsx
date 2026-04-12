@@ -1,7 +1,26 @@
 import { useMemo, useState } from 'react'
 
-export function ReceiptAuditPanel({ auditItems, availableMonths, selectedMonth }) {
+const categoryOptions = [
+  'Produce',
+  'Protein',
+  'Dairy',
+  'Pantry',
+  'Bakery',
+  'Beverages',
+  'Snacks',
+  'Household',
+  'Exclude from budget',
+  'Other',
+]
+
+export function ReceiptAuditPanel({
+  auditItems,
+  availableMonths,
+  selectedMonth,
+  onSaveReceiptItems,
+}) {
   const [openReceiptId, setOpenReceiptId] = useState(null)
+  const [drafts, setDrafts] = useState({})
   const [auditMonth, setAuditMonth] = useState(selectedMonth)
   const [isOpen, setIsOpen] = useState(true)
   const effectiveAuditMonth = useMemo(() => {
@@ -77,6 +96,7 @@ export function ReceiptAuditPanel({ auditItems, availableMonths, selectedMonth }
                   <th>Receipt</th>
                   <th>Parsed count</th>
                   <th>Status</th>
+                  <th>Totals</th>
                   <th>Items</th>
                 </tr>
               </thead>
@@ -105,11 +125,20 @@ export function ReceiptAuditPanel({ auditItems, availableMonths, selectedMonth }
                       </div>
                     </td>
                     <td>
+                      <div className="item-cell">
+                        <span>{receipt.officialTotalMxn}</span>
+                        <small>
+                          Parsed {receipt.parsedItemsTotalMxn}
+                          {receipt.differenceMxn ? ` · Diff ${receipt.differenceMxn}` : ''}
+                        </small>
+                      </div>
+                    </td>
+                    <td>
                       <button
                         className="receipt-review-link"
                         type="button"
                         disabled={receipt.parsedItemDetails.length === 0}
-                        onClick={() => setOpenReceiptId(receipt.id)}
+                        onClick={() => openReceiptEditor(receipt, setOpenReceiptId, setDrafts)}
                       >
                         {receipt.parsedItemDetails.length === 0
                           ? 'No items'
@@ -141,11 +170,15 @@ export function ReceiptAuditPanel({ auditItems, availableMonths, selectedMonth }
                     <strong>{receipt.parsedItemsCount} parsed items</strong>
                   </div>
                   <small className="mobile-audit-card__detail">{receipt.auditDetail}</small>
+                  <small className="mobile-audit-card__detail">
+                    Printed {receipt.officialTotalMxn} · Parsed {receipt.parsedItemsTotalMxn}
+                    {receipt.differenceMxn ? ` · Diff ${receipt.differenceMxn}` : ''}
+                  </small>
                   <button
                     className="receipt-review-link"
                     type="button"
                     disabled={receipt.parsedItemDetails.length === 0}
-                    onClick={() => setOpenReceiptId(receipt.id)}
+                    onClick={() => openReceiptEditor(receipt, setOpenReceiptId, setDrafts)}
                   >
                     {receipt.parsedItemDetails.length === 0
                       ? 'No items'
@@ -172,9 +205,9 @@ export function ReceiptAuditPanel({ auditItems, availableMonths, selectedMonth }
           >
             <div className="panel__header">
               <div>
-                <p className="panel__eyebrow">Parsed items</p>
+                <p className="panel__eyebrow">Digital receipt</p>
                 <h2 id="receipt-audit-title">
-                  Audit parsed items for {openReceipt.fileName}.
+                  Adjust parsed items for {openReceipt.fileName}.
                 </h2>
               </div>
               <div className="receipt-modal__actions">
@@ -195,7 +228,10 @@ export function ReceiptAuditPanel({ auditItems, availableMonths, selectedMonth }
               </div>
             </div>
 
-            <p className="table-empty">{openReceipt.auditDetail}</p>
+            <p className="table-empty">
+              Use this to fix missed multipliers, wrong line totals, or product
+              rows that do not match the actual receipt.
+            </p>
 
             <div className="table-wrap">
               <table className="overview-table">
@@ -205,32 +241,198 @@ export function ReceiptAuditPanel({ auditItems, availableMonths, selectedMonth }
                     <th>Category</th>
                     <th>Qty</th>
                     <th>Line total</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {openReceipt.parsedItemDetails.map((item) => (
-                    <tr key={item.key}>
+                  {getDraftItems(drafts, openReceipt).map((item, index) => (
+                    <tr key={item.id}>
                       <td>
                         <div className="item-cell">
-                          <span>{item.name}</span>
-                          {item.originalName !== item.name ? (
-                            <small>{item.originalName}</small>
-                          ) : null}
+                          <input
+                            className="mapping-input"
+                            value={item.name}
+                            onChange={(event) =>
+                              updateDraftItem(
+                                setDrafts,
+                                openReceipt.id,
+                                index,
+                                'name',
+                                event.target.value,
+                              )
+                            }
+                          />
+                          <small>{item.originalName || item.name}</small>
                         </div>
                       </td>
-                      <td>{item.category}</td>
-                      <td>{item.quantity}</td>
-                      <td>{item.totalMxn}</td>
+                      <td>
+                        <select
+                          className="mapping-select"
+                          value={item.category}
+                          onChange={(event) =>
+                            updateDraftItem(
+                              setDrafts,
+                              openReceipt.id,
+                              index,
+                              'category',
+                              event.target.value,
+                            )
+                          }
+                        >
+                          {categoryOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td>
+                        <input
+                          className="mapping-input"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={item.quantity}
+                          onChange={(event) =>
+                            updateDraftItem(
+                              setDrafts,
+                              openReceipt.id,
+                              index,
+                              'quantity',
+                              event.target.value,
+                            )
+                          }
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className="mapping-input"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={item.totalMxn}
+                          onChange={(event) =>
+                            updateDraftItem(
+                              setDrafts,
+                              openReceipt.id,
+                              index,
+                              'totalMxn',
+                              event.target.value,
+                            )
+                          }
+                        />
+                      </td>
+                      <td>
+                        <button
+                          className="receipt-review-secondary"
+                          type="button"
+                          onClick={() =>
+                            removeDraftItem(setDrafts, openReceipt.id, index)
+                          }
+                        >
+                          Remove
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="receipt-editor__actions">
+              <button
+                className="receipt-review-secondary"
+                type="button"
+                onClick={() => addDraftItem(setDrafts, openReceipt.id)}
+              >
+                Add line
+              </button>
+              <button
+                className="mapping-save"
+                type="button"
+                onClick={() =>
+                  onSaveReceiptItems(
+                    openReceipt.id,
+                    sanitizeDraftItems(getDraftItems(drafts, openReceipt)),
+                  )
+                }
+              >
+                Save parsed items
+              </button>
             </div>
           </div>
         </div>
       ) : null}
     </>
   )
+}
+
+function getDraftItems(drafts, receipt) {
+  return drafts[receipt.id] ?? receipt.editableItems
+}
+
+function openReceiptEditor(receipt, setOpenReceiptId, setDrafts) {
+  setOpenReceiptId(receipt.id)
+  setDrafts((currentDrafts) => ({
+    ...currentDrafts,
+    [receipt.id]:
+      currentDrafts[receipt.id] ?? receipt.editableItems.map((item) => ({ ...item })),
+  }))
+}
+
+function updateDraftItem(setDrafts, receiptId, index, field, value) {
+  setDrafts((currentDrafts) => ({
+    ...currentDrafts,
+    [receiptId]: currentDrafts[receiptId].map((item, itemIndex) =>
+      itemIndex === index ? { ...item, [field]: value } : item,
+    ),
+  }))
+}
+
+function removeDraftItem(setDrafts, receiptId, index) {
+  setDrafts((currentDrafts) => ({
+    ...currentDrafts,
+    [receiptId]: currentDrafts[receiptId].filter((_, itemIndex) => itemIndex !== index),
+  }))
+}
+
+function addDraftItem(setDrafts, receiptId) {
+  setDrafts((currentDrafts) => ({
+    ...currentDrafts,
+    [receiptId]: [
+      ...(currentDrafts[receiptId] ?? []),
+      {
+        id: `${receiptId}-new-${Date.now()}`,
+        name: '',
+        originalName: '',
+        productCode: null,
+        category: 'Other',
+        quantity: 1,
+        totalMxn: 0,
+        swedenUnitSek: 0,
+        normalizationStatus: 'user_override',
+      },
+    ],
+  }))
+}
+
+function sanitizeDraftItems(items) {
+  return items
+    .map((item) => ({
+      ...item,
+      name: item.name.trim(),
+      originalName: (item.originalName || item.name).trim(),
+      quantity: Number(item.quantity),
+      totalMxn: Number(item.totalMxn),
+    }))
+    .filter(
+      (item) =>
+        item.name &&
+        Number.isFinite(item.quantity) &&
+        item.quantity > 0 &&
+        Number.isFinite(item.totalMxn) &&
+        item.totalMxn >= 0,
+    )
 }
 
 function openReceiptWindow(url, fileName) {

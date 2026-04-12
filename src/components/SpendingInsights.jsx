@@ -33,7 +33,14 @@ export function SpendingInsights({
           <div className="insight-strip__headline">
             <strong>{metrics.totalSpentMxn}</strong>
             <small className="insight-strip__value-detail">
-              Avg / month {metrics.averageMonthlyTotalMxn}
+              <span>Avg / month {metrics.averageMonthlyTotalMxn}</span>
+              {metrics.totalPaceLabel ? (
+                <span
+                  className={`insight-strip__pace insight-strip__pace--${metrics.totalPaceStatus}`}
+                >
+                  {metrics.totalPaceLabel}
+                </span>
+              ) : null}
             </small>
           </div>
         </article>

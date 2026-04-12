@@ -334,7 +334,7 @@
   {
     "productCode": "00000042398011",
     "originalName": "NIVEA FACE",
-    "canonicalName": "Nivea Face",
+    "canonicalName": "Nivea face",
     "category": "Household"
   },
   {
@@ -982,7 +982,7 @@
   {
     "productCode": "600",
     "originalName": "BROCOL",
-    "canonicalName": "Brocoli",
+    "canonicalName": "Brócoli",
     "category": "Produce"
   },
   {
@@ -1319,7 +1319,7 @@
   },
   {
     "originalName": "Queso manchego Lala Rallado 250 g",
-    "canonicalName": "Queso manchego",
+    "canonicalName": "Queso rallado",
     "category": "Dairy"
   },
   {
@@ -1489,7 +1489,7 @@
   },
   {
     "originalName": "Queso manchego NocheBuena rallado 250 g",
-    "canonicalName": "Queso manchego",
+    "canonicalName": "Queso rallado",
     "category": "Dairy"
   },
   {
@@ -1585,7 +1585,7 @@
   {
     "productCode": "0000000046930",
     "originalName": "CHILE CUARE",
-    "canonicalName": "Chile Jalapeño",
+    "canonicalName": "Chile jalapeño",
     "category": "Produce"
   },
   {
@@ -1599,5 +1599,125 @@
     "originalName": "PIERNA TROZ",
     "canonicalName": "Pierna de cerdo",
     "category": "Protein"
+  },
+  {
+    "productCode": "80050094",
+    "originalName": "CHOCOLATE",
+    "canonicalName": "Chocolate",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "7502211161899",
+    "originalName": "COSTAL OPG",
+    "canonicalName": "Bolsas de basura",
+    "category": "Household"
+  },
+  {
+    "productCode": "7501020564853",
+    "originalName": "LALA_MANCH",
+    "canonicalName": "Queso manchego",
+    "category": "Dairy"
+  },
+  {
+    "productCode": "43137",
+    "originalName": "MANGO MANILA",
+    "canonicalName": "Mango",
+    "category": "Produce"
+  },
+  {
+    "productCode": "204430015645",
+    "originalName": "PINA MIEL",
+    "canonicalName": "Piña",
+    "category": "Produce"
+  },
+  {
+    "productCode": "07501017006021",
+    "originalName": "COSTENA CH",
+    "canonicalName": "Chiles adobados",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07500810001660",
+    "originalName": "PAN MOLIDO",
+    "canonicalName": "Pan molido",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501518476347",
+    "originalName": "PARMESANO",
+    "canonicalName": "Queso parmesano",
+    "category": "Dairy"
+  },
+  {
+    "productCode": "49597",
+    "originalName": "MANGO PARAIS",
+    "canonicalName": "Mango",
+    "category": "Produce"
+  },
+  {
+    "productCode": "506495013837",
+    "originalName": "N00DLES",
+    "canonicalName": "Fideos",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "654032001155",
+    "originalName": "KAPORO PANK",
+    "canonicalName": "Pan'ko",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "7501011135512",
+    "originalName": "BOTANAS",
+    "canonicalName": "Papas fritas",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "7501011143258",
+    "originalName": "PAPA CRUJI COMBINA 2X$10 -11.00 x",
+    "canonicalName": "Papas fritas",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "7501055356256",
+    "originalName": "COCA SNAZ",
+    "canonicalName": "Coca Cola",
+    "category": "Beverages"
+  },
+  {
+    "productCode": "7501040027499",
+    "originalName": "SALCH HD",
+    "canonicalName": "Salchicha",
+    "category": "Protein"
+  },
+  {
+    "productCode": "7500478037766",
+    "originalName": "PAPAS FRIT",
+    "canonicalName": "Papas fritas",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "506495013820",
+    "originalName": "NO0DLE3",
+    "canonicalName": "Fideos",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "40273",
+    "originalName": "TORONJA",
+    "canonicalName": "Toronja",
+    "category": "Produce"
+  },
+  {
+    "productCode": "4000415001919",
+    "originalName": "CHOCO FUN",
+    "canonicalName": "Choco fun",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "7506495003289",
+    "originalName": "GV TRI CHE",
+    "canonicalName": "Queso rallado",
+    "category": "Dairy"
   }
 ]

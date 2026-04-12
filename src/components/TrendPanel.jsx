@@ -5,7 +5,7 @@ export function TrendPanel({
   categoryTrends,
   productMovers,
 }) {
-  const [isOpen, setIsOpen] = useState(monthComparison.hasComparison)
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <section className="panel trend-panel">

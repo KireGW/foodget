@@ -4,7 +4,6 @@ import { MonthlyOverview } from './components/MonthlyOverview.jsx'
 import { SpendingInsights } from './components/SpendingInsights.jsx'
 import { CategorySpendChart } from './components/CategorySpendChart.jsx'
 import { TrendPanel } from './components/TrendPanel.jsx'
-import { ReceiptReviewPanel } from './components/ReceiptReviewPanel.jsx'
 import { ReceiptAuditPanel } from './components/ReceiptAuditPanel.jsx'
 import { UnknownProductsPanel } from './components/UnknownProductsPanel.jsx'
 import { useBudgetApp } from './hooks/useBudgetApp.js'
@@ -34,7 +33,6 @@ function App() {
     productMovers,
     monthlyItems,
     receiptCalendar,
-    receiptReviewItems,
     receiptAuditItems,
     productMappings,
     syncStatus,
@@ -48,10 +46,8 @@ function App() {
     createManualReceipt,
     deleteReceipt,
     overrideStatus,
-    reviewStatus,
     learningSuggestions,
     saveProductMappingOverride,
-    saveReceiptReviewDecision,
     saveReceiptItems,
     setLearningSuggestions,
   } = useBudgetApp()
@@ -110,17 +106,11 @@ function App() {
         onCategoryRangeEndChange={setCategoryRangeEnd}
       />
 
-      <ReceiptReviewPanel
-        reviewItems={receiptReviewItems}
-        reviewStatus={reviewStatus}
-        onSaveReceiptReview={saveReceiptReviewDecision}
-        onSaveReceiptItems={saveReceiptItems}
-      />
-
       <ReceiptAuditPanel
         auditItems={receiptAuditItems}
         availableMonths={availableMonths}
         selectedMonth={selectedMonth}
+        onSaveReceiptItems={saveReceiptItems}
       />
 
       <UnknownProductsPanel

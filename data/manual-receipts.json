@@ -246,5 +246,67 @@
         "normalizationStatus": "user_override"
       }
     ]
+  },
+  {
+    "id": "manual-2026-04-08-panales",
+    "fileName": "Manual - Pañales",
+    "relativePath": null,
+    "purchasedAt": "2026-04-08",
+    "monthKey": "2026-04",
+    "url": null,
+    "parseStatus": "manual_entry",
+    "parseNotes": "Manual entry added in the app.",
+    "textPreview": "",
+    "store": "Manual entry",
+    "sourceType": "manual",
+    "totalMxnValue": 1099,
+    "soldItemsCount": 1,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$1,099.00",
+    "items": [
+      {
+        "name": "Pañales",
+        "productCode": null,
+        "originalName": "Pañales",
+        "category": "Household",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 1099,
+        "totalMxn": 1099,
+        "swedenAverageSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
+  },
+  {
+    "id": "manual-2026-04-10-limpieza-del-hogar",
+    "fileName": "Manual - Limpieza del hogar",
+    "relativePath": null,
+    "purchasedAt": "2026-04-10",
+    "monthKey": "2026-04",
+    "url": null,
+    "parseStatus": "manual_entry",
+    "parseNotes": "Manual entry added in the app.",
+    "textPreview": "",
+    "store": "Manual entry",
+    "sourceType": "manual",
+    "totalMxnValue": 627,
+    "soldItemsCount": 1,
+    "ignoredAdjustmentTotalMxn": 0,
+    "totalMxn": "MX$627.00",
+    "items": [
+      {
+        "name": "Limpieza del hogar",
+        "productCode": null,
+        "originalName": "Limpieza del hogar",
+        "category": "Household",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 627,
+        "totalMxn": 627,
+        "swedenAverageSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
   }
 ]
