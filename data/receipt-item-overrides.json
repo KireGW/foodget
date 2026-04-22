@@ -1,1 +1,442 @@
-[]
+[
+  {
+    "receiptId": "2026-04-13",
+    "items": [
+      {
+        "name": "Leche Oatly",
+        "originalName": "OATLY BEBIDA AVENA",
+        "productCode": null,
+        "category": "Dairy",
+        "quantity": 1,
+        "totalMxn": 305.87,
+        "swedenUnitSek": 42,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Huevos",
+        "originalName": "HUEVO ORGANICO 18P",
+        "productCode": null,
+        "category": "Protein",
+        "quantity": 1,
+        "totalMxn": 101.17,
+        "swedenUnitSek": 46,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Queso gouda",
+        "originalName": "QUESO GOUDA 1.4KG",
+        "productCode": null,
+        "category": "Dairy",
+        "quantity": 1,
+        "totalMxn": 229.41,
+        "swedenUnitSek": 40,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Detergente para lavavajillas",
+        "originalName": "KS DISH PACSKG",
+        "productCode": null,
+        "category": "Household",
+        "quantity": 1,
+        "totalMxn": 254.71,
+        "swedenUnitSek": 58,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Bolsas de basura",
+        "originalName": "BOLSAS 180/49.2L",
+        "productCode": null,
+        "category": "Household",
+        "quantity": 1,
+        "totalMxn": 285.4,
+        "swedenUnitSek": 58,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Carne y pescado Costco",
+        "originalName": "CUETE CALIDA",
+        "productCode": null,
+        "category": "Protein",
+        "quantity": 1,
+        "totalMxn": 343.88,
+        "swedenUnitSek": 74,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Esponjas",
+        "originalName": "CLOROX ESPONJA",
+        "productCode": null,
+        "category": "Household",
+        "quantity": 1,
+        "totalMxn": 203.56,
+        "swedenUnitSek": 58,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Carne y pescado Costco",
+        "originalName": "MOLIDA DE RES",
+        "productCode": null,
+        "category": "Protein",
+        "quantity": 1,
+        "totalMxn": 371.92,
+        "swedenUnitSek": 74,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Cafe Costco",
+        "originalName": "KSCAFE DLA CASA 1K",
+        "productCode": null,
+        "category": "Pantry",
+        "quantity": 1,
+        "totalMxn": 336.56,
+        "swedenUnitSek": 38,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Carne y pescado Costco",
+        "originalName": "MILANESA DE RES",
+        "productCode": null,
+        "category": "Protein",
+        "quantity": 1,
+        "totalMxn": 403.67,
+        "swedenUnitSek": 74,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Creatina Birdman",
+        "originalName": "CREAT BIRDMAN 600G",
+        "productCode": null,
+        "category": "Pantry",
+        "quantity": 1,
+        "totalMxn": 490.22,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Carne y pescado Costco",
+        "originalName": "TRUCHA STEEL",
+        "productCode": null,
+        "category": "Protein",
+        "quantity": 1,
+        "totalMxn": 398.07,
+        "swedenUnitSek": 74,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Carne y pescado Costco",
+        "originalName": "PIERNAYMUSLO",
+        "productCode": null,
+        "category": "Protein",
+        "quantity": 1,
+        "totalMxn": 154.74,
+        "swedenUnitSek": 74,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Aceite de oliva",
+        "originalName": "KS ACEITE OLIVA 3L",
+        "productCode": null,
+        "category": "Pantry",
+        "quantity": 1,
+        "totalMxn": 387.71,
+        "swedenUnitSek": 32,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Pechuga de pollo sin piel",
+        "originalName": "PECHUGA S/HS",
+        "productCode": null,
+        "category": "Protein",
+        "quantity": 1,
+        "totalMxn": 327.4,
+        "swedenUnitSek": 74,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Carne y pescado Costco",
+        "originalName": "PIERNAYMUSLO",
+        "productCode": null,
+        "category": "Protein",
+        "quantity": 1,
+        "totalMxn": 153.58,
+        "swedenUnitSek": 74,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Mezcla de moras",
+        "originalName": "KS MEZCLA MORAS",
+        "productCode": null,
+        "category": "Produce",
+        "quantity": 1,
+        "totalMxn": 244.49,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "matched"
+      }
+    ]
+  },
+  {
+    "receiptId": "2026-04-16",
+    "items": [
+      {
+        "name": "Cebolla blanca",
+        "originalName": "CEBOLLA BLA",
+        "productCode": "0000000046633",
+        "category": "Produce",
+        "quantity": 1.059,
+        "totalMxn": 33.89,
+        "swedenUnitSek": 17.941454202077434,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Cilantro",
+        "originalName": "CILANTRO",
+        "productCode": "00000000048897",
+        "category": "Produce",
+        "quantity": 1,
+        "totalMxn": 12.9,
+        "swedenUnitSek": 16,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Fud Jamon",
+        "originalName": "FUD JAMON",
+        "productCode": "07501040003844",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 76,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Cebolla morada",
+        "originalName": "CEBOLLA MOR",
+        "productCode": "0000000032865",
+        "category": "Produce",
+        "quantity": 0.598,
+        "totalMxn": 22.07,
+        "swedenUnitSek": 18.39464882943144,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Mango",
+        "originalName": "MANGO ATAUL",
+        "productCode": "0000000049610",
+        "category": "Other",
+        "quantity": 0.449,
+        "totalMxn": 19.76,
+        "swedenUnitSek": 33.40757238307349,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Tortillas Mission",
+        "originalName": "MISSION CA",
+        "productCode": "07501054910794",
+        "category": "Pantry",
+        "quantity": 2,
+        "totalMxn": 86,
+        "swedenUnitSek": 24,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Camote amarillo",
+        "originalName": "CAMOTE AMA",
+        "productCode": "0000000048163",
+        "category": "Produce",
+        "quantity": 2.284,
+        "totalMxn": 111.92,
+        "swedenUnitSek": 17.950963222416814,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Pimiento rojo",
+        "originalName": "PIMIENTO RO",
+        "productCode": "0000000046886",
+        "category": "Produce",
+        "quantity": 0.188,
+        "totalMxn": 22.56,
+        "swedenUnitSek": 26.595744680851062,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Pepino",
+        "originalName": "PEPINO",
+        "productCode": "0000000040624",
+        "category": "Other",
+        "quantity": 0.428,
+        "totalMxn": 24.82,
+        "swedenUnitSek": 35.046728971962615,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Papa blanca",
+        "originalName": "PAPA BLANC",
+        "productCode": "0000000040839",
+        "category": "Produce",
+        "quantity": 2.614,
+        "totalMxn": 156.58,
+        "swedenUnitSek": 17.98010711553175,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Topo Chico",
+        "originalName": "TOPOCH MIN",
+        "productCode": "00021136010480",
+        "category": "Beverages",
+        "quantity": 1,
+        "totalMxn": 32,
+        "swedenUnitSek": 24,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Limón",
+        "originalName": "LIMON SIN S",
+        "productCode": "0000000040488",
+        "category": "Produce",
+        "quantity": 0.358,
+        "totalMxn": 24.7,
+        "swedenUnitSek": 25.139664804469273,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Mandarina",
+        "originalName": "MANDARINA",
+        "productCode": "0000000044509",
+        "category": "Produce",
+        "quantity": 1.009,
+        "totalMxn": 50.45,
+        "swedenUnitSek": 27.75024777006938,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Manzana Red Delicious",
+        "originalName": "MAN RED",
+        "productCode": "0000000040167",
+        "category": "Produce",
+        "quantity": 0.699,
+        "totalMxn": 27.96,
+        "swedenUnitSek": 28.61230329041488,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Platano organico Marketside",
+        "originalName": "PLAT ORG MK",
+        "productCode": "0000000048538",
+        "category": "Produce",
+        "quantity": 1.334,
+        "totalMxn": 46.56,
+        "swedenUnitSek": 27.736131934032983,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Pan",
+        "originalName": "PAN DE CAJ",
+        "productCode": "07501000131440",
+        "category": "Bakery",
+        "quantity": 1,
+        "totalMxn": 75,
+        "swedenUnitSek": 24,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Yoghurt griego Yoplait",
+        "originalName": "YOPLAIT GR",
+        "productCode": "07501040095160",
+        "category": "Dairy",
+        "quantity": 1,
+        "totalMxn": 75,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Jitomate saladet",
+        "originalName": "JITOMAT SAL",
+        "productCode": "0000000040877",
+        "category": "Produce",
+        "quantity": 1.164,
+        "totalMxn": 74.5,
+        "swedenUnitSek": 22.336769759450174,
+        "normalizationStatus": "matched"
+      }
+    ]
+  },
+  {
+    "receiptId": "2026-04-18",
+    "items": [
+      {
+        "name": "Cilantro",
+        "originalName": "CILANTRO",
+        "productCode": "48897",
+        "category": "Produce",
+        "quantity": 1,
+        "totalMxn": 12.9,
+        "swedenUnitSek": 16,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Col Morada",
+        "originalName": "COL MORADA",
+        "productCode": "45544",
+        "category": "Produce",
+        "quantity": 1.575,
+        "totalMxn": 102,
+        "swedenUnitSek": 34.285714285714285,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Coca Cola",
+        "originalName": "Coca Cola",
+        "productCode": null,
+        "category": "Beverages",
+        "quantity": 1,
+        "totalMxn": 28,
+        "swedenUnitSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
+  },
+  {
+    "receiptId": "2026-03-24",
+    "items": [
+      {
+        "name": "Carne y pescado Costco",
+        "originalName": "TRUCHA STEEL",
+        "productCode": null,
+        "category": "Protein",
+        "quantity": 1,
+        "totalMxn": 299.9,
+        "swedenUnitSek": 74,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Ks Pimienta 400g",
+        "originalName": "KS PIMIENTA 400G",
+        "productCode": null,
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 172.88,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Granola",
+        "originalName": "DASAVENA GRANOLA1K",
+        "productCode": null,
+        "category": "Pantry",
+        "quantity": 1,
+        "totalMxn": 195.6,
+        "swedenUnitSek": 30,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Ks Cafe French 1kg",
+        "originalName": "KS CAFE FRENCH 1KG",
+        "productCode": null,
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 336.56,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      }
+    ]
+  }
+]

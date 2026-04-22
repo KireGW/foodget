@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 export function CategorySpendChart({
   categoryChart,
@@ -17,7 +17,10 @@ export function CategorySpendChart({
   const [comparisonMonth, setComparisonMonth] = useState('')
   const [hoveredComparisonCategory, setHoveredComparisonCategory] = useState(null)
   const [selectedChartMonth, setSelectedChartMonth] = useState(selectedMonth)
+  const [paceCardPositions, setPaceCardPositions] = useState({})
   const categoryRowRefs = useRef(new Map())
+  const paceRowRefs = useRef(new Map())
+  const paceCardRefs = useRef(new Map())
 
   const effectiveSelectedMonth = useMemo(() => {
     if (
@@ -176,6 +179,72 @@ export function CategorySpendChart({
     })
   }, [isOpen, openCategory])
 
+  useLayoutEffect(() => {
+    if (!isOpen || effectiveComparisonMonth) {
+      return undefined
+    }
+
+    let animationFrame = null
+
+    const measurePaceCards = () => {
+      const nextPositions = {}
+
+      mergedChart.forEach((entry) => {
+        if (entry.share <= 0) {
+          return
+        }
+
+        const row = paceRowRefs.current.get(entry.category)
+        const card = paceCardRefs.current.get(entry.category)
+
+        if (!row || !card) {
+          return
+        }
+
+        const rowWidth = row.clientWidth
+        const cardWidth = card.offsetWidth
+
+        if (!rowWidth || !cardWidth) {
+          return
+        }
+
+        const markerLeft = (Math.max(entry.renderedShare, 0) / 100) * rowWidth
+        const centeredLeft = markerLeft - cardWidth / 2
+        const maxLeft = Math.max(rowWidth - cardWidth, 0)
+        nextPositions[entry.category] = Math.min(Math.max(centeredLeft, 0), maxLeft)
+      })
+
+      setPaceCardPositions((currentPositions) => {
+        const currentKeys = Object.keys(currentPositions)
+        const nextKeys = Object.keys(nextPositions)
+        const hasSamePositions =
+          currentKeys.length === nextKeys.length &&
+          nextKeys.every((key) => Math.abs((currentPositions[key] ?? -1) - nextPositions[key]) < 0.5)
+
+        return hasSamePositions ? currentPositions : nextPositions
+      })
+    }
+
+    const scheduleMeasure = () => {
+      if (animationFrame) {
+        window.cancelAnimationFrame(animationFrame)
+      }
+
+      animationFrame = window.requestAnimationFrame(measurePaceCards)
+    }
+
+    scheduleMeasure()
+    window.addEventListener('resize', scheduleMeasure)
+
+    return () => {
+      if (animationFrame) {
+        window.cancelAnimationFrame(animationFrame)
+      }
+
+      window.removeEventListener('resize', scheduleMeasure)
+    }
+  }, [effectiveComparisonMonth, isOpen, mergedChart])
+
   return (
     <section className="panel">
       <div className="panel__header">
@@ -283,6 +352,30 @@ export function CategorySpendChart({
         </p>
       ) : (
         <div className="category-chart" role="img" aria-label="Bar chart of monthly spend by category">
+          {selectedMonthProgress ? (
+            <div
+              className="category-chart__timeline"
+              style={{ '--timeline-progress': `${selectedMonthProgress.ratio * 100}%` }}
+              aria-label={`Month timeline: ${selectedMonthProgress.markerLabel}`}
+            >
+              <span className="category-chart__timeline-label">
+                {selectedMonthProgress.startLabel}
+              </span>
+              <div className="category-chart__timeline-track" aria-hidden="true">
+                <div className="category-chart__timeline-fill" />
+                <div
+                  className={`category-chart__timeline-marker category-chart__timeline-marker--${buildTimelineMarkerAlignment(
+                    selectedMonthProgress.ratio,
+                  )}`}
+                >
+                  <span>{selectedMonthProgress.markerLabel}</span>
+                </div>
+              </div>
+              <span className="category-chart__timeline-label">
+                {selectedMonthProgress.endLabel}
+              </span>
+            </div>
+          ) : null}
           <div className="category-chart__header" aria-hidden="true">
             <span className="category-chart__header-spacer" />
             <div className="category-chart__header-values">
@@ -413,18 +506,35 @@ export function CategorySpendChart({
                     className={`category-chart__pace-row${
                       entry.paceAssessment ? ` category-chart__pace-row--${entry.paceAssessment.status}` : ''
                     }`}
+                    ref={(node) => {
+                      if (node) {
+                        paceRowRefs.current.set(entry.category, node)
+                      } else {
+                        paceRowRefs.current.delete(entry.category)
+                      }
+                    }}
                   >
                     <div
                       className="category-chart__pace-marker"
                       style={{ left: `${Math.max(entry.renderedShare, 0).toFixed(2)}%` }}
                     />
                     <div
-                      className={`category-chart__pace-anchor category-chart__pace-anchor--${buildPaceAnchorAlignment(
+                      className="category-chart__pace-anchor"
+                      style={buildPaceAnchorStyle(
                         entry.renderedShare,
-                      )}`}
-                      style={buildPaceAnchorStyle(entry.renderedShare)}
+                        paceCardPositions[entry.category],
+                      )}
                     >
-                      <div className="category-chart__pace-card">
+                      <div
+                        className="category-chart__pace-card"
+                        ref={(node) => {
+                          if (node) {
+                            paceCardRefs.current.set(entry.category, node)
+                          } else {
+                            paceCardRefs.current.delete(entry.category)
+                          }
+                        }}
+                      >
                         <strong className="category-chart__pace-total">{entry.totalMxn}</strong>
                         {entry.paceAssessment ? (
                           <span className="category-chart__pace-caption">
@@ -487,17 +597,37 @@ function buildMonthProgress(selectedMonth, now = new Date()) {
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1
 
+  const monthDate = new Date(Date.UTC(yearValue, monthValue - 1, 1))
+  const monthLabel = new Intl.DateTimeFormat('en', {
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(monthDate)
+  const daysInMonth = new Date(yearValue, monthValue, 0).getDate()
+
   if (yearValue < currentYear || (yearValue === currentYear && monthValue < currentMonth)) {
-    return { ratio: 1 }
+    return {
+      ratio: 1,
+      markerLabel: 'Month complete',
+      startLabel: `${monthLabel} 1`,
+      endLabel: `${monthLabel} ${daysInMonth}`,
+    }
   }
 
   if (yearValue > currentYear || (yearValue === currentYear && monthValue > currentMonth)) {
-    return { ratio: 0 }
+    return {
+      ratio: 0,
+      markerLabel: 'Upcoming',
+      startLabel: `${monthLabel} 1`,
+      endLabel: `${monthLabel} ${daysInMonth}`,
+    }
   }
 
-  const daysInMonth = new Date(yearValue, monthValue, 0).getDate()
+  const today = Math.min(now.getDate(), daysInMonth)
   return {
-    ratio: Math.min(now.getDate() / daysInMonth, 1),
+    ratio: Math.min(today / daysInMonth, 1),
+    markerLabel: `Today ${monthLabel} ${today}`,
+    startLabel: `${monthLabel} 1`,
+    endLabel: `${monthLabel} ${daysInMonth}`,
   }
 }
 
@@ -506,44 +636,55 @@ function assessCategoryPace(currentValue, averageValue, monthProgressRatio) {
     return null
   }
 
-  const spendRatio = currentValue / averageValue
-  const difference = spendRatio - monthProgressRatio
+  const expectedValue = averageValue * monthProgressRatio
+  const differenceValue = currentValue - expectedValue
+  const difference = differenceValue / averageValue
   const tolerance = 0.08
 
   if (difference > tolerance) {
-    return { status: 'over', label: 'Over average' }
+    return {
+      status: 'over',
+      label: `Above pace by ${formatPaceCurrency(Math.abs(differenceValue))}`,
+    }
   }
 
   if (difference < -tolerance) {
-    return { status: 'under', label: 'Under average' }
+    return {
+      status: 'under',
+      label: `Below pace by ${formatPaceCurrency(Math.abs(differenceValue))}`,
+    }
   }
 
   return { status: 'on', label: 'On average' }
 }
 
-function buildPaceAnchorAlignment(share) {
-  if (share <= 24) {
+function formatPaceCurrency(value) {
+  return new Intl.NumberFormat('en', {
+    style: 'currency',
+    currency: 'MXN',
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+function buildTimelineMarkerAlignment(ratio) {
+  if (ratio <= 0.12) {
     return 'left'
   }
 
-  if (share >= 76) {
+  if (ratio >= 0.88) {
     return 'right'
   }
 
   return 'center'
 }
 
-function buildPaceAnchorStyle(share) {
-  const normalizedShare = Math.max(share, 0).toFixed(2)
-  const alignment = buildPaceAnchorAlignment(share)
-
-  if (alignment === 'left') {
-    return { left: '0%' }
+function buildPaceAnchorStyle(share, measuredLeft) {
+  if (typeof measuredLeft === 'number') {
+    return {
+      left: `${measuredLeft}px`,
+      transform: 'none',
+    }
   }
 
-  if (alignment === 'right') {
-    return { left: '100%' }
-  }
-
-  return { left: `${normalizedShare}%` }
+  return { left: `${Math.max(share, 0).toFixed(2)}%` }
 }

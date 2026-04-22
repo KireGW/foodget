@@ -4,6 +4,8 @@ export function SpendingInsights({
   onMonthChange,
   metrics,
 }) {
+  const todayLabel = formatTodayLabel()
+
   return (
     <section className="panel insights-panel">
       <div className="panel__header">
@@ -29,20 +31,23 @@ export function SpendingInsights({
 
       <div className="insight-strip">
         <article className="insight-strip__card insight-strip__card--sand">
+          <time className="insight-strip__today" dateTime={new Date().toISOString().slice(0, 10)}>
+            {todayLabel}
+          </time>
           <span>MXN total</span>
           <div className="insight-strip__headline">
             <strong>{metrics.totalSpentMxn}</strong>
             <small className="insight-strip__value-detail">
               <span>Avg / month {metrics.averageMonthlyTotalMxn}</span>
-              {metrics.totalPaceLabel ? (
-                <span
-                  className={`insight-strip__pace insight-strip__pace--${metrics.totalPaceStatus}`}
-                >
-                  {metrics.totalPaceLabel}
-                </span>
-              ) : null}
             </small>
           </div>
+          {metrics.totalPaceLabel ? (
+            <div
+              className={`insight-strip__pace-card insight-strip__pace-card--${metrics.totalPaceStatus}`}
+            >
+              <span>{metrics.totalPaceLabel}</span>
+            </div>
+          ) : null}
         </article>
         <article className="insight-strip__card insight-strip__card--mint">
           <span>Biggest category</span>
@@ -65,4 +70,11 @@ export function SpendingInsights({
       </div>
     </section>
   )
+}
+
+function formatTodayLabel(date = new Date()) {
+  return new Intl.DateTimeFormat('en', {
+    month: 'short',
+    day: 'numeric',
+  }).format(date)
 }

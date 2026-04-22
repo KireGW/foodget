@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 const categoryOptions = [
   'Produce',
@@ -14,147 +14,139 @@ const categoryOptions = [
 ]
 
 export function UploadPanel({
-  syncStatus,
   uploadStatus,
   isReadOnly = false,
-  receiptCalendar,
   isUploading,
   pendingDuplicateImport,
+  manualReceiptToEdit = null,
   onImportReceipts,
   onConfirmDuplicateImport,
   onCancelDuplicateImport,
   onCreateManualReceipt,
-  onDeleteReceipt,
 }) {
   const fileInputRef = useRef(null)
   const [isDragActive, setIsDragActive] = useState(false)
-  const [openMonthKey, setOpenMonthKey] = useState(null)
-  const [showManualForm, setShowManualForm] = useState(false)
-  const [manualDraft, setManualDraft] = useState(() => ({
-    purchasedAt: new Date().toISOString().slice(0, 10),
-    title: '',
-    category: 'Other',
-    totalMxn: '',
-    notes: '',
-  }))
-
-  const openMonth = useMemo(
-    () => receiptCalendar.find((month) => month.monthKey === openMonthKey) ?? null,
-    [receiptCalendar, openMonthKey],
+  const [showManualForm, setShowManualForm] = useState(Boolean(manualReceiptToEdit))
+  const [editingManualReceiptId, setEditingManualReceiptId] = useState(
+    manualReceiptToEdit?.id ?? null,
+  )
+  const [manualDraft, setManualDraft] = useState(() =>
+    manualReceiptToEdit
+      ? buildManualDraftFromReceipt(manualReceiptToEdit)
+      : buildEmptyManualDraft(),
   )
 
   return (
     <aside className="upload-panel">
-      <div className="upload-panel__header">
-        <p className="upload-panel__title">Receipt intake</p>
-        <p className="upload-panel__subtitle">
-          Drag receipt PDFs or screenshots straight into the app and it will file them into the right
-          <code> /receipts/YYYYMM/ </code>
-          folder automatically.
-        </p>
-      </div>
-
-      <div
-        className={`upload-dropzone${isDragActive ? ' upload-dropzone--active' : ''}${isUploading || isReadOnly ? ' upload-dropzone--busy' : ''}`}
-        onDragEnter={isReadOnly ? undefined : handleDragStateChange(setIsDragActive, true)}
-        onDragOver={isReadOnly ? undefined : handleDragStateChange(setIsDragActive, true)}
-        onDragLeave={isReadOnly ? undefined : handleDragStateChange(setIsDragActive, false)}
-        onDrop={(event) => {
-          event.preventDefault()
-          setIsDragActive(false)
-          if (!isReadOnly) {
-            onImportReceipts(event.dataTransfer.files)
-          }
-        }}
-        onClick={() => {
-          if (!isReadOnly) {
-            fileInputRef.current?.click()
-          }
-        }}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault()
-            if (!isReadOnly) {
-              fileInputRef.current?.click()
-            }
-          }
-        }}
-      >
-        <input
-          ref={fileInputRef}
-          className="upload-dropzone__input"
-          type="file"
-          accept="application/pdf,image/png,image/jpeg"
-          multiple
-          onChange={(event) => {
-            onImportReceipts(event.target.files)
-            event.target.value = ''
-          }}
-        />
-        <span className="upload-dropzone__headline">
-          {isReadOnly
-            ? 'Read-only deployed view'
-            : isUploading
-              ? 'Importing receipts...'
-              : 'Drop receipts or screenshots here'}
-        </span>
-        <span className="upload-dropzone__copy">
-          {isReadOnly
-            ? 'This version shows the receipt data bundled with the latest build. Uploads, deletes, and edits stay in the local app.'
-            : 'The importer first tries to read the purchase date from the receipt text, then falls back to the filename, and finally to the upload date if needed.'}
-        </span>
-      </div>
-
-      <div className="upload-status" role="status" aria-live="polite">
-        <strong>{uploadStatus}</strong>
-        <span>{syncStatus}</span>
-      </div>
-
-      {pendingDuplicateImport ? (
-        <div className="duplicate-import-modal" role="dialog" aria-modal="true">
-          <div className="duplicate-import-modal__card">
-            <p className="panel__eyebrow">Possible duplicate</p>
-            <h3>This receipt looks identical to one that is already imported.</h3>
-            <p className="upload-list__hint">
-              Existing receipt: <strong>{pendingDuplicateImport.duplicate.fileName}</strong>
-            </p>
-            <p className="upload-list__hint">
-              {formatDuplicateMeta(pendingDuplicateImport.duplicate)}
-            </p>
-            <div className="duplicate-import-modal__actions">
-              <button
-                type="button"
-                className="receipt-review-secondary"
-                onClick={onCancelDuplicateImport}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="mapping-save"
-                onClick={onConfirmDuplicateImport}
-              >
-                Import anyway
-              </button>
-            </div>
+      <div className="receipt-intake__grid">
+        <div className="receipt-intake__upload">
+          <div
+            className={`upload-dropzone${isDragActive ? ' upload-dropzone--active' : ''}${isUploading || isReadOnly ? ' upload-dropzone--busy' : ''}`}
+            onDragEnter={isReadOnly ? undefined : handleDragStateChange(setIsDragActive, true)}
+            onDragOver={isReadOnly ? undefined : handleDragStateChange(setIsDragActive, true)}
+            onDragLeave={isReadOnly ? undefined : handleDragStateChange(setIsDragActive, false)}
+            onDrop={(event) => {
+              event.preventDefault()
+              setIsDragActive(false)
+              if (!isReadOnly) {
+                onImportReceipts(event.dataTransfer.files)
+              }
+            }}
+            onClick={() => {
+              if (!isReadOnly) {
+                fileInputRef.current?.click()
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                if (!isReadOnly) {
+                  fileInputRef.current?.click()
+                }
+              }
+            }}
+          >
+            <input
+              ref={fileInputRef}
+              className="upload-dropzone__input"
+              type="file"
+              accept="application/pdf,image/png,image/jpeg"
+              multiple
+              onChange={(event) => {
+                onImportReceipts(event.target.files)
+                event.target.value = ''
+              }}
+            />
+            <span className="upload-dropzone__headline">
+              {isReadOnly
+                ? 'Read-only deployed view'
+                : isUploading
+                  ? 'Importing receipts...'
+                  : 'Drop receipts or screenshots here'}
+            </span>
+            <span className="upload-dropzone__copy">
+              {isReadOnly
+                ? 'Uploads, deletes, and edits stay in the local app.'
+                : 'PDF, PNG, or JPEG. The importer reads the receipt date first.'}
+            </span>
           </div>
-        </div>
-      ) : null}
+
+          {uploadStatus ? (
+            <div className="upload-status" role="status" aria-live="polite">
+              <strong>{uploadStatus}</strong>
+            </div>
+          ) : null}
+
+          {pendingDuplicateImport ? (
+            <div className="duplicate-import-modal" role="dialog" aria-modal="true">
+              <div className="duplicate-import-modal__card">
+                <p className="panel__eyebrow">Possible duplicate</p>
+                <h3>This receipt looks identical to one that is already imported.</h3>
+                <p className="upload-list__hint">
+                  Existing receipt: <strong>{pendingDuplicateImport.duplicate.fileName}</strong>
+                </p>
+                <p className="upload-list__hint">
+                  {formatDuplicateMeta(pendingDuplicateImport.duplicate)}
+                </p>
+                <div className="duplicate-import-modal__actions">
+                  <button
+                    type="button"
+                    className="receipt-review-secondary"
+                    onClick={onCancelDuplicateImport}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="mapping-save"
+                    onClick={onConfirmDuplicateImport}
+                  >
+                    Import anyway
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
+          </div>
 
       <div className="manual-entry">
-        <div className="upload-list__header">
-          <div className="upload-list__label">Manual receipt</div>
-          <button
-            className="upload-list__toggle"
-            type="button"
-            onClick={() => setShowManualForm((currentValue) => !currentValue)}
-            disabled={isReadOnly}
-          >
-            {showManualForm ? 'Hide form' : 'Add manual entry'}
-          </button>
-        </div>
+        {showManualForm ? (
+          <div className="upload-list__header">
+            <button
+              className="upload-list__toggle"
+              type="button"
+              onClick={() => {
+                resetManualDraft(setManualDraft, setEditingManualReceiptId)
+                setShowManualForm(false)
+              }}
+              disabled={isReadOnly}
+            >
+              Cancel
+            </button>
+          </div>
+        ) : null}
 
         {showManualForm ? (
           <form
@@ -172,6 +164,7 @@ export function UploadPanel({
               }
 
               await onCreateManualReceipt({
+                id: editingManualReceiptId,
                 purchasedAt: manualDraft.purchasedAt,
                 title: manualDraft.title.trim(),
                 category: manualDraft.category,
@@ -179,12 +172,7 @@ export function UploadPanel({
                 notes: manualDraft.notes.trim(),
               })
 
-              setManualDraft((currentDraft) => ({
-                ...currentDraft,
-                title: '',
-                totalMxn: '',
-                notes: '',
-              }))
+              resetManualDraft(setManualDraft, setEditingManualReceiptId)
               setShowManualForm(false)
             }}
           >
@@ -272,111 +260,58 @@ export function UploadPanel({
             </label>
 
             <button className="mapping-save" type="submit" disabled={isUploading}>
-              Save manual entry
+              {editingManualReceiptId ? 'Save manual changes' : 'Save manual entry'}
             </button>
           </form>
         ) : (
-          <p className="upload-list__hint">
-            Add a dated expense directly when there is no receipt to upload.
-          </p>
-        )}
-      </div>
-
-      <div className="upload-list">
-        <div className="upload-list__header">
-          <div className="upload-list__label">Receipt calendar</div>
           <button
-            className="upload-list__toggle"
+            className="manual-entry__add"
             type="button"
-            onClick={() => setOpenMonthKey(null)}
-            disabled={openMonthKey == null}
+            onClick={() => setShowManualForm(true)}
+            disabled={isReadOnly}
+            aria-label="Add manual receipt"
           >
-            Close list
+            <span aria-hidden="true">+</span>
+            <strong>Add manual</strong>
+            <small>No file needed</small>
           </button>
-        </div>
-
-        {receiptCalendar.length === 0 ? (
-          <p className="upload-list__empty">No receipts detected yet.</p>
-        ) : (
-          <>
-            <div className="receipt-calendar">
-              {receiptCalendar.map((month) => (
-                <button
-                  key={month.monthKey}
-                  className={`receipt-calendar__month${openMonthKey === month.monthKey ? ' receipt-calendar__month--active' : ''}`}
-                  type="button"
-                  onClick={() =>
-                    setOpenMonthKey((currentMonthKey) =>
-                      currentMonthKey === month.monthKey ? null : month.monthKey,
-                    )
-                  }
-                >
-                  <span>{month.monthLabel}</span>
-                  <strong>
-                    {month.receiptCount} PDF{month.receiptCount === 1 ? '' : 's'}
-                  </strong>
-                </button>
-              ))}
-            </div>
-
-            {openMonth ? (
-              <div className="upload-list__month">
-                <div className="upload-list__month-header">
-                  <strong>{openMonth.monthLabel}</strong>
-                  <span>
-                    {openMonth.receiptCount} receipt
-                    {openMonth.receiptCount === 1 ? '' : 's'}
-                  </span>
-                </div>
-
-                <ul>
-                  {openMonth.receipts.map((receipt) => (
-                    <li key={receipt.id}>
-                      <div className="upload-list__receipt">
-                        {receipt.url ? (
-                          <button
-                            className="upload-list__link"
-                            type="button"
-                            onClick={() => openReceiptWindow(receipt.url, receipt.fileName)}
-                          >
-                            {receipt.fileName}
-                          </button>
-                        ) : (
-                          <span className="upload-list__link upload-list__link--static">
-                            {receipt.fileName}
-                          </span>
-                        )}
-                        <small>{receipt.parseNotes}</small>
-                        <small>{receipt.totalCheckDetail}</small>
-                      </div>
-                      <div className="upload-list__meta">
-                        <span>{receipt.purchasedAt}</span>
-                        <strong>
-                          {formatParseStatus(receipt)}
-                        </strong>
-                        <button
-                          className="upload-list__delete"
-                          type="button"
-                          disabled={isReadOnly}
-                          onClick={() => onDeleteReceipt(receipt)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <p className="upload-list__hint">
-                Click a month to open its uploaded PDFs.
-              </p>
-            )}
-          </>
         )}
       </div>
+      </div>
+
     </aside>
   )
+}
+
+function resetManualDraft(setManualDraft, setEditingManualReceiptId) {
+  setManualDraft(buildEmptyManualDraft())
+  setEditingManualReceiptId(null)
+}
+
+function buildEmptyManualDraft() {
+  return {
+    purchasedAt: new Date().toISOString().slice(0, 10),
+    title: '',
+    category: 'Other',
+    totalMxn: '',
+    notes: '',
+  }
+}
+
+function buildManualDraftFromReceipt(receipt) {
+  const firstItem = receipt.editableItems?.[0]
+  const notes =
+    receipt.parseNotes === 'Manual entry added in the app.'
+      ? ''
+      : receipt.parseNotes?.replace(/^Manual entry\.?\s*/i, '') ?? ''
+
+  return {
+    purchasedAt: receipt.purchasedAtValue ?? receipt.monthKey ?? new Date().toISOString().slice(0, 10),
+    title: firstItem?.name ?? receipt.fileName.replace(/^Manual\s+-\s*/i, ''),
+    category: firstItem?.category ?? 'Other',
+    totalMxn: String(firstItem?.totalMxn ?? ''),
+    notes: notes === 'Manual entry added in the app.' ? '' : notes,
+  }
 }
 
 function formatDuplicateMeta(duplicate) {
@@ -392,55 +327,9 @@ function formatDateLabel(value) {
   }).format(new Date(`${value}T00:00:00Z`))
 }
 
-function formatParseStatus(receipt) {
-  if (receipt.totalCheckStatus === 'needs_review') {
-    return 'Needs review'
-  }
-
-  if (receipt.totalCheckStatus === 'confirmed_official') {
-    return `Confirmed ${receipt.budgetTotalMxn}`
-  }
-
-  if (receipt.totalCheckStatus === 'confirmed_items') {
-    return `Kept parsed ${receipt.budgetTotalMxn}`
-  }
-
-  if (receipt.totalCheckStatus === 'aligned') {
-    return `Aligned ${receipt.budgetTotalMxn}`
-  }
-
-  const { parseStatus, totalMxn } = receipt
-
-  if (parseStatus === 'manual_entry') {
-    return totalMxn ? `Manual entry ${totalMxn}` : 'Manual entry'
-  }
-
-  if (parseStatus === 'parsed_items') {
-    return totalMxn ? `Items + total ${totalMxn}` : 'Items parsed'
-  }
-
-  if (parseStatus === 'parsed_total') {
-    return totalMxn ? `Total ${totalMxn}` : 'Total parsed'
-  }
-
-  if (parseStatus === 'text_only') {
-    return 'Text found'
-  }
-
-  return 'Date only'
-}
-
 function handleDragStateChange(setter, active) {
   return (event) => {
     event.preventDefault()
     setter(active)
   }
-}
-
-function openReceiptWindow(url, receiptName) {
-  window.open(
-    url,
-    `receipt-${receiptName}`,
-    'popup=yes,width=960,height=1200,resizable=yes,scrollbars=yes',
-  )
 }

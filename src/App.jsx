@@ -1,5 +1,4 @@
 import './App.css'
-import { UploadPanel } from './components/UploadPanel.jsx'
 import { MonthlyOverview } from './components/MonthlyOverview.jsx'
 import { SpendingInsights } from './components/SpendingInsights.jsx'
 import { CategorySpendChart } from './components/CategorySpendChart.jsx'
@@ -32,10 +31,8 @@ function App() {
     categoryTrends,
     productMovers,
     monthlyItems,
-    receiptCalendar,
     receiptAuditItems,
     productMappings,
-    syncStatus,
     uploadStatus,
     isReadOnly,
     isUploading,
@@ -54,31 +51,27 @@ function App() {
 
   return (
     <main className="app-shell">
-      <section className="hero-panel">
+      <section className="hero-panel hero-panel--intro">
         <div className="hero-copy">
-          <p className="eyebrow">Mexico grocery budget cockpit</p>
-          <h1>Read dated receipt PDFs and build a monthly grocery overview.</h1>
-          <p className="hero-text">
-            {isReadOnly
-              ? 'This deployed version is a read-only dashboard. Receipt PDF parsing and editing happen in the local Mac app, while this web version only shows the latest bundled snapshot.'
-              : 'Your PDFs in the root receipts folder are now the app input. The scaffold uses each filename as the purchase date, groups receipts by month, and extracts line items and totals from the PDF contents.'}
-          </p>
+          <h1>GW&apos;s Groceries</h1>
         </div>
-
-        <UploadPanel
-          syncStatus={syncStatus}
-          uploadStatus={uploadStatus}
-          isReadOnly={isReadOnly}
-          receiptCalendar={receiptCalendar}
-          isUploading={isUploading}
-          pendingDuplicateImport={pendingDuplicateImport}
-          onImportReceipts={importReceipts}
-          onConfirmDuplicateImport={confirmDuplicateImport}
-          onCancelDuplicateImport={cancelDuplicateImport}
-          onCreateManualReceipt={createManualReceipt}
-          onDeleteReceipt={deleteReceipt}
-        />
       </section>
+
+      <ReceiptAuditPanel
+        auditItems={receiptAuditItems}
+        availableMonths={availableMonths}
+        selectedMonth={selectedMonth}
+        uploadStatus={uploadStatus}
+        isReadOnly={isReadOnly}
+        isUploading={isUploading}
+        pendingDuplicateImport={pendingDuplicateImport}
+        onImportReceipts={importReceipts}
+        onConfirmDuplicateImport={confirmDuplicateImport}
+        onCancelDuplicateImport={cancelDuplicateImport}
+        onCreateManualReceipt={createManualReceipt}
+        onDeleteReceipt={deleteReceipt}
+        onSaveReceiptItems={saveReceiptItems}
+      />
 
       <SpendingInsights
         availableMonths={availableMonths}
@@ -104,13 +97,6 @@ function App() {
         onCategoryRangeStartChange={setCategoryRangeStart}
         categoryRangeEnd={categoryRangeEnd}
         onCategoryRangeEndChange={setCategoryRangeEnd}
-      />
-
-      <ReceiptAuditPanel
-        auditItems={receiptAuditItems}
-        availableMonths={availableMonths}
-        selectedMonth={selectedMonth}
-        onSaveReceiptItems={saveReceiptItems}
       />
 
       <UnknownProductsPanel

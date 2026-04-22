@@ -388,7 +388,7 @@
   {
     "productCode": "0206135000001",
     "originalName": "FIL SALMON",
-    "canonicalName": "Salmon",
+    "canonicalName": "Salmón",
     "category": "Protein"
   },
   {
@@ -466,7 +466,7 @@
   {
     "productCode": "07502211161905",
     "originalName": "COSTAL OPM",
-    "canonicalName": "Bolsas para basura",
+    "canonicalName": "Bolsas de basura",
     "category": "Household"
   },
   {
@@ -532,7 +532,7 @@
   {
     "productCode": "07506495018139",
     "originalName": "CAFE EN GR",
-    "canonicalName": "Café en grano",
+    "canonicalName": "Café",
     "category": "Pantry"
   },
   {
@@ -754,7 +754,7 @@
   {
     "productCode": "0201456000006",
     "originalName": "MOLIDA 95/5",
-    "canonicalName": "Carne molida",
+    "canonicalName": "Carne molida de res",
     "category": "Protein"
   },
   {
@@ -850,7 +850,7 @@
   {
     "productCode": "07501052419206",
     "originalName": "CAFE GARAT",
-    "canonicalName": "Café en grano",
+    "canonicalName": "Café",
     "category": "Pantry"
   },
   {
@@ -1048,7 +1048,7 @@
   },
   {
     "originalName": "Molida de res premium 95/5 por kg peso aprox por charola 700 a 800 g",
-    "canonicalName": "Carne molida",
+    "canonicalName": "Carne molida de res",
     "category": "Protein"
   },
   {
@@ -1088,7 +1088,7 @@
   },
   {
     "originalName": "Café puro tostado Extra Special grano entero tueste oscuro 420 g",
-    "canonicalName": "Café en grano",
+    "canonicalName": "Café",
     "category": "Pantry"
   },
   {
@@ -1561,7 +1561,7 @@
   {
     "productCode": "005",
     "originalName": "MOLIDA RES EXTRA FI",
-    "canonicalName": "Carne molida",
+    "canonicalName": "Carne molida de res",
     "category": "Protein"
   },
   {
@@ -1719,5 +1719,195 @@
     "originalName": "GV TRI CHE",
     "canonicalName": "Queso rallado",
     "category": "Dairy"
+  },
+  {
+    "originalName": "CREAT BIRDMAN 600G",
+    "canonicalName": "Creatina",
+    "category": "Household"
+  },
+  {
+    "originalName": "CUETE CALIDA",
+    "canonicalName": "Carne de res",
+    "category": "Protein"
+  },
+  {
+    "originalName": "MILANESA DE RES",
+    "canonicalName": "Milanesa de pollo",
+    "category": "Protein"
+  },
+  {
+    "originalName": "MOLIDA DE RES",
+    "canonicalName": "Carne molida de res",
+    "category": "Protein"
+  },
+  {
+    "originalName": "PIERNAYMUSLO",
+    "canonicalName": "Pierna y muslo de pollo",
+    "category": "Protein"
+  },
+  {
+    "originalName": "TRUCHA STEEL",
+    "canonicalName": "Trucha",
+    "category": "Protein"
+  },
+  {
+    "originalName": "BOLSAS 180/49.2L",
+    "canonicalName": "Bolsas de basura",
+    "category": "Household"
+  },
+  {
+    "originalName": "KSCAFE DLA CASA 1K",
+    "canonicalName": "Café",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "Café en grano",
+    "canonicalName": "Café",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "CLOROX ESPONJA",
+    "canonicalName": "Limpieza del hogar",
+    "category": "Household"
+  },
+  {
+    "originalName": "KS MEZCLA MORAS",
+    "canonicalName": "Frutos rojos congelados",
+    "category": "Produce"
+  },
+  {
+    "originalName": "PECHUGA S/HS",
+    "canonicalName": "Pechuga de pollo",
+    "category": "Protein"
+  },
+  {
+    "productCode": "0000000049610",
+    "originalName": "MANGO ATAUL",
+    "canonicalName": "Mango",
+    "category": "Produce"
+  },
+  {
+    "productCode": "00000075003371",
+    "originalName": "GE DURAZNO",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "00000075003388",
+    "originalName": "GE MANZANA",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "00000075003487",
+    "originalName": "GE MANGO",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501000904235",
+    "originalName": "GERBER VER",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501000904242",
+    "originalName": "GERBER",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501000904754",
+    "originalName": "GERB SALAD",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501058640871",
+    "originalName": "GERBER ORG",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07506475115421",
+    "originalName": "POUCH YOGM",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "45544",
+    "originalName": "COL MORADA",
+    "canonicalName": "Col morada",
+    "category": "Produce"
+  },
+  {
+    "originalName": "KS CAFE FRENCH 1KG",
+    "canonicalName": "Café",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "KS PIMIENTA 400G",
+    "canonicalName": "Pimienta",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "49610",
+    "originalName": "MANGO ATAULFO",
+    "canonicalName": "Mango",
+    "category": "Produce"
+  },
+  {
+    "productCode": "715756200023",
+    "originalName": "FRESA 454 G",
+    "canonicalName": "Fresa",
+    "category": "Produce"
+  },
+  {
+    "productCode": "7501000904228",
+    "originalName": "GERBER V P",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "7501000904747",
+    "originalName": "2A CHAYOTE",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "7501024546138",
+    "originalName": "KISSES",
+    "canonicalName": "Chocolate",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "00000075000639",
+    "originalName": "CLORALEX3.",
+    "canonicalName": "Limpieza del hogar",
+    "category": "Household"
+  },
+  {
+    "productCode": "07500435258937",
+    "originalName": "SBILA 1.2",
+    "canonicalName": "Limpieza del hogar",
+    "category": "Household"
+  },
+  {
+    "productCode": "07501025405212",
+    "originalName": "CLORALEX 9",
+    "canonicalName": "Limpieza del hogar",
+    "category": "Household"
+  },
+  {
+    "productCode": "07501026004605",
+    "originalName": "ROMA DET 1",
+    "canonicalName": "Detergente para ropa",
+    "category": "Household"
+  },
+  {
+    "productCode": "07501058756701",
+    "originalName": "HARPIC HON",
+    "canonicalName": "Limpieza del hogar",
+    "category": "Household"
   }
 ]

@@ -246,16 +246,23 @@ function assessSpendPace(currentValue, averageValue, monthProgressRatio) {
     return null
   }
 
-  const spendRatio = currentValue / averageValue
-  const difference = spendRatio - monthProgressRatio
+  const expectedValue = averageValue * monthProgressRatio
+  const differenceValue = currentValue - expectedValue
+  const difference = differenceValue / averageValue
   const tolerance = 0.08
 
   if (difference > tolerance) {
-    return { status: 'over', label: 'Over average' }
+    return {
+      status: 'over',
+      label: `Above pace by ${formatCurrency(Math.abs(differenceValue), 'MXN')}`,
+    }
   }
 
   if (difference < -tolerance) {
-    return { status: 'under', label: 'Under average' }
+    return {
+      status: 'under',
+      label: `Below pace by ${formatCurrency(Math.abs(differenceValue), 'MXN')}`,
+    }
   }
 
   return { status: 'on', label: 'On average' }
@@ -508,14 +515,25 @@ export function buildReceiptEntries(receipts, receiptReviews = []) {
         receipt,
         receiptReviewMap.get(receipt.id),
       )
+      const removedItems = receipt.removedItems ?? []
+      const removedItemsTotalValue = removedItems.reduce(
+        (sum, item) => sum + Number(item.totalMxn ?? item.totalMxnValue ?? 0),
+        0,
+      )
+      const removedItemsCountValue = removedItems.reduce(
+        (sum, item) => sum + (item.unitType === 'weight' ? 1 : Number(item.quantity ?? 1)),
+        0,
+      )
 
       return {
         id: receipt.id,
         fileName: receipt.fileName,
         relativePath: receipt.relativePath,
         monthKey: receipt.purchasedAt.slice(0, 7),
+        purchasedAtValue: receipt.purchasedAt,
         purchasedAt: formatDate(receipt.purchasedAt),
         url: receipt.url,
+        sourceType: receipt.sourceType ?? 'parsed',
         parseStatus: receipt.parseStatus,
         parseNotes: receipt.parseNotes,
         totalMxn: receipt.totalMxn,
@@ -528,6 +546,23 @@ export function buildReceiptEntries(receipts, receiptReviews = []) {
         parsedItemsCount: summary.parsedItemsCount,
         parsedItemsCountValue: summary.parsedItemsCountValue,
         differenceMxn: summary.differenceMxn,
+        hasMaterialDifference: summary.totalCheckStatus === 'needs_review',
+        hasReceiptItemOverride: receipt.hasReceiptItemOverride ?? false,
+        removedItemsCount: removedItems.length,
+        removedItemsCountValue,
+        removedItemsTotalMxn: formatCurrency(removedItemsTotalValue, 'MXN'),
+        removedItemsSummary:
+          removedItems.length === 0
+            ? ''
+            : `${formatQuantity(removedItemsCountValue)} ${removedItems.length === 1 ? 'line' : 'lines'} (${formatCurrency(removedItemsTotalValue, 'MXN')})`,
+        removedItemDetails: removedItems.map((item, index) => ({
+          key: `${receipt.id}-removed-${index}-${item.productCode ?? item.originalName}`,
+          name: item.name,
+          originalName: item.originalName,
+          quantity: item.quantity,
+          totalMxn: formatCurrency(item.totalMxn ?? item.totalMxnValue ?? 0, 'MXN'),
+          category: item.category,
+        })),
         parsedItemDetails: receipt.items.map((item) => ({
           key: `${receipt.id}-${item.productCode ?? item.originalName}-${item.totalMxnValue}`,
           name: item.name,
@@ -610,6 +645,11 @@ export function buildReceiptAuditItems(receiptEntries) {
         auditDetail = receipt.parseNotes
       }
 
+      if (receipt.removedItemsCount > 0 && auditStatus === 'ok') {
+        auditLabel = 'Edited complete'
+        auditDetail = `${auditDetail} ${receipt.removedItemsSummary} removed from budget calculations.`
+      }
+
       return {
         ...receipt,
         auditStatus,
@@ -626,7 +666,15 @@ export function buildReceiptAuditItems(receiptEntries) {
         return leftRank - rightRank
       }
 
-      return right.purchasedAt.localeCompare(left.purchasedAt)
+      const dateComparison = right.purchasedAtValue.localeCompare(left.purchasedAtValue)
+      if (dateComparison !== 0) {
+        return dateComparison
+      }
+
+      return right.fileName.localeCompare(left.fileName, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      })
     })
 }
 

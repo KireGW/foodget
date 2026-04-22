@@ -242,7 +242,7 @@ app.post('/api/receipt-reviews', (req, res) => {
 })
 
 app.post('/api/receipt-item-overrides', (req, res) => {
-  const { receiptId, items } = req.body ?? {}
+  const { receiptId, items, removedItems = [] } = req.body ?? {}
 
   if (!receiptId || !Array.isArray(items)) {
     res.status(400).json({
@@ -271,9 +271,33 @@ app.post('/api/receipt-item-overrides', (req, res) => {
         Number.isFinite(item.totalMxn) &&
         item.totalMxn >= 0,
     )
+  const cleanedRemovedItems = Array.isArray(removedItems)
+    ? removedItems
+      .map((item) => ({
+        name: String(item.name ?? '').trim(),
+        originalName: String(item.originalName ?? item.name ?? '').trim(),
+        productCode: item.productCode ? String(item.productCode) : null,
+        category: String(item.category ?? 'Other').trim() || 'Other',
+        quantity: Number(item.quantity),
+        totalMxn: Number(item.totalMxn),
+      }))
+      .filter(
+        (item) =>
+          item.name &&
+          item.category &&
+          Number.isFinite(item.quantity) &&
+          item.quantity > 0 &&
+          Number.isFinite(item.totalMxn) &&
+          item.totalMxn >= 0,
+      )
+    : []
 
   const overrides = readReceiptItemOverrides()
-  const nextOverride = { receiptId, items: cleanedItems }
+  const nextOverride = {
+    receiptId,
+    items: cleanedItems,
+    ...(cleanedRemovedItems.length > 0 ? { removedItems: cleanedRemovedItems } : {}),
+  }
   const existingIndex = overrides.findIndex((override) => override.receiptId === receiptId)
 
   if (existingIndex === -1) {
@@ -291,6 +315,7 @@ app.post('/api/receipt-item-overrides', (req, res) => {
 
 app.post('/api/manual-receipts', (req, res) => {
   const {
+    id = null,
     purchasedAt,
     title,
     category,
@@ -315,9 +340,14 @@ app.post('/api/manual-receipts', (req, res) => {
   }
 
   const manualReceipts = readManualReceipts()
-  const id = buildManualReceiptId(purchasedAt, title, manualReceipts)
+  const existingIndex = id
+    ? manualReceipts.findIndex((receipt) => receipt.id === id)
+    : -1
+  const receiptId = existingIndex >= 0
+    ? id
+    : buildManualReceiptId(purchasedAt, title, manualReceipts)
   const receipt = {
-    id,
+    id: receiptId,
     fileName: `Manual - ${String(title).trim()}`,
     relativePath: null,
     purchasedAt: String(purchasedAt),
@@ -350,10 +380,14 @@ app.post('/api/manual-receipts', (req, res) => {
     ],
   }
 
-  manualReceipts.push(receipt)
+  if (existingIndex >= 0) {
+    manualReceipts.splice(existingIndex, 1, receipt)
+  } else {
+    manualReceipts.push(receipt)
+  }
   writeManualReceipts(manualReceipts)
 
-  res.status(201).json({
+  res.status(existingIndex >= 0 ? 200 : 201).json({
     receipt,
   })
 })

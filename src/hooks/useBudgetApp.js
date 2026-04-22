@@ -53,9 +53,7 @@ export function useBudgetApp() {
     [liveReceipts, manualReceipts],
   )
   const [deletedReceiptIds, setDeletedReceiptIds] = useState([])
-  const [uploadStatus, setUploadStatus] = useState(
-    'Drop receipt PDFs or screenshots here to import them.',
-  )
+  const [uploadStatus, setUploadStatus] = useState('')
   const [isUploading, setIsUploading] = useState(false)
   const [productOverrides, setProductOverrides] = useState([])
   const [receiptReviews, setReceiptReviews] = useState([])
@@ -68,17 +66,17 @@ export function useBudgetApp() {
   const [reviewStatus, setReviewStatus] = useState(
     'Receipts with bigger total differences will land here so you can confirm which total to trust.',
   )
-  const receiptsWithOverrides = useMemo(
-    () =>
-      applyProductOverrides(
-        sourceReceipts.filter((receipt) => !deletedReceiptIds.includes(receipt.id)),
-        productOverrides,
-      ),
-    [sourceReceipts, productOverrides, deletedReceiptIds],
+  const activeReceipts = useMemo(
+    () => sourceReceipts.filter((receipt) => !deletedReceiptIds.includes(receipt.id)),
+    [sourceReceipts, deletedReceiptIds],
+  )
+  const receiptsWithReceiptEdits = useMemo(
+    () => applyReceiptItemOverrides(activeReceipts, receiptItemOverrides),
+    [activeReceipts, receiptItemOverrides],
   )
   const receiptsWithManualCorrections = useMemo(
-    () => applyReceiptItemOverrides(receiptsWithOverrides, receiptItemOverrides),
-    [receiptsWithOverrides, receiptItemOverrides],
+    () => applyProductOverrides(receiptsWithReceiptEdits, productOverrides),
+    [receiptsWithReceiptEdits, productOverrides],
   )
   const availableMonths = useMemo(
     () => buildAvailableMonths(receiptsWithManualCorrections),
@@ -383,8 +381,8 @@ export function useBudgetApp() {
     [receiptEntries],
   )
   const productMappings = useMemo(
-    () => buildProductMappings(sourceReceipts, productOverrides),
-    [sourceReceipts, productOverrides],
+    () => buildProductMappings(receiptsWithManualCorrections, productOverrides),
+    [receiptsWithManualCorrections, productOverrides],
   )
 
   const parsedCount = receiptsWithManualCorrections.filter(
@@ -528,12 +526,28 @@ export function useBudgetApp() {
     }
 
     setIsUploading(true)
-    setUploadStatus(`Saving manual receipt for ${manualReceipt.title}...`)
+    setUploadStatus(
+      `${manualReceipt.id ? 'Updating' : 'Saving'} manual receipt for ${manualReceipt.title}...`,
+    )
 
     try {
       const savedReceipt = await saveManualReceipt(manualReceipt)
-      setManualReceipts((currentReceipts) => [...currentReceipts, savedReceipt])
-      setUploadStatus(`Saved manual receipt for ${savedReceipt.fileName}.`)
+      setManualReceipts((currentReceipts) => {
+        const existingIndex = currentReceipts.findIndex(
+          (receipt) => receipt.id === savedReceipt.id,
+        )
+
+        if (existingIndex === -1) {
+          return [...currentReceipts, savedReceipt]
+        }
+
+        const nextReceipts = [...currentReceipts]
+        nextReceipts.splice(existingIndex, 1, savedReceipt)
+        return nextReceipts
+      })
+      setUploadStatus(
+        `${manualReceipt.id ? 'Updated' : 'Saved'} manual receipt for ${savedReceipt.fileName}.`,
+      )
     } catch (error) {
       setUploadStatus(
         error instanceof Error ? error.message : 'Could not save manual receipt.',
@@ -619,12 +633,12 @@ export function useBudgetApp() {
     }
   }
 
-  async function saveReceiptItems(receiptId, items) {
+  async function saveReceiptItems(receiptId, items, removedItems = []) {
     if (isReadOnly) {
       setReviewStatus(
         'This deployed version is read-only. Save receipt item edits in your local app.',
       )
-      return
+      return false
     }
 
     setReviewStatus('Saving corrected receipt items...')
@@ -634,7 +648,13 @@ export function useBudgetApp() {
       const savedOverride = await saveReceiptItemOverride({
         receiptId,
         items,
+        removedItems,
       })
+      const savedReview = await saveReceiptReview({
+        receiptId,
+        decision: 'keep_parsed_items',
+      })
+
       setReceiptItemOverrides((currentOverrides) => {
         const nextOverrides = currentOverrides.filter(
           (entry) => entry.receiptId !== savedOverride.receiptId,
@@ -642,14 +662,25 @@ export function useBudgetApp() {
         nextOverrides.push(savedOverride)
         return nextOverrides
       })
+      setReceiptReviews((currentReviews) => {
+        const nextReviews = currentReviews.filter(
+          (entry) => entry.receiptId !== savedReview.receiptId,
+        )
+        nextReviews.push(savedReview)
+        return nextReviews
+      })
       setLearningSuggestions(buildLearningSuggestions(originalReceipt, items))
-      setReviewStatus('Saved the edited parsed items for this receipt.')
+      setReviewStatus(
+        'Saved the edited parsed items. This receipt now uses the corrected parsed total.',
+      )
+      return true
     } catch (error) {
       setReviewStatus(
         error instanceof Error
           ? error.message
           : 'Could not save corrected receipt items.',
       )
+      return false
     }
   }
 
