@@ -15,6 +15,7 @@ const categoryOptions = [
 
 export function UploadPanel({
   uploadStatus,
+  uploadProgress,
   isReadOnly = false,
   isUploading,
   pendingDuplicateImport,
@@ -96,6 +97,24 @@ export function UploadPanel({
           {uploadStatus ? (
             <div className="upload-status" role="status" aria-live="polite">
               <strong>{uploadStatus}</strong>
+            </div>
+          ) : null}
+
+          {uploadProgress ? (
+            <div className="upload-progress" role="status" aria-live="polite">
+              <div className="upload-progress__header">
+                <strong>{uploadProgress.label}</strong>
+                <span>{Math.round(uploadProgress.percent)}%</span>
+              </div>
+              <div className="upload-progress__track" aria-hidden="true">
+                <span
+                  className={`upload-progress__bar${
+                    uploadProgress.isIndeterminate ? ' upload-progress__bar--active' : ''
+                  }`}
+                  style={{ width: `${Math.max(4, uploadProgress.percent)}%` }}
+                />
+              </div>
+              <small>{uploadProgress.detail}</small>
             </div>
           ) : null}
 

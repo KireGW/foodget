@@ -46,7 +46,7 @@ import { fetchReceiptCatalog } from '../lib/receiptCatalog.js'
 
 export function useBudgetApp() {
   const [liveReceipts, setLiveReceipts] = useState(receipts)
-  const [manualReceipts, setManualReceipts] = useState([])
+  const [manualReceipts, setManualReceipts] = useState(fallbackManualReceipts)
   const [isReadOnly, setIsReadOnly] = useState(false)
   const sourceReceipts = useMemo(
     () => [...liveReceipts, ...manualReceipts],
@@ -55,9 +55,12 @@ export function useBudgetApp() {
   const [deletedReceiptIds, setDeletedReceiptIds] = useState([])
   const [uploadStatus, setUploadStatus] = useState('')
   const [isUploading, setIsUploading] = useState(false)
-  const [productOverrides, setProductOverrides] = useState([])
-  const [receiptReviews, setReceiptReviews] = useState([])
-  const [receiptItemOverrides, setReceiptItemOverrides] = useState([])
+  const [uploadProgress, setUploadProgress] = useState(null)
+  const [productOverrides, setProductOverrides] = useState(fallbackProductOverrides)
+  const [receiptReviews, setReceiptReviews] = useState(fallbackReceiptReviews)
+  const [receiptItemOverrides, setReceiptItemOverrides] = useState(
+    fallbackReceiptItemOverrides,
+  )
   const [learningSuggestions, setLearningSuggestions] = useState([])
   const [pendingDuplicateImport, setPendingDuplicateImport] = useState(null)
   const [overrideStatus, setOverrideStatus] = useState(
@@ -415,17 +418,53 @@ export function useBudgetApp() {
       return
     }
 
+    const receiptLabel = `${files.length} receipt${files.length === 1 ? '' : 's'}`
+
     setIsUploading(true)
-    setUploadStatus(`Importing ${files.length} receipt${files.length === 1 ? '' : 's'}...`)
+    setUploadProgress({
+      label: `Importing ${receiptLabel}`,
+      detail: 'Reading receipt text and totals...',
+      percent: 12,
+      isIndeterminate: true,
+    })
+    setUploadStatus(`Importing ${receiptLabel}...`)
 
     try {
+      setUploadProgress({
+        label: `Importing ${receiptLabel}`,
+        detail: 'Parsing line items and checking totals...',
+        percent: 36,
+        isIndeterminate: true,
+      })
       const result = await uploadReceiptFiles(files, options)
       setPendingDuplicateImport(null)
-      setUploadStatus(result.message)
+
+      setUploadProgress({
+        label: 'Syncing updated numbers',
+        detail: 'Loading the refreshed receipt catalog...',
+        percent: 72,
+        isIndeterminate: true,
+      })
+      const loadedReceipts = await fetchReceiptCatalog()
+      setLiveReceipts(loadedReceipts)
+      setDeletedReceiptIds([])
+
+      setUploadProgress({
+        label: 'Updating dashboard',
+        detail: 'Recalculating totals, mappings, and charts...',
+        percent: 92,
+        isIndeterminate: false,
+      })
 
       window.setTimeout(() => {
-        window.location.reload()
-      }, 450)
+        setUploadProgress({
+          label: 'Import complete',
+          detail: result.message,
+          percent: 100,
+          isIndeterminate: false,
+        })
+        setUploadStatus(result.message)
+      }, 120)
     } catch (error) {
       if (error instanceof DuplicateReceiptError) {
         setPendingDuplicateImport({
@@ -433,14 +472,21 @@ export function useBudgetApp() {
           duplicate: error.duplicate,
         })
         setUploadStatus('Possible duplicate found. Confirm whether you want to import it anyway.')
+        setUploadProgress(null)
+        setIsUploading(false)
         return
       }
 
       setUploadStatus(
         error instanceof Error ? error.message : 'Receipt upload failed.',
       )
-    } finally {
+      setUploadProgress(null)
       setIsUploading(false)
+    } finally {
+      window.setTimeout(() => {
+        setIsUploading(false)
+        setUploadProgress(null)
+      }, 900)
     }
   }
 
@@ -714,6 +760,7 @@ export function useBudgetApp() {
     productMappings,
     syncStatus,
     uploadStatus,
+    uploadProgress,
     isReadOnly,
     isUploading,
     pendingDuplicateImport,

@@ -1909,5 +1909,71 @@
     "originalName": "HARPIC HON",
     "canonicalName": "Limpieza del hogar",
     "category": "Household"
+  },
+  {
+    "productCode": "07501005183703",
+    "originalName": "CONSOME",
+    "canonicalName": "Caldo",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "00000000048880",
+    "originalName": "CEBOLLIN",
+    "canonicalName": "Cebollín",
+    "category": "Produce"
+  },
+  {
+    "productCode": "7503018544717",
+    "originalName": "CHIPS JALA",
+    "canonicalName": "Papas fritas",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "041364083544",
+    "originalName": "SOUR SURT",
+    "canonicalName": "Dulces",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "7501079702848",
+    "originalName": "OFUERTE PI",
+    "canonicalName": "Tomates molidos",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501791605434",
+    "originalName": "CAM CHI MK",
+    "canonicalName": "Camarones congelados",
+    "category": "Protein"
+  },
+  {
+    "productCode": "0000000047302",
+    "originalName": "PAPA ALFA C",
+    "canonicalName": "Papa",
+    "category": "Produce"
+  },
+  {
+    "productCode": "07538129502509",
+    "originalName": "MANGOBALMO",
+    "canonicalName": "Mango deshidratado",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "07501017660223",
+    "originalName": "YUCATEC SA",
+    "canonicalName": "Salsa picante",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501003113191",
+    "originalName": "SAL HAB145",
+    "canonicalName": "Salsa picante",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "00757528040536",
+    "originalName": "CHIP JALA2",
+    "canonicalName": "Papas fritas",
+    "category": "Snacks"
   }
 ]

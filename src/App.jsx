@@ -34,6 +34,7 @@ function App() {
     receiptAuditItems,
     productMappings,
     uploadStatus,
+    uploadProgress,
     isReadOnly,
     isUploading,
     pendingDuplicateImport,
@@ -62,6 +63,7 @@ function App() {
         availableMonths={availableMonths}
         selectedMonth={selectedMonth}
         uploadStatus={uploadStatus}
+        uploadProgress={uploadProgress}
         isReadOnly={isReadOnly}
         isUploading={isUploading}
         pendingDuplicateImport={pendingDuplicateImport}

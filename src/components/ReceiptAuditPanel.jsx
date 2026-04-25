@@ -19,6 +19,7 @@ export function ReceiptAuditPanel({
   availableMonths,
   selectedMonth,
   uploadStatus,
+  uploadProgress,
   isReadOnly,
   isUploading,
   pendingDuplicateImport,
@@ -87,6 +88,7 @@ export function ReceiptAuditPanel({
           <UploadPanel
             key={manualEditRequest?.requestId ?? 'receipt-intake'}
             uploadStatus={uploadStatus}
+            uploadProgress={uploadProgress}
             isReadOnly={isReadOnly}
             isUploading={isUploading}
             pendingDuplicateImport={pendingDuplicateImport}
