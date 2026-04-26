@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { receipts } from 'virtual:receipts'
 import fallbackProductOverrides from '../../data/product-overrides.json'
 import fallbackReceiptReviews from '../../data/receipt-reviews.json'
@@ -56,6 +56,9 @@ export function useBudgetApp() {
   const [uploadStatus, setUploadStatus] = useState('')
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(null)
+  const uploadProgressTimerRef = useRef(null)
+  const uploadProgressClearTimerRef = useRef(null)
+  const uploadProgressPercentRef = useRef(0)
   const [productOverrides, setProductOverrides] = useState(fallbackProductOverrides)
   const [receiptReviews, setReceiptReviews] = useState(fallbackReceiptReviews)
   const [receiptItemOverrides, setReceiptItemOverrides] = useState(
@@ -220,6 +223,14 @@ export function useBudgetApp() {
 
     loadReceiptItemOverrides()
   }, [])
+
+  useEffect(
+    () => () => {
+      window.clearInterval(uploadProgressTimerRef.current)
+      window.clearTimeout(uploadProgressClearTimerRef.current)
+    },
+    [],
+  )
 
   const monthReceipts = useMemo(
     () =>
@@ -399,6 +410,122 @@ export function useBudgetApp() {
       ? 'No receipts found yet.'
       : `${receiptsWithManualCorrections.length} receipt${receiptsWithManualCorrections.length === 1 ? '' : 's'} loaded, ${parsedCount} interpreted PDF${parsedCount === 1 ? '' : 's'} so far.`
 
+  function stopUploadProgressAnimation() {
+    window.clearInterval(uploadProgressTimerRef.current)
+    uploadProgressTimerRef.current = null
+  }
+
+  function scheduleUploadProgressClear(delayMs = 1000) {
+    window.clearTimeout(uploadProgressClearTimerRef.current)
+    uploadProgressClearTimerRef.current = window.setTimeout(() => {
+      setIsUploading(false)
+      setUploadProgress(null)
+    }, delayMs)
+  }
+
+  function animateUploadProgress({
+    label,
+    detail,
+    targetPercent,
+    initialPercent = 4,
+    isIndeterminate = true,
+  }) {
+    stopUploadProgressAnimation()
+    window.clearTimeout(uploadProgressClearTimerRef.current)
+
+    setUploadProgress((currentProgress) => {
+      const startPercent = Math.max(
+        initialPercent,
+        currentProgress?.percent ?? initialPercent,
+      )
+      uploadProgressPercentRef.current = startPercent
+
+      return {
+        label,
+        detail,
+        percent: startPercent,
+        isIndeterminate,
+      }
+    })
+
+    uploadProgressTimerRef.current = window.setInterval(() => {
+      setUploadProgress((currentProgress) => {
+        if (!currentProgress) {
+          return currentProgress
+        }
+
+        const remaining = targetPercent - currentProgress.percent
+
+        if (remaining <= 0.15) {
+          stopUploadProgressAnimation()
+          uploadProgressPercentRef.current = targetPercent
+          return {
+            ...currentProgress,
+            percent: targetPercent,
+          }
+        }
+
+        const nextPercent =
+          currentProgress.percent + Math.max(0.35, remaining * 0.09)
+        uploadProgressPercentRef.current = Math.min(targetPercent, nextPercent)
+
+        return {
+          ...currentProgress,
+          percent: Math.min(targetPercent, nextPercent),
+        }
+      })
+    }, 80)
+  }
+
+  function waitForProgressBeat(delayMs = 160) {
+    return new Promise((resolve) => {
+      window.setTimeout(resolve, delayMs)
+    })
+  }
+
+  async function completeUploadProgress(resultMessage, label = 'Import complete') {
+    stopUploadProgressAnimation()
+
+    const startPercent = Math.min(98, uploadProgressPercentRef.current || 0)
+    const startedAt = Date.now()
+    const durationMs = Math.max(420, (100 - startPercent) * 10)
+
+    setUploadProgress({
+      label,
+      detail: resultMessage,
+      percent: startPercent,
+      isIndeterminate: false,
+    })
+
+    await new Promise((resolve) => {
+      uploadProgressTimerRef.current = window.setInterval(() => {
+        const elapsedRatio = Math.min(1, (Date.now() - startedAt) / durationMs)
+        const easedRatio = 1 - Math.pow(1 - elapsedRatio, 3)
+        const nextPercent = startPercent + (100 - startPercent) * easedRatio
+        uploadProgressPercentRef.current = nextPercent
+
+        setUploadProgress({
+          label,
+          detail: resultMessage,
+          percent: nextPercent,
+          isIndeterminate: false,
+        })
+
+        if (elapsedRatio >= 1) {
+          stopUploadProgressAnimation()
+          uploadProgressPercentRef.current = 100
+          setUploadProgress({
+            label,
+            detail: resultMessage,
+            percent: 100,
+            isIndeterminate: false,
+          })
+          resolve()
+        }
+      }, 50)
+    })
+  }
+
   async function importReceipts(fileList, options = {}) {
     if (isReadOnly) {
       setUploadStatus(
@@ -421,51 +548,49 @@ export function useBudgetApp() {
     const receiptLabel = `${files.length} receipt${files.length === 1 ? '' : 's'}`
 
     setIsUploading(true)
-    setUploadProgress({
+    setUploadStatus(`Importing ${receiptLabel}...`)
+    animateUploadProgress({
       label: `Importing ${receiptLabel}`,
       detail: 'Reading receipt text and totals...',
-      percent: 12,
+      targetPercent: 24,
+      initialPercent: 4,
       isIndeterminate: true,
     })
-    setUploadStatus(`Importing ${receiptLabel}...`)
 
     try {
-      setUploadProgress({
+      await waitForProgressBeat()
+
+      animateUploadProgress({
         label: `Importing ${receiptLabel}`,
         detail: 'Parsing line items and checking totals...',
-        percent: 36,
+        targetPercent: 68,
         isIndeterminate: true,
       })
       const result = await uploadReceiptFiles(files, options)
       setPendingDuplicateImport(null)
 
-      setUploadProgress({
+      animateUploadProgress({
         label: 'Syncing updated numbers',
         detail: 'Loading the refreshed receipt catalog...',
-        percent: 72,
+        targetPercent: 86,
         isIndeterminate: true,
       })
       const loadedReceipts = await fetchReceiptCatalog()
       setLiveReceipts(loadedReceipts)
       setDeletedReceiptIds([])
 
-      setUploadProgress({
+      animateUploadProgress({
         label: 'Updating dashboard',
         detail: 'Recalculating totals, mappings, and charts...',
-        percent: 92,
+        targetPercent: 96,
         isIndeterminate: false,
       })
 
-      window.setTimeout(() => {
-        setUploadProgress({
-          label: 'Import complete',
-          detail: result.message,
-          percent: 100,
-          isIndeterminate: false,
-        })
-        setUploadStatus(result.message)
-      }, 120)
+      await waitForProgressBeat(220)
+      await completeUploadProgress(result.message)
+      setUploadStatus(result.message)
     } catch (error) {
+      stopUploadProgressAnimation()
       if (error instanceof DuplicateReceiptError) {
         setPendingDuplicateImport({
           files,
@@ -483,10 +608,7 @@ export function useBudgetApp() {
       setUploadProgress(null)
       setIsUploading(false)
     } finally {
-      window.setTimeout(() => {
-        setIsUploading(false)
-        setUploadProgress(null)
-      }, 900)
+      scheduleUploadProgressClear(1000)
     }
   }
 
@@ -515,9 +637,19 @@ export function useBudgetApp() {
       return
     }
 
+    setIsUploading(true)
     setUploadStatus(`Deleting ${receipt.fileName}...`)
+    animateUploadProgress({
+      label: `Deleting ${receipt.fileName}`,
+      detail: 'Removing the receipt and clearing related edits...',
+      targetPercent: 58,
+      initialPercent: 4,
+      isIndeterminate: true,
+    })
 
     try {
+      await waitForProgressBeat()
+
       if (receipt.sourceType === 'manual') {
         await deleteManualReceipt(receipt.id)
         setManualReceipts((currentReceipts) =>
@@ -537,26 +669,41 @@ export function useBudgetApp() {
 
         await readJsonOrThrow(response, 'Could not delete receipt.')
       }
+
+      animateUploadProgress({
+        label: `Deleting ${receipt.fileName}`,
+        detail: 'Refreshing dashboard totals and receipt audit...',
+        targetPercent: 92,
+        isIndeterminate: false,
+      })
+      await waitForProgressBeat(220)
     } catch (error) {
+      stopUploadProgressAnimation()
       if (
         error instanceof Error &&
         /Receipt file was not found\./i.test(error.message)
       ) {
         finalizeDeletedReceipt(receipt)
-        setUploadStatus(
-          `${receipt.fileName} was already gone on disk, so it was cleared from the app.`,
-        )
+        const message = `${receipt.fileName} was already gone on disk, so it was cleared from the app.`
+        await completeUploadProgress(message, 'Receipt cleared')
+        setUploadStatus(message)
+        scheduleUploadProgressClear()
         return
       }
 
       setUploadStatus(
         error instanceof Error ? error.message : 'Could not delete receipt.',
       )
+      setUploadProgress(null)
+      setIsUploading(false)
       return
     }
 
     finalizeDeletedReceipt(receipt)
-    setUploadStatus(`Deleted ${receipt.fileName}.`)
+    const deletedMessage = `Deleted ${receipt.fileName}.`
+    await completeUploadProgress(deletedMessage, 'Receipt deleted')
+    setUploadStatus(deletedMessage)
+    scheduleUploadProgressClear()
   }
 
   async function createManualReceipt(manualReceipt) {
@@ -571,12 +718,25 @@ export function useBudgetApp() {
       return
     }
 
+    const manualActionLabel = manualReceipt.id
+      ? 'Updating manual receipt'
+      : 'Saving manual receipt'
+
     setIsUploading(true)
     setUploadStatus(
       `${manualReceipt.id ? 'Updating' : 'Saving'} manual receipt for ${manualReceipt.title}...`,
     )
+    animateUploadProgress({
+      label: manualActionLabel,
+      detail: 'Saving the entry and preparing updated totals...',
+      targetPercent: 72,
+      initialPercent: 4,
+      isIndeterminate: true,
+    })
 
     try {
+      await waitForProgressBeat()
+
       const savedReceipt = await saveManualReceipt(manualReceipt)
       setManualReceipts((currentReceipts) => {
         const existingIndex = currentReceipts.findIndex(
@@ -591,15 +751,30 @@ export function useBudgetApp() {
         nextReceipts.splice(existingIndex, 1, savedReceipt)
         return nextReceipts
       })
-      setUploadStatus(
-        `${manualReceipt.id ? 'Updated' : 'Saved'} manual receipt for ${savedReceipt.fileName}.`,
+
+      animateUploadProgress({
+        label: manualActionLabel,
+        detail: 'Recalculating dashboard and mappings...',
+        targetPercent: 94,
+        isIndeterminate: false,
+      })
+      await waitForProgressBeat(220)
+
+      const savedMessage = `${manualReceipt.id ? 'Updated' : 'Saved'} manual receipt for ${savedReceipt.fileName}.`
+      await completeUploadProgress(
+        savedMessage,
+        manualReceipt.id ? 'Manual receipt updated' : 'Manual receipt saved',
       )
+      setUploadStatus(savedMessage)
     } catch (error) {
+      stopUploadProgressAnimation()
       setUploadStatus(
         error instanceof Error ? error.message : 'Could not save manual receipt.',
       )
-    } finally {
+      setUploadProgress(null)
       setIsUploading(false)
+    } finally {
+      scheduleUploadProgressClear()
     }
   }
 
