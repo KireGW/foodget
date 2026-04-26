@@ -51,8 +51,7 @@ export function buildMonthlyItems(receipts, allReceipts = receipts) {
       }
 
       currentItem.quantity += item.quantity
-      currentItem.itemCount +=
-        item.isAdjustment ? 0 : item.unitType === 'weight' ? 1 : item.quantity
+      currentItem.itemCount += getItemCount(item)
       currentItem.totalMxn += item.totalMxn
       currentItem.swedenAverageSek += item.swedenAverageSek
       currentItem.originalNames.add(item.originalName)
@@ -127,9 +126,7 @@ export function buildMetrics(
         }
 
         summary.totalMxn += item.totalMxn
-        if (!item.isAdjustment) {
-          summary.totalQuantity += item.unitType === 'weight' ? 1 : item.quantity
-        }
+        summary.totalQuantity += getItemCount(item)
         summary.categoryTotals.set(
           item.category,
           (summary.categoryTotals.get(item.category) ?? 0) + item.totalMxn,
@@ -137,7 +134,7 @@ export function buildMetrics(
         if (!item.isAdjustment) {
           summary.itemTotals.set(
             item.name,
-            (summary.itemTotals.get(item.name) ?? 0) + (item.unitType === 'weight' ? 1 : item.quantity),
+            (summary.itemTotals.get(item.name) ?? 0) + getItemCount(item),
           )
         }
       })
@@ -521,7 +518,7 @@ export function buildReceiptEntries(receipts, receiptReviews = []) {
         0,
       )
       const removedItemsCountValue = removedItems.reduce(
-        (sum, item) => sum + (item.unitType === 'weight' ? 1 : Number(item.quantity ?? 1)),
+        (sum, item) => sum + getItemCount(item),
         0,
       )
 
@@ -701,7 +698,7 @@ function summarizeReceiptBudget(receipt, reviewDecision = null) {
     0,
   )
   const parsedItemsCountValue = receipt.items.reduce(
-    (sum, item) => sum + (item.unitType === 'weight' ? 1 : item.quantity),
+    (sum, item) => sum + getItemCount(item),
     0,
   )
   const excludedItemsTotalValue = receipt.items.reduce(
@@ -853,11 +850,29 @@ function sumOfficialOrParsedItemCounts(receipts) {
     (sum, receipt) =>
       sum +
       receipt.items.reduce(
-        (itemSum, item) => itemSum + (item.unitType === 'weight' ? 1 : item.quantity),
+        (itemSum, item) => itemSum + getItemCount(item),
         0,
       ),
     0,
   )
+}
+
+function getItemCount(item) {
+  if (item.isAdjustment) {
+    return 0
+  }
+
+  const quantity = Number(item.quantity ?? 1)
+
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    return 0
+  }
+
+  if (item.unitType === 'weight' || !Number.isInteger(quantity)) {
+    return 1
+  }
+
+  return quantity
 }
 
 function sumMonthlyItemsByCategory(monthlyItems) {
