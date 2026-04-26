@@ -11230,5 +11230,179 @@
         "normalizationStatus": "unmatched"
       }
     ]
+  },
+  {
+    "id": "2026-04-26",
+    "fileName": "2026-04-26.pdf",
+    "relativePath": "202604/2026-04-26.pdf",
+    "purchasedAt": "2026-04-26",
+    "monthKey": "2026-04",
+    "url": "/receipts/202604/2026-04-26.pdf",
+    "parseStatus": "parsed_items",
+    "parseNotes": "Parsed 13 line items from store receipt text.",
+    "textPreview": "NUEVA WAL MART DE MEXICO S DE RL DE CV\nNEXTENGO 78 STA. CRUZ ACAYUCAN 02770\nUNIDAD LOMAS\nBLVD A CAMACHO #641 CP 11220 MEX, CDMX\nAZCAPOTZALCO MEX CDMX RFC. NWM9709244W4\nREGIMEN FISCAL - 601\nGENERAL DE LEY PERSONAS MORALES\nTDA#2344 OP#0000060",
+    "store": "Walmart",
+    "totalMxnValue": 1027.95,
+    "soldItemsCount": 31,
+    "ignoredAdjustmentTotalMxn": -116.99,
+    "totalMxn": "MX$1,027.95",
+    "items": [
+      {
+        "name": "Heads Sham",
+        "productCode": "07500435231237",
+        "originalName": "HEADS SHAM",
+        "category": "Other",
+        "quantity": 2,
+        "unitType": "count",
+        "totalMxnValue": 210,
+        "totalMxn": 210,
+        "swedenAverageSek": 68,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Queso manchego",
+        "productCode": "07501020564853",
+        "originalName": "LALA MANCH",
+        "category": "Dairy",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 65,
+        "totalMxn": 65,
+        "swedenAverageSek": 40,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Grbr Frutm",
+        "productCode": "07506475122443",
+        "originalName": "GRBR FRUTM",
+        "category": "Other",
+        "quantity": 4,
+        "unitType": "count",
+        "totalMxnValue": 76,
+        "totalMxn": 76,
+        "swedenAverageSek": 136,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Mc Chipot",
+        "productCode": "07501003308535",
+        "originalName": "MC CHIPOT",
+        "category": "Other",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 46,
+        "totalMxn": 46,
+        "swedenAverageSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Pasta",
+        "productCode": "08076809515191",
+        "originalName": "BARILLA PA",
+        "category": "Pantry",
+        "quantity": 2,
+        "unitType": "count",
+        "totalMxnValue": 52,
+        "totalMxn": 52,
+        "swedenAverageSek": 56,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Limon eureka",
+        "productCode": "0000000040334",
+        "originalName": "LIMON EUREK",
+        "category": "Produce",
+        "quantity": 0.999,
+        "unitType": "weight",
+        "totalMxnValue": 64.94,
+        "totalMxn": 64.94,
+        "swedenAverageSek": 24,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Jamaica",
+        "productCode": "07501791670258",
+        "originalName": "JAMAICA",
+        "category": "Other",
+        "quantity": 3,
+        "unitType": "count",
+        "totalMxnValue": 93,
+        "totalMxn": 93,
+        "swedenAverageSek": 102,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Gerber Ver",
+        "productCode": "07501000904235",
+        "originalName": "GERBER VER",
+        "category": "Other",
+        "quantity": 4,
+        "unitType": "count",
+        "totalMxnValue": 72,
+        "totalMxn": 72,
+        "swedenAverageSek": 136,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Gerber",
+        "productCode": "07501000904242",
+        "originalName": "GERBER",
+        "category": "Other",
+        "quantity": 4,
+        "unitType": "count",
+        "totalMxnValue": 72,
+        "totalMxn": 72,
+        "swedenAverageSek": 136,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Ge Durazno",
+        "productCode": "00000075003371",
+        "originalName": "GE DURAZNO",
+        "category": "Other",
+        "quantity": 4,
+        "unitType": "count",
+        "totalMxnValue": 72,
+        "totalMxn": 72,
+        "swedenAverageSek": 136,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Condimentos",
+        "productCode": "07503007498199",
+        "originalName": "EMILIO SAL",
+        "category": "Pantry",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 85,
+        "totalMxn": 85,
+        "swedenAverageSek": 28,
+        "normalizationStatus": "needs_mapping"
+      },
+      {
+        "name": "Grisi Bw",
+        "productCode": "00037836050312",
+        "originalName": "GRISI BW",
+        "category": "Other",
+        "quantity": 2,
+        "unitType": "count",
+        "totalMxnValue": 130,
+        "totalMxn": 130,
+        "swedenAverageSek": 68,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Coca-Cola sin azucar",
+        "productCode": "07501055349913",
+        "originalName": "COCA SN AZ",
+        "category": "Beverages",
+        "quantity": 1,
+        "unitType": "count",
+        "totalMxnValue": 107,
+        "totalMxn": 107,
+        "swedenAverageSek": 24,
+        "normalizationStatus": "matched"
+      }
+    ]
   }
 ]
