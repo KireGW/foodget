@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { UploadPanel } from './UploadPanel.jsx'
+import { shouldIgnorePanelHeaderClick } from '../lib/panelHeader.js'
 
 const categoryOptions = [
   'Produce',
@@ -16,6 +17,7 @@ const categoryOptions = [
 
 export function ReceiptAuditPanel({
   auditItems,
+  isReceiptCatalogHydrating,
   availableMonths,
   selectedMonth,
   uploadStatus,
@@ -60,7 +62,14 @@ export function ReceiptAuditPanel({
   return (
     <>
       <section className="panel">
-        <div className="panel__header">
+        <div
+          className="panel__header panel__header--clickable"
+          onClick={(event) => {
+            if (!shouldIgnorePanelHeaderClick(event)) {
+              setIsOpen((currentValue) => !currentValue)
+            }
+          }}
+        >
           <div>
             <p className="panel__eyebrow">Receipt manager</p>
           </div>
@@ -100,7 +109,11 @@ export function ReceiptAuditPanel({
           />
         ) : null}
 
-        {!isOpen ? null : visibleAuditItems.length === 0 ? (
+        {!isOpen ? null : isReceiptCatalogHydrating ? (
+          <p className="table-empty">
+            Syncing latest receipt parsing status...
+          </p>
+        ) : visibleAuditItems.length === 0 ? (
           <p className="table-empty">No receipts available to audit for this month yet.</p>
         ) : (
           <div className="table-wrap">

@@ -1,6 +1,5 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -12,28 +11,11 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url))
 const receiptSnapshotPath = path.resolve(rootDir, 'data', 'receipt-catalog.json')
 
 function loadReceiptsForBuild(receiptsDir) {
-  const shouldUseSnapshot =
-    process.env.VERCEL === '1' || process.env.VERCEL === 'true'
-
-  if (shouldUseSnapshot && fs.existsSync(receiptSnapshotPath)) {
+  if (fs.existsSync(receiptSnapshotPath)) {
     return JSON.parse(fs.readFileSync(receiptSnapshotPath, 'utf8'))
   }
 
   return readReceiptCatalog(receiptsDir)
-}
-
-function getReceiptContentType(filePath) {
-  const extension = path.extname(filePath).toLowerCase()
-
-  if (extension === '.png') {
-    return 'image/png'
-  }
-
-  if (extension === '.jpg' || extension === '.jpeg') {
-    return 'image/jpeg'
-  }
-
-  return 'application/pdf'
 }
 
 function receiptsPlugin() {
@@ -72,7 +54,16 @@ function receiptsPlugin() {
           return
         }
 
-        res.setHeader('Content-Type', getReceiptContentType(filePath))
+        const extension = path.extname(filePath).toLowerCase()
+        const contentType =
+          extension === '.png'
+            ? 'image/png'
+            : extension === '.jpg' || extension === '.jpeg'
+              ? 'image/jpeg'
+              : 'application/pdf'
+
+        res.setHeader('Content-Type', contentType)
+        res.setHeader('Cache-Control', 'no-store')
         fs.createReadStream(filePath).pipe(res)
       })
     },

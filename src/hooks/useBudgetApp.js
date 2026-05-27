@@ -44,8 +44,58 @@ import { uploadReceiptFiles } from '../lib/receiptUpload.js'
 import { DuplicateReceiptError } from '../lib/receiptUpload.js'
 import { fetchReceiptCatalog } from '../lib/receiptCatalog.js'
 
+function mergeStableReceiptCatalog(incomingReceipts, currentReceipts = [], bundledReceipts = []) {
+  const currentById = new Map(currentReceipts.map((receipt) => [receipt.id, receipt]))
+  const bundledById = new Map(bundledReceipts.map((receipt) => [receipt.id, receipt]))
+
+  return incomingReceipts.map((incomingReceipt) => {
+    const stableCandidate = chooseMoreCompleteReceipt(
+      currentById.get(incomingReceipt.id),
+      bundledById.get(incomingReceipt.id),
+    )
+
+    return chooseMoreCompleteReceipt(incomingReceipt, stableCandidate)
+  })
+}
+
+function chooseMoreCompleteReceipt(primaryReceipt, fallbackReceipt) {
+  if (!primaryReceipt) {
+    return fallbackReceipt
+  }
+
+  if (!fallbackReceipt) {
+    return primaryReceipt
+  }
+
+  const primaryScore = getReceiptCompletenessScore(primaryReceipt)
+  const fallbackScore = getReceiptCompletenessScore(fallbackReceipt)
+  const totalsMatch =
+    primaryReceipt.totalMxnValue == null ||
+    fallbackReceipt.totalMxnValue == null ||
+    Math.abs(Number(primaryReceipt.totalMxnValue) - Number(fallbackReceipt.totalMxnValue)) < 0.01
+
+  if (totalsMatch && fallbackScore > primaryScore) {
+    return fallbackReceipt
+  }
+
+  return primaryReceipt
+}
+
+function getReceiptCompletenessScore(receipt) {
+  const itemCount = receipt?.items?.length ?? 0
+  const statusScore = receipt?.parseStatus === 'parsed_items'
+    ? 1000
+    : receipt?.parseStatus === 'parsed_total'
+      ? 100
+      : 0
+  const totalScore = receipt?.totalMxnValue == null ? 0 : 10
+
+  return statusScore + totalScore + itemCount
+}
+
 export function useBudgetApp() {
   const [liveReceipts, setLiveReceipts] = useState(receipts)
+  const [isReceiptCatalogHydrating, setIsReceiptCatalogHydrating] = useState(true)
   const [manualReceipts, setManualReceipts] = useState(fallbackManualReceipts)
   const [isReadOnly, setIsReadOnly] = useState(false)
   const sourceReceipts = useMemo(
@@ -147,9 +197,13 @@ export function useBudgetApp() {
     async function loadReceiptCatalog() {
       try {
         const loadedReceipts = await fetchReceiptCatalog()
-        setLiveReceipts(loadedReceipts)
+        setLiveReceipts((currentReceipts) =>
+          mergeStableReceiptCatalog(loadedReceipts, currentReceipts, receipts),
+        )
       } catch {
         setLiveReceipts(receipts)
+      } finally {
+        setIsReceiptCatalogHydrating(false)
       }
     }
 
@@ -576,7 +630,9 @@ export function useBudgetApp() {
         isIndeterminate: true,
       })
       const loadedReceipts = await fetchReceiptCatalog()
-      setLiveReceipts(loadedReceipts)
+      setLiveReceipts((currentReceipts) =>
+        mergeStableReceiptCatalog(loadedReceipts, currentReceipts, receipts),
+      )
       setDeletedReceiptIds([])
 
       animateUploadProgress({
@@ -924,6 +980,7 @@ export function useBudgetApp() {
     metrics,
     categoryChart,
     categoryChartsByMonth,
+    comparisonReceipts: receiptsWithManualCorrections,
     monthComparison,
     categoryTrends,
     productMovers,
@@ -932,6 +989,7 @@ export function useBudgetApp() {
     receiptCalendar,
     receiptReviewItems,
     receiptAuditItems,
+    isReceiptCatalogHydrating,
     productMappings,
     syncStatus,
     uploadStatus,

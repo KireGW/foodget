@@ -9,6 +9,7 @@
     "dev:server": "node server/uploadServer.mjs",
     "build": "vite build",
     "lint": "eslint .",
+    "reindex:receipts": "FOODGET_DISABLE_SERVER=true node scripts/reindex-receipts.mjs",
     "refresh-snapshot": "node scripts/write-receipt-snapshot.mjs",
     "preview": "vite preview"
   },
@@ -16,6 +17,7 @@
     "concurrently": "^9.2.1",
     "express": "^5.2.1",
     "multer": "^2.1.1",
+    "pg": "^8.21.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },

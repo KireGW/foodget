@@ -27,11 +27,13 @@ function App() {
     metrics,
     categoryChart,
     categoryChartsByMonth,
+    comparisonReceipts,
     monthComparison,
     categoryTrends,
     productMovers,
     monthlyItems,
     receiptAuditItems,
+    isReceiptCatalogHydrating,
     productMappings,
     uploadStatus,
     uploadProgress,
@@ -60,6 +62,7 @@ function App() {
 
       <ReceiptAuditPanel
         auditItems={receiptAuditItems}
+        isReceiptCatalogHydrating={isReceiptCatalogHydrating}
         availableMonths={availableMonths}
         selectedMonth={selectedMonth}
         uploadStatus={uploadStatus}
@@ -91,6 +94,7 @@ function App() {
       <CategorySpendChart
         categoryChart={categoryChart}
         categoryChartsByMonth={categoryChartsByMonth}
+        comparisonReceipts={comparisonReceipts}
         availableMonths={availableMonths}
         selectedMonth={selectedMonth}
         categoryRangeMode={categoryRangeMode}

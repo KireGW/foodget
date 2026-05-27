@@ -5,22 +5,37 @@ import path from 'node:path'
 import multer from 'multer'
 import { fileURLToPath } from 'node:url'
 import {
+  buildReceiptCatalogEntry,
   buildImportPlanFromFile,
   buildImportPlanFromText,
   extractPdfText,
+  listReceiptFiles,
   parseReceiptForImport,
-  readReceiptCatalog,
+  parseReceiptCatalogEntry,
 } from '../scripts/receiptParser.mjs'
+import {
+  readManualReceiptsStore,
+  readReceiptIndexStore,
+  writeManualReceiptsStore,
+  removeReceiptIndexStoreEntry,
+  upsertReceiptIndexStoreEntry,
+  writeReceiptIndexStore,
+} from './receiptIndexStore.mjs'
+
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+loadLocalEnv(rootDir)
 
 const app = express()
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const receiptsDir = path.join(rootDir, 'receipts')
 const tempDir = path.join(rootDir, 'tmp', 'uploads')
+const receiptIndexPath = path.join(rootDir, 'data', 'receipt-index.json')
 const productOverridesPath = path.join(rootDir, 'data', 'product-overrides.json')
 const receiptReviewsPath = path.join(rootDir, 'data', 'receipt-reviews.json')
 const receiptItemOverridesPath = path.join(rootDir, 'data', 'receipt-item-overrides.json')
 const manualReceiptsPath = path.join(rootDir, 'data', 'manual-receipts.json')
 const port = Number(process.env.UPLOAD_SERVER_PORT ?? 3101)
+const receiptIndexSchemaVersion = 1
+const receiptParserVersion = computeReceiptParserVersion()
 
 fs.mkdirSync(tempDir, { recursive: true })
 fs.mkdirSync(receiptsDir, { recursive: true })
@@ -43,6 +58,16 @@ if (!fs.existsSync(manualReceiptsPath)) {
 }
 
 app.use(express.json())
+app.use(
+  '/receipts',
+  express.static(receiptsDir, {
+    fallthrough: false,
+    setHeaders(res, filePath) {
+      res.setHeader('Content-Type', getReceiptContentType(filePath))
+      res.setHeader('Cache-Control', 'no-store')
+    },
+  }),
+)
 
 const upload = multer({
   dest: tempDir,
@@ -86,20 +111,20 @@ app.get('/api/receipt-item-overrides', (_req, res) => {
   })
 })
 
-app.get('/api/manual-receipts', (_req, res) => {
+app.get('/api/manual-receipts', async (_req, res) => {
   res.json({
-    receipts: readManualReceipts(),
+    receipts: await readManualReceipts(),
   })
 })
 
-app.get('/api/receipts/catalog', (_req, res) => {
+app.get('/api/receipts/catalog', async (_req, res) => {
   res.setHeader('Cache-Control', 'no-store')
   res.json({
-    receipts: readReceiptCatalog(receiptsDir),
+    receipts: (await getReceiptCatalog()).receipts,
   })
 })
 
-app.delete('/api/receipts', (req, res) => {
+app.delete('/api/receipts', async (req, res) => {
   const { relativePath = null, receiptId } = req.body ?? {}
 
   if (!receiptId) {
@@ -109,7 +134,7 @@ app.delete('/api/receipts', (req, res) => {
     return
   }
 
-  const catalogReceipt = readReceiptCatalog(receiptsDir).find(
+  const catalogReceipt = (await getReceiptCatalog()).receipts.find(
     (receipt) => receipt.id === receiptId,
   )
   const resolvedRelativePath = catalogReceipt?.relativePath ?? relativePath
@@ -140,6 +165,7 @@ app.delete('/api/receipts', (req, res) => {
 
   fs.rmSync(targetPath, { force: true })
   pruneEmptyReceiptFolders(path.dirname(targetPath))
+  await removeReceiptIndexEntry(normalizedRelativePath)
   writeReceiptReviews(
     readReceiptReviews().filter((review) => review.receiptId !== receiptId),
   )
@@ -155,7 +181,7 @@ app.delete('/api/receipts', (req, res) => {
   })
 })
 
-app.delete('/api/manual-receipts', (req, res) => {
+app.delete('/api/manual-receipts', async (req, res) => {
   const { receiptId } = req.body ?? {}
 
   if (!receiptId) {
@@ -165,11 +191,11 @@ app.delete('/api/manual-receipts', (req, res) => {
     return
   }
 
-  const nextManualReceipts = readManualReceipts().filter(
+  const nextManualReceipts = (await readManualReceipts()).filter(
     (receipt) => receipt.id !== receiptId,
   )
 
-  writeManualReceipts(nextManualReceipts)
+  await writeManualReceipts(nextManualReceipts)
 
   res.json({
     deleted: {
@@ -313,7 +339,7 @@ app.post('/api/receipt-item-overrides', (req, res) => {
   })
 })
 
-app.post('/api/manual-receipts', (req, res) => {
+app.post('/api/manual-receipts', async (req, res) => {
   const {
     id = null,
     purchasedAt,
@@ -339,7 +365,7 @@ app.post('/api/manual-receipts', (req, res) => {
     return
   }
 
-  const manualReceipts = readManualReceipts()
+  const manualReceipts = await readManualReceipts()
   const existingIndex = id
     ? manualReceipts.findIndex((receipt) => receipt.id === id)
     : -1
@@ -385,14 +411,14 @@ app.post('/api/manual-receipts', (req, res) => {
   } else {
     manualReceipts.push(receipt)
   }
-  writeManualReceipts(manualReceipts)
+  await writeManualReceipts(manualReceipts)
 
   res.status(existingIndex >= 0 ? 200 : 201).json({
     receipt,
   })
 })
 
-app.post('/api/receipts/import', upload.array('receipts', 20), (req, res) => {
+app.post('/api/receipts/import', upload.array('receipts', 20), async (req, res) => {
   const files = req.files ?? []
   const allowDuplicates = String(req.body?.allowDuplicates ?? '').toLowerCase() === 'true'
 
@@ -403,12 +429,9 @@ app.post('/api/receipts/import', upload.array('receipts', 20), (req, res) => {
 
   try {
     const imported = []
-    const existingCatalog = readReceiptCatalog(receiptsDir)
+    const { receipts: existingCatalog, indexEntries } = await getReceiptCatalog()
     const existingHashes = new Map(
-      existingCatalog.map((receipt) => [
-        receipt.relativePath,
-        hashFile(path.join(receiptsDir, receipt.relativePath)),
-      ]),
+      Object.entries(indexEntries).map(([relativePath, entry]) => [relativePath, entry.fileHash]),
     )
 
     for (const file of files) {
@@ -416,7 +439,11 @@ app.post('/api/receipts/import', upload.array('receipts', 20), (req, res) => {
       const textPlan = buildImportPlanFromText(extractedText, file.originalname)
       const fallbackPlan = buildImportPlanFromFile(file.originalname, new Date())
       const importPlan = textPlan ?? fallbackPlan
-      const parsedReceipt = parseReceiptForImport(extractedText, importPlan.purchasedAt)
+      const parsedReceipt = parseReceiptForImport(
+        extractedText,
+        importPlan.purchasedAt,
+        file.originalname,
+      )
       const incomingHash = hashFile(file.path)
       const duplicateMatch = allowDuplicates
         ? null
@@ -448,8 +475,15 @@ app.post('/api/receipts/import', upload.array('receipts', 20), (req, res) => {
         targetExtension,
       )
       const targetFilePath = path.join(targetMonthDir, targetFileName)
+      const targetRelativePath = path.join(importPlan.folderMonth, targetFileName)
 
       fs.renameSync(file.path, targetFilePath)
+      const receiptEntry = buildReceiptCatalogEntry(targetRelativePath, parsedReceipt)
+      const targetFileHash = hashFile(targetFilePath)
+
+      await upsertReceiptIndexEntry(targetRelativePath, targetFileHash, receiptEntry)
+      existingCatalog.push(receiptEntry)
+      existingHashes.set(targetRelativePath, targetFileHash)
 
       imported.push({
         fileName: targetFileName,
@@ -477,9 +511,51 @@ app.use((error, _req, res, _next) => {
   })
 })
 
-app.listen(port, () => {
-  console.log(`Receipt upload server listening on http://localhost:${port}`)
-})
+if (process.env.FOODGET_DISABLE_SERVER !== 'true') {
+  app.listen(port, () => {
+    console.log(`Receipt upload server listening on http://localhost:${port}`)
+  })
+}
+
+function loadLocalEnv(projectRoot) {
+  const envPath = path.join(projectRoot, '.env.local')
+
+  if (!fs.existsSync(envPath)) {
+    return
+  }
+
+  const envContent = fs.readFileSync(envPath, 'utf8')
+
+  for (const line of envContent.split(/\r?\n/u)) {
+    const trimmedLine = line.trim()
+
+    if (!trimmedLine || trimmedLine.startsWith('#')) {
+      continue
+    }
+
+    const separatorIndex = trimmedLine.indexOf('=')
+
+    if (separatorIndex <= 0) {
+      continue
+    }
+
+    const key = trimmedLine.slice(0, separatorIndex).trim()
+
+    if (!key || key in process.env) {
+      continue
+    }
+
+    const rawValue = trimmedLine.slice(separatorIndex + 1).trim()
+    const value =
+      rawValue.startsWith('"') && rawValue.endsWith('"')
+        ? rawValue.slice(1, -1)
+        : rawValue.startsWith("'") && rawValue.endsWith("'")
+          ? rawValue.slice(1, -1)
+          : rawValue
+
+    process.env[key] = value
+  }
+}
 
 function cleanupTempFiles(files) {
   files.forEach((file) => {
@@ -505,17 +581,37 @@ function determineReceiptExtension(file) {
   return '.pdf'
 }
 
-function buildUniqueFileName(directory, baseName, extension) {
-  const sanitizedBaseName = sanitizeSegment(baseName)
-  let candidate = `${sanitizedBaseName}${extension}`
-  let counter = 2
+function getReceiptContentType(filePath) {
+  const extension = path.extname(filePath).toLowerCase()
 
-  while (fs.existsSync(path.join(directory, candidate))) {
-    candidate = `${sanitizedBaseName}-${counter}${extension}`
-    counter += 1
+  if (extension === '.png') {
+    return 'image/png'
   }
 
-  return candidate
+  if (extension === '.jpg' || extension === '.jpeg') {
+    return 'image/jpeg'
+  }
+
+  return 'application/pdf'
+}
+
+function buildUniqueFileName(directory, baseName, extension) {
+  const sanitizedBaseName = sanitizeSegment(baseName)
+  let counter = 1
+
+  while (true) {
+    const stem = counter === 1 ? sanitizedBaseName : `${sanitizedBaseName}-${counter}`
+    const candidate = `${stem}${extension}`
+    const stemTaken = fs
+      .readdirSync(directory)
+      .some((entry) => path.parse(entry).name === stem)
+
+    if (!stemTaken && !fs.existsSync(path.join(directory, candidate))) {
+      return candidate
+    }
+
+    counter += 1
+  }
 }
 
 function findDuplicateReceipt(
@@ -554,6 +650,63 @@ function findDuplicateReceipt(
   return buildDuplicateDescriptor(existingReceipt)
 }
 
+export async function getReceiptCatalog(options = {}) {
+  const { forceReparse = false } = options
+  const index = await readReceiptIndex()
+  const nextEntries = {}
+  const receipts = []
+  const relativePaths = listReceiptFiles(receiptsDir)
+  let didChange =
+    forceReparse || relativePaths.length !== Object.keys(index.entries).length
+  let reparsedCount = 0
+
+  for (const relativePath of relativePaths) {
+    const filePath = path.join(receiptsDir, relativePath)
+    const fileHash = hashFile(filePath)
+    const cachedEntry = index.entries[relativePath]
+    const needsReparse =
+      forceReparse ||
+      !cachedEntry ||
+      cachedEntry.fileHash !== fileHash ||
+      cachedEntry.parserVersion !== receiptParserVersion ||
+      !cachedEntry.receipt
+
+    const receipt = needsReparse
+      ? parseReceiptCatalogEntry(receiptsDir, relativePath)
+      : cachedEntry.receipt
+
+    if (needsReparse) {
+      didChange = true
+      reparsedCount += 1
+    }
+
+    nextEntries[relativePath] = {
+      fileHash,
+      parserVersion: receiptParserVersion,
+      receipt,
+      updatedAt: new Date().toISOString(),
+    }
+    receipts.push(receipt)
+  }
+
+  if (didChange) {
+    await writeReceiptIndex({
+      schemaVersion: receiptIndexSchemaVersion,
+      entries: nextEntries,
+    })
+  }
+
+  return {
+    receipts: receipts.sort((left, right) => left.purchasedAt.localeCompare(right.purchasedAt)),
+    indexEntries: nextEntries,
+    reparsedCount,
+  }
+}
+
+export async function rebuildReceiptIndex() {
+  return getReceiptCatalog({ forceReparse: true })
+}
+
 function buildReceiptFingerprint(purchasedAt, receipt) {
   const normalizedItems = receipt.items.map((item) => [
     item.productCode ?? '',
@@ -587,6 +740,22 @@ function hashFile(filePath) {
   return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex')
 }
 
+function computeReceiptParserVersion() {
+  const parserInputs = [
+    path.join(rootDir, 'scripts', 'receiptParser.mjs'),
+    path.join(rootDir, 'scripts', 'extract-pdf-text.js'),
+    path.join(rootDir, 'scripts', 'extract-pdf-ocr.swift'),
+  ]
+
+  const hash = crypto.createHash('sha256')
+
+  parserInputs.forEach((filePath) => {
+    hash.update(fs.readFileSync(filePath))
+  })
+
+  return hash.digest('hex')
+}
+
 function sanitizeSegment(value) {
   return value
     .normalize('NFKD')
@@ -604,12 +773,49 @@ function readReceiptReviews() {
   return JSON.parse(fs.readFileSync(receiptReviewsPath, 'utf8'))
 }
 
+async function readReceiptIndex() {
+  return readReceiptIndexStore({
+    receiptIndexPath,
+    schemaVersion: receiptIndexSchemaVersion,
+  })
+}
+
 function readReceiptItemOverrides() {
   return JSON.parse(fs.readFileSync(receiptItemOverridesPath, 'utf8'))
 }
 
-function readManualReceipts() {
-  return JSON.parse(fs.readFileSync(manualReceiptsPath, 'utf8'))
+async function readManualReceipts() {
+  return readManualReceiptsStore({
+    manualReceiptsPath,
+  })
+}
+
+async function writeReceiptIndex(index) {
+  await writeReceiptIndexStore({
+    receiptIndexPath,
+    schemaVersion: receiptIndexSchemaVersion,
+    entries: index.entries,
+  })
+}
+
+async function upsertReceiptIndexEntry(relativePath, fileHash, receipt) {
+  await upsertReceiptIndexStoreEntry({
+    receiptIndexPath,
+    schemaVersion: receiptIndexSchemaVersion,
+    relativePath,
+    fileHash,
+    parserVersion: receiptParserVersion,
+    receipt,
+    updatedAt: new Date().toISOString(),
+  })
+}
+
+async function removeReceiptIndexEntry(relativePath) {
+  await removeReceiptIndexStoreEntry({
+    receiptIndexPath,
+    schemaVersion: receiptIndexSchemaVersion,
+    relativePath,
+  })
 }
 
 function writeReceiptReviews(reviews) {
@@ -620,8 +826,11 @@ function writeReceiptItemOverrides(overrides) {
   fs.writeFileSync(receiptItemOverridesPath, `${JSON.stringify(overrides, null, 2)}\n`)
 }
 
-function writeManualReceipts(receipts) {
-  fs.writeFileSync(manualReceiptsPath, `${JSON.stringify(receipts, null, 2)}\n`)
+async function writeManualReceipts(receipts) {
+  await writeManualReceiptsStore({
+    manualReceiptsPath,
+    receipts,
+  })
 }
 
 function pruneEmptyReceiptFolders(directory) {
