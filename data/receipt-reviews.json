@@ -2,5 +2,21 @@
   {
     "receiptId": "2026-03-24",
     "decision": "keep_parsed_items"
+  },
+  {
+    "receiptId": "2026-04-30",
+    "decision": "keep_parsed_items"
+  },
+  {
+    "receiptId": "2026-05-10",
+    "decision": "keep_parsed_items"
+  },
+  {
+    "receiptId": "2026-05-19",
+    "decision": "keep_parsed_items"
+  },
+  {
+    "receiptId": "2026-05-19-2",
+    "decision": "keep_parsed_items"
   }
 ]
