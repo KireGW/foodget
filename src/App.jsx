@@ -53,7 +53,7 @@ function App() {
   } = useBudgetApp()
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" data-build="2026-05-27-2">
       <section className="hero-panel hero-panel--intro">
         <div className="hero-copy">
           <h1>GW&apos;s Groceries</h1>
