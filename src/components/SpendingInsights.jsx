@@ -1,10 +1,25 @@
+import { useState } from 'react'
+
 export function SpendingInsights({
   availableMonths,
   selectedMonth,
   onMonthChange,
   metrics,
 }) {
+  const [excludeHousehold, setExcludeHousehold] = useState(false)
   const todayLabel = formatTodayLabel()
+  const totalSpentMxn = excludeHousehold
+    ? metrics.totalSpentExcludingHouseholdMxn
+    : metrics.totalSpentMxn
+  const averageMonthlyTotalMxn = excludeHousehold
+    ? metrics.averageMonthlyTotalExcludingHouseholdMxn
+    : metrics.averageMonthlyTotalMxn
+  const totalPaceStatus = excludeHousehold
+    ? metrics.totalPaceExcludingHouseholdStatus
+    : metrics.totalPaceStatus
+  const totalPaceLabel = excludeHousehold
+    ? metrics.totalPaceExcludingHouseholdLabel
+    : metrics.totalPaceLabel
 
   return (
     <section className="panel insights-panel">
@@ -36,18 +51,28 @@ export function SpendingInsights({
           </time>
           <span>MXN total</span>
           <div className="insight-strip__headline">
-            <strong>{metrics.totalSpentMxn}</strong>
+            <strong>{totalSpentMxn}</strong>
             <small className="insight-strip__value-detail">
-              <span>Avg / month {metrics.averageMonthlyTotalMxn}</span>
+              <span>Avg / month {averageMonthlyTotalMxn}</span>
             </small>
           </div>
-          {metrics.totalPaceLabel ? (
-            <div
-              className={`insight-strip__pace-card insight-strip__pace-card--${metrics.totalPaceStatus}`}
-            >
-              <span>{metrics.totalPaceLabel}</span>
-            </div>
-          ) : null}
+          <div className="insight-strip__footer">
+            <label className="insight-strip__filter">
+              <input
+                type="checkbox"
+                checked={excludeHousehold}
+                onChange={(event) => setExcludeHousehold(event.target.checked)}
+              />
+              <span>Exclude household</span>
+            </label>
+            {totalPaceLabel ? (
+              <div
+                className={`insight-strip__pace-card insight-strip__pace-card--${totalPaceStatus}`}
+              >
+                <span>{totalPaceLabel}</span>
+              </div>
+            ) : null}
+          </div>
         </article>
         <article className="insight-strip__card insight-strip__card--mint">
           <span>Biggest category</span>

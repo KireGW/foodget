@@ -438,5 +438,355 @@
         "normalizationStatus": "unmatched"
       }
     ]
+  },
+  {
+    "receiptId": "2026-04-30",
+    "items": [
+      {
+        "name": "Shampoo Jo",
+        "originalName": "SHAMPOO JO",
+        "productCode": "7702031293620",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 127,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Herbal Sh",
+        "originalName": "HERBAL SH",
+        "productCode": "7500435253000",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 52,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Jabón líquido corporal",
+        "originalName": "GRISI BW",
+        "productCode": "037836050282",
+        "category": "Household",
+        "quantity": 1,
+        "totalMxn": 65,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "user_override"
+      },
+      {
+        "name": "Mantequilla",
+        "originalName": "LURPAK MAN",
+        "productCode": "5740900401464",
+        "category": "Dairy",
+        "quantity": 1,
+        "totalMxn": 110,
+        "swedenUnitSek": 44,
+        "normalizationStatus": "user_override"
+      },
+      {
+        "name": "Huevos",
+        "originalName": "SJUAN HVO",
+        "productCode": "7503000555172",
+        "category": "Protein",
+        "quantity": 1,
+        "totalMxn": 71,
+        "swedenUnitSek": 46,
+        "normalizationStatus": "user_override"
+      },
+      {
+        "name": "Yoghurt",
+        "originalName": "YOPLAIT GR",
+        "productCode": "7501040095160",
+        "category": "Dairy",
+        "quantity": 1,
+        "totalMxn": 75,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "user_override"
+      },
+      {
+        "name": "Uht En 200",
+        "originalName": "UHT EN 200",
+        "productCode": "7501055915118",
+        "category": "Other",
+        "quantity": 2,
+        "totalMxn": 19,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Ajo",
+        "originalName": "DIENTE AJO",
+        "productCode": "31721",
+        "category": "Produce",
+        "quantity": 1,
+        "totalMxn": 54,
+        "swedenUnitSek": 18,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Platano chiapas",
+        "originalName": "PLATANO CHIA",
+        "productCode": "40112",
+        "category": "Produce",
+        "quantity": 1.155,
+        "totalMxn": 27.72,
+        "swedenUnitSek": 27.705627705627705,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Limon Malla",
+        "originalName": "LIMON MALLA",
+        "productCode": "43069",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 45,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Pesto",
+        "originalName": "BARIL PEST",
+        "productCode": "8076809579346",
+        "category": "Pantry",
+        "quantity": 1,
+        "totalMxn": 70,
+        "swedenUnitSek": 36,
+        "normalizationStatus": "user_override"
+      },
+      {
+        "name": "Palomitas",
+        "originalName": "PALOMITAS",
+        "productCode": "7501006560565",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 41,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Jumexito",
+        "originalName": "JUMEXITO",
+        "productCode": "7501013107296",
+        "category": "Other",
+        "quantity": 2,
+        "totalMxn": 20,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Pan Tostad",
+        "originalName": "PAN TOSTAD",
+        "productCode": "7501000111800",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 40,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Oreo Choco",
+        "originalName": "OREO CHOCO",
+        "productCode": "7622210575586",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 27,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Harina",
+        "originalName": "HARINA",
+        "productCode": "7501404603116",
+        "category": "Pantry",
+        "quantity": 1,
+        "totalMxn": 23,
+        "swedenUnitSek": 24,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Gv Cafeg 5",
+        "originalName": "GV CAFEG 5",
+        "productCode": "7501791654258",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 60,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Pasta",
+        "originalName": "BARILLA PA",
+        "productCode": "8076809515191",
+        "category": "Pantry",
+        "quantity": 1,
+        "totalMxn": 21,
+        "swedenUnitSek": 28,
+        "normalizationStatus": "matched"
+      },
+      {
+        "name": "Greatvalue",
+        "originalName": "GREATVALUE",
+        "productCode": "7506495017392",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 59,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Bolsas de basura",
+        "originalName": "COSTAL OPM",
+        "productCode": "7502211161905",
+        "category": "Household",
+        "quantity": 1,
+        "totalMxn": 39,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "user_override"
+      },
+      {
+        "name": "Gv Microfi",
+        "originalName": "GV MICROFI",
+        "productCode": "7501791610650",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 68,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Arielltq",
+        "originalName": "ARIELLTQ",
+        "productCode": "7500435258029",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 189,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      }
+    ]
+  },
+  {
+    "receiptId": "2026-05-10",
+    "items": [
+      {
+        "name": "Bron Bico E Pauaderta Y Tortilleria---",
+        "originalName": "BRON BICO E PAUADERTA Y TORTILLERIA---",
+        "productCode": "4200910427",
+        "category": "Household",
+        "quantity": 1,
+        "totalMxn": 29,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Pastel 1",
+        "originalName": "MOUSSE CC",
+        "productCode": "1668620621",
+        "category": "Snacks",
+        "quantity": 1,
+        "totalMxn": 48,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Pastel 2",
+        "originalName": "NY MARBLE :2092232 NY Y FRESA ABAPROTES PROCESADOS- *500473045761 CACAHUATE CONGELADOS :191667296 GV PAPA 50 FRUTRS Y VERQURAS-",
+        "productCode": "146211425",
+        "category": "Snacks",
+        "quantity": 0.985,
+        "totalMxn": 58,
+        "swedenUnitSek": 33.50253807106599,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Pastel 3",
+        "originalName": "Pastel 3",
+        "productCode": null,
+        "category": "Snacks",
+        "quantity": 1,
+        "totalMxn": 58,
+        "swedenUnitSek": 0,
+        "normalizationStatus": "user_override"
+      },
+      {
+        "name": "Cacahuate",
+        "originalName": "Cacahuate",
+        "productCode": null,
+        "category": "Pantry",
+        "quantity": 1,
+        "totalMxn": 10.5,
+        "swedenUnitSek": 0,
+        "normalizationStatus": "user_override"
+      },
+      {
+        "name": "Papas a la francesa",
+        "originalName": "Papas a la francesa",
+        "productCode": null,
+        "category": "Pantry",
+        "quantity": 1,
+        "totalMxn": 40,
+        "swedenUnitSek": 0,
+        "normalizationStatus": "user_override"
+      },
+      {
+        "name": "Plátano",
+        "originalName": "Plátano",
+        "productCode": null,
+        "category": "Produce",
+        "quantity": 1,
+        "totalMxn": 34.38,
+        "swedenUnitSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
+  },
+  {
+    "receiptId": "2026-05-19",
+    "items": [
+      {
+        "name": "Flores",
+        "originalName": "RAMO GOLDEN HILLS 1",
+        "productCode": "034",
+        "category": "Household",
+        "quantity": 1,
+        "totalMxn": 135,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      }
+    ]
+  },
+  {
+    "receiptId": "2026-05-19-2",
+    "items": [
+      {
+        "name": "Rosca Doble Chocola",
+        "originalName": "ROSCA DOBLE CHOCOLA",
+        "productCode": "000",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 290,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Malvavisco De La Ro",
+        "originalName": "MALVAVISCO DE LA RO",
+        "productCode": "282",
+        "category": "Other",
+        "quantity": 1,
+        "totalMxn": 155,
+        "swedenUnitSek": 34,
+        "normalizationStatus": "unmatched"
+      },
+      {
+        "name": "Agua de jamaica",
+        "originalName": "Agua de jamaica",
+        "productCode": null,
+        "category": "Beverages",
+        "quantity": 1,
+        "totalMxn": 21,
+        "swedenUnitSek": 0,
+        "normalizationStatus": "user_override"
+      }
+    ]
   }
 ]

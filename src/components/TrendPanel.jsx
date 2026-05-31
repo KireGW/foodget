@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { shouldIgnorePanelHeaderClick } from '../lib/panelHeader.js'
 
 export function TrendPanel({
   monthComparison,
@@ -9,7 +10,14 @@ export function TrendPanel({
 
   return (
     <section className="panel trend-panel">
-      <div className="panel__header">
+      <div
+        className="panel__header panel__header--clickable"
+        onClick={(event) => {
+          if (!shouldIgnorePanelHeaderClick(event)) {
+            setIsOpen((currentValue) => !currentValue)
+          }
+        }}
+      >
         <div>
           <p className="panel__eyebrow">Month-over-month</p>
           <h2>See how this month compares with the previous one.</h2>

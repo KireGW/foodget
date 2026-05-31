@@ -15,7 +15,7 @@ export function buildAvailableMonths(receipts) {
 
 export function buildMonthlyItems(receipts, allReceipts = receipts) {
   const itemsByName = new Map()
-  const averageReceipts = selectCompleteMonthReceipts(allReceipts)
+  const averageReceipts = allReceipts
   const totalMonthCount = Math.max(
     1,
     new Set(averageReceipts.map((receipt) => receipt.purchasedAt.slice(0, 7))).size,
@@ -74,7 +74,7 @@ export function buildMonthlyItems(receipts, allReceipts = receipts) {
       totalMxnValue: item.totalMxn,
       swedenAverageSekValue: item.swedenAverageSek,
       averageMonthlySpendMxnValue:
-        (historicalSpendByItem.get(item.name) ?? item.totalMxn) / totalMonthCount,
+        (historicalSpendByItem.get(item.name) ?? 0) / totalMonthCount,
       relativeCostIndex:
         item.swedenAverageSek === 0 ? 0 : item.totalMxn / item.swedenAverageSek,
       itemCountLabel: item.isAdjustment ? '—' : formatItemCount(item.itemCount),
@@ -82,7 +82,7 @@ export function buildMonthlyItems(receipts, allReceipts = receipts) {
       averageMonthlySpendMxn: item.isAdjustment
         ? '—'
         : formatCurrency(
-            (historicalSpendByItem.get(item.name) ?? item.totalMxn) / totalMonthCount,
+            (historicalSpendByItem.get(item.name) ?? 0) / totalMonthCount,
             'MXN',
           ),
       swedenAverageSek: item.isAdjustment ? '—' : formatCurrency(item.swedenAverageSek, 'SEK'),
@@ -126,6 +126,9 @@ export function buildMetrics(
         }
 
         summary.totalMxn += item.totalMxn
+        if (item.category !== 'Household') {
+          summary.nonHouseholdTotalMxn += item.totalMxn
+        }
         summary.totalQuantity += getItemCount(item)
         summary.categoryTotals.set(
           item.category,
@@ -143,6 +146,7 @@ export function buildMetrics(
     },
     {
       totalMxn: 0,
+      nonHouseholdTotalMxn: 0,
       effectiveBudgetTotalMxn: 0,
       totalQuantity: 0,
       categoryTotals: new Map(),
@@ -161,9 +165,19 @@ export function buildMetrics(
 
       return sum + receiptSummary.effectiveBudgetTotalMxn
     }, 0) / averageMonthCount
+  const averageMonthlyNonHouseholdTotalMxn =
+    averageReceipts.reduce(
+      (sum, receipt) => sum + sumReceiptBudgetItemsExcludingHousehold(receipt),
+      0,
+    ) / averageMonthCount
   const totalPaceAssessment = assessSpendPace(
     totals.effectiveBudgetTotalMxn,
     averageMonthlyBudgetTotalMxn,
+    buildMonthProgress(selectedMonth)?.ratio ?? 1,
+  )
+  const nonHouseholdPaceAssessment = assessSpendPace(
+    totals.nonHouseholdTotalMxn,
+    averageMonthlyNonHouseholdTotalMxn,
     buildMonthProgress(selectedMonth)?.ratio ?? 1,
   )
 
@@ -181,12 +195,22 @@ export function buildMetrics(
       totals.effectiveBudgetTotalMxn === 0
         ? 'Pending PDF parsing'
         : formatCurrency(totals.effectiveBudgetTotalMxn, 'MXN'),
+    totalSpentExcludingHouseholdMxn:
+      totals.nonHouseholdTotalMxn === 0
+        ? 'Pending PDF parsing'
+        : formatCurrency(totals.nonHouseholdTotalMxn, 'MXN'),
     averageMonthlyTotalMxn:
       averageMonthlyBudgetTotalMxn === 0
         ? 'Pending PDF parsing'
         : formatCurrency(averageMonthlyBudgetTotalMxn, 'MXN'),
+    averageMonthlyTotalExcludingHouseholdMxn:
+      averageMonthlyNonHouseholdTotalMxn === 0
+        ? 'Pending PDF parsing'
+        : formatCurrency(averageMonthlyNonHouseholdTotalMxn, 'MXN'),
     totalPaceStatus: totalPaceAssessment?.status ?? null,
     totalPaceLabel: totalPaceAssessment?.label ?? null,
+    totalPaceExcludingHouseholdStatus: nonHouseholdPaceAssessment?.status ?? null,
+    totalPaceExcludingHouseholdLabel: nonHouseholdPaceAssessment?.label ?? null,
     averageReceiptMxn:
       totals.effectiveBudgetTotalMxn === 0
         ? 'Awaiting totals'
@@ -279,10 +303,13 @@ export function buildMonthComparison(selectedMonth, availableMonths, receipts, r
   const receiptReviewMap = new Map(
     receiptReviews.map((review) => [review.receiptId, review.decision]),
   )
-  const currentReceipts = receipts.filter((receipt) => receipt.purchasedAt.startsWith(selectedMonth))
-  const previousReceipts = receipts.filter((receipt) =>
-    receipt.purchasedAt.startsWith(previousMonth.value),
+  const comparisonPeriod = buildReceiptComparisonPeriod(
+    selectedMonth,
+    previousMonth.value,
+    receipts,
   )
+  const currentReceipts = comparisonPeriod.currentReceipts
+  const previousReceipts = comparisonPeriod.comparisonReceipts
   const currentSpend = sumEffectiveBudgetTotals(currentReceipts, receiptReviewMap)
   const previousSpend = sumEffectiveBudgetTotals(previousReceipts, receiptReviewMap)
   const currentItemsBought = sumOfficialOrParsedItemCounts(currentReceipts)
@@ -290,8 +317,10 @@ export function buildMonthComparison(selectedMonth, availableMonths, receipts, r
 
   return {
     hasComparison: true,
-    currentMonthLabel: formatMonthLabel(selectedMonth),
-    previousMonthLabel: previousMonth.label,
+    currentMonthLabel: comparisonPeriod.currentLabel,
+    previousMonthLabel: comparisonPeriod.comparisonLabel,
+    comparisonMode: comparisonPeriod.mode,
+    comparisonPeriodLabel: comparisonPeriod.label,
     spendDeltaValue: currentSpend - previousSpend,
     itemsDeltaValue: currentItemsBought - previousItemsBought,
     receiptDeltaValue: currentReceipts.length - previousReceipts.length,
@@ -312,12 +341,13 @@ export function buildCategoryTrends(selectedMonth, availableMonths, receipts) {
     return []
   }
 
-  const currentItems = buildMonthlyItems(
-    receipts.filter((receipt) => receipt.purchasedAt.startsWith(selectedMonth)),
+  const comparisonPeriod = buildReceiptComparisonPeriod(
+    selectedMonth,
+    previousMonth.value,
+    receipts,
   )
-  const previousItems = buildMonthlyItems(
-    receipts.filter((receipt) => receipt.purchasedAt.startsWith(previousMonth.value)),
-  )
+  const currentItems = buildMonthlyItems(comparisonPeriod.currentReceipts)
+  const previousItems = buildMonthlyItems(comparisonPeriod.comparisonReceipts)
   const currentTotals = sumMonthlyItemsByCategory(currentItems)
   const previousTotals = sumMonthlyItemsByCategory(previousItems)
   const categories = [...new Set([...currentTotals.keys(), ...previousTotals.keys()])]
@@ -351,12 +381,13 @@ export function buildProductMovers(selectedMonth, availableMonths, receipts) {
     }
   }
 
-  const currentItems = buildMonthlyItems(
-    receipts.filter((receipt) => receipt.purchasedAt.startsWith(selectedMonth)),
+  const comparisonPeriod = buildReceiptComparisonPeriod(
+    selectedMonth,
+    previousMonth.value,
+    receipts,
   )
-  const previousItems = buildMonthlyItems(
-    receipts.filter((receipt) => receipt.purchasedAt.startsWith(previousMonth.value)),
-  )
+  const currentItems = buildMonthlyItems(comparisonPeriod.currentReceipts)
+  const previousItems = buildMonthlyItems(comparisonPeriod.comparisonReceipts)
   const currentByName = new Map(currentItems.map((item) => [item.name, item]))
   const previousByName = new Map(previousItems.map((item) => [item.name, item]))
   const itemNames = [...new Set([...currentByName.keys(), ...previousByName.keys()])]
@@ -482,6 +513,35 @@ export function buildCategoryChartForMonth(selectedMonth, receipts) {
   )
 }
 
+export function buildCategoryChartForComparisonMonth(
+  selectedMonth,
+  comparisonMonth,
+  receipts,
+) {
+  if (!selectedMonth || !comparisonMonth) {
+    return []
+  }
+
+  const comparisonPeriod = buildReceiptComparisonPeriod(
+    selectedMonth,
+    comparisonMonth,
+    receipts,
+  )
+
+  return buildCategoryChart(
+    buildMonthlyItems(comparisonPeriod.comparisonReceipts, receipts),
+    receipts,
+  )
+}
+
+export function buildComparisonPeriodLabel(selectedMonth, comparisonMonth) {
+  if (!selectedMonth || !comparisonMonth) {
+    return ''
+  }
+
+  return buildReceiptComparisonPeriod(selectedMonth, comparisonMonth, []).label
+}
+
 function selectCompleteMonthReceipts(receipts, now = new Date()) {
   if (!receipts.length) {
     return receipts
@@ -493,6 +553,63 @@ function selectCompleteMonthReceipts(receipts, now = new Date()) {
   )
 
   return completeMonthReceipts.length > 0 ? completeMonthReceipts : receipts
+}
+
+function buildReceiptComparisonPeriod(
+  selectedMonth,
+  comparisonMonth,
+  receipts,
+  now = new Date(),
+) {
+  const currentMonthKey = getMonthKey(now)
+  const isSelectedMonthInProgress = selectedMonth === currentMonthKey
+  const cutoffDay = isSelectedMonthInProgress ? now.getDate() : null
+  const currentCutoffDay =
+    cutoffDay == null ? null : Math.min(cutoffDay, getDaysInMonth(selectedMonth))
+  const comparisonCutoffDay =
+    cutoffDay == null ? null : Math.min(cutoffDay, getDaysInMonth(comparisonMonth))
+
+  return {
+    mode: cutoffDay == null ? 'full_month' : 'same_period',
+    currentReceipts: filterReceiptsByMonthPeriod(receipts, selectedMonth, currentCutoffDay),
+    comparisonReceipts: filterReceiptsByMonthPeriod(
+      receipts,
+      comparisonMonth,
+      comparisonCutoffDay,
+    ),
+    currentLabel: formatMonthPeriodLabel(selectedMonth, currentCutoffDay),
+    comparisonLabel: formatMonthPeriodLabel(comparisonMonth, comparisonCutoffDay),
+    label:
+      cutoffDay == null
+        ? `${formatMonthLabel(selectedMonth)} compared with ${formatMonthLabel(comparisonMonth)}`
+        : `${formatMonthPeriodLabel(selectedMonth, currentCutoffDay)} compared with ${formatMonthPeriodLabel(comparisonMonth, comparisonCutoffDay)}`,
+  }
+}
+
+function filterReceiptsByMonthPeriod(receipts, monthValue, cutoffDay = null) {
+  return receipts.filter((receipt) => {
+    if (!receipt.purchasedAt.startsWith(monthValue)) {
+      return false
+    }
+
+    if (cutoffDay == null) {
+      return true
+    }
+
+    return getReceiptDay(receipt) <= cutoffDay
+  })
+}
+
+function getReceiptDay(receipt) {
+  const day = Number(receipt.purchasedAt.slice(8, 10))
+
+  return Number.isFinite(day) && day > 0 ? day : 31
+}
+
+function getDaysInMonth(monthValue) {
+  const [yearValue, monthIndex] = monthValue.split('-').map(Number)
+
+  return new Date(yearValue, monthIndex, 0).getDate()
 }
 
 function getMonthKey(date) {
@@ -845,6 +962,16 @@ function sumEffectiveBudgetTotals(receipts, receiptReviewMap) {
   }, 0)
 }
 
+function sumReceiptBudgetItemsExcludingHousehold(receipt) {
+  return buildReceiptBudgetItems(receipt).reduce((sum, item) => {
+    if (item.category === 'Exclude from budget' || item.category === 'Household') {
+      return sum
+    }
+
+    return sum + item.totalMxn
+  }, 0)
+}
+
 function sumOfficialOrParsedItemCounts(receipts) {
   return receipts.reduce(
     (sum, receipt) =>
@@ -888,6 +1015,20 @@ function formatMonthLabel(monthValue) {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(`${monthValue}-01T00:00:00Z`))
+}
+
+function formatMonthPeriodLabel(monthValue, cutoffDay = null) {
+  if (cutoffDay == null) {
+    return formatMonthLabel(monthValue)
+  }
+
+  const monthLabel = new Intl.DateTimeFormat('en', {
+    month: 'long',
+    timeZone: 'UTC',
+  }).format(new Date(`${monthValue}-01T00:00:00Z`))
+  const yearValue = monthValue.slice(0, 4)
+
+  return `${monthLabel} 1-${cutoffDay}, ${yearValue}`
 }
 
 function formatSignedNumber(value) {

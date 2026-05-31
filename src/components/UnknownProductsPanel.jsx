@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { shouldIgnorePanelHeaderClick } from '../lib/panelHeader.js'
 
 const categoryOptions = [
   'Produce',
@@ -28,6 +29,10 @@ export function UnknownProductsPanel({
   )
   const [isOpen, setIsOpen] = useState(hasNeedsMapping)
 
+  useEffect(() => {
+    setIsOpen(hasNeedsMapping)
+  }, [hasNeedsMapping])
+
   if (unknownProducts.length === 0) {
     return (
       <section className="panel">
@@ -48,7 +53,14 @@ export function UnknownProductsPanel({
 
   return (
     <section className="panel">
-      <div className="panel__header">
+      <div
+        className="panel__header panel__header--clickable"
+        onClick={(event) => {
+          if (!shouldIgnorePanelHeaderClick(event)) {
+            setIsOpen((currentValue) => !currentValue)
+          }
+        }}
+      >
         <div>
           <p className="panel__eyebrow">Product mappings</p>
           <h2>Review the parser's guesses and fix anything that landed wrong.</h2>

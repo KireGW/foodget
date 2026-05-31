@@ -1,8 +1,14 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  buildCategoryChartForComparisonMonth,
+  buildComparisonPeriodLabel,
+} from '../lib/receiptAnalytics.js'
+import { shouldIgnorePanelHeaderClick } from '../lib/panelHeader.js'
 
 export function CategorySpendChart({
   categoryChart,
   categoryChartsByMonth,
+  comparisonReceipts,
   availableMonths,
   selectedMonth,
   categoryRangeMode,
@@ -61,7 +67,13 @@ export function CategorySpendChart({
 
   const mergedChart = useMemo(() => {
     const comparisonChart = effectiveComparisonMonth
-      ? (categoryChartsByMonth[effectiveComparisonMonth] ?? [])
+      ? categoryRangeMode === 'custom'
+        ? (categoryChartsByMonth[effectiveComparisonMonth] ?? [])
+        : buildCategoryChartForComparisonMonth(
+            effectiveSelectedMonth,
+            effectiveComparisonMonth,
+            comparisonReceipts,
+          )
       : []
     const currentMap = new Map(activeCategoryChart.map((entry) => [entry.category, entry]))
     const comparisonMap = new Map(comparisonChart.map((entry) => [entry.category, entry]))
@@ -135,7 +147,23 @@ export function CategorySpendChart({
 
         return left.category.localeCompare(right.category)
       })
-  }, [activeCategoryChart, categoryChartsByMonth, effectiveComparisonMonth, selectedMonthProgress])
+  }, [
+    activeCategoryChart,
+    categoryChartsByMonth,
+    categoryRangeMode,
+    comparisonReceipts,
+    effectiveComparisonMonth,
+    effectiveSelectedMonth,
+    selectedMonthProgress,
+  ])
+
+  const comparisonPeriodLabel = useMemo(() => {
+    if (!effectiveComparisonMonth || categoryRangeMode === 'custom') {
+      return ''
+    }
+
+    return buildComparisonPeriodLabel(effectiveSelectedMonth, effectiveComparisonMonth)
+  }, [categoryRangeMode, effectiveComparisonMonth, effectiveSelectedMonth])
 
   const currentMonthTotal = useMemo(
     () => activeCategoryChart.reduce((sum, entry) => sum + entry.totalMxnValue, 0),
@@ -247,7 +275,14 @@ export function CategorySpendChart({
 
   return (
     <section className="panel">
-      <div className="panel__header">
+      <div
+        className="panel__header panel__header--clickable"
+        onClick={(event) => {
+          if (!shouldIgnorePanelHeaderClick(event)) {
+            setIsOpen((currentValue) => !currentValue)
+          }
+        }}
+      >
         <div>
           <p className="panel__eyebrow">Category totals</p>
           <h2>See which budget categories carry the most weight this month.</h2>
@@ -352,6 +387,12 @@ export function CategorySpendChart({
         </p>
       ) : (
         <div className="category-chart" role="img" aria-label="Bar chart of monthly spend by category">
+          {comparisonPeriodLabel ? (
+            <p className="category-chart__comparison-label">
+              {comparisonPeriodLabel}
+            </p>
+          ) : null}
+
           {selectedMonthProgress ? (
             <div
               className="category-chart__timeline"

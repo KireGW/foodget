@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { shouldIgnorePanelHeaderClick } from '../lib/panelHeader.js'
 
 const defaultSort = {
   column: 'spent',
@@ -40,7 +41,14 @@ export function MonthlyOverview({
 
   return (
     <section className="panel">
-      <div className="panel__header">
+      <div
+        className="panel__header panel__header--clickable"
+        onClick={(event) => {
+          if (!shouldIgnorePanelHeaderClick(event)) {
+            setIsOpen((currentValue) => !currentValue)
+          }
+        }}
+      >
         <div>
           <p className="panel__eyebrow">Itemized view</p>
           <h2>See how many items you bought and what you spent.</h2>

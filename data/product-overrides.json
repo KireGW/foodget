@@ -1209,7 +1209,7 @@
   },
   {
     "originalName": "Graneodín F Flurbiprofeno 8.75 mg doble acción sabor miel limón 16 pastillas",
-    "canonicalName": "Farmacía",
+    "canonicalName": "Farmácia",
     "category": "Household"
   },
   {
@@ -1264,7 +1264,7 @@
   },
   {
     "originalName": "Graneodín F Flurbiprofeno 8.75 mg sabor naranja 16 tabletas",
-    "canonicalName": "Farmacía",
+    "canonicalName": "Farmácia",
     "category": "Household"
   },
   {
@@ -1975,5 +1975,525 @@
     "originalName": "CHIP JALA2",
     "canonicalName": "Papas fritas",
     "category": "Snacks"
+  },
+  {
+    "productCode": "07506475122443",
+    "originalName": "GRBR FRUTM",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501791670258",
+    "originalName": "JAMAICA",
+    "canonicalName": "Flor de jamaica",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501003308535",
+    "originalName": "MC CHIPOT",
+    "canonicalName": "Salsa",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07500435231237",
+    "originalName": "HEADS SHAM",
+    "canonicalName": "Shampoo",
+    "category": "Household"
+  },
+  {
+    "productCode": "43069",
+    "originalName": "LIMON MALLA",
+    "canonicalName": "Limón",
+    "category": "Produce"
+  },
+  {
+    "productCode": "7501006560565",
+    "originalName": "PALOMITAS",
+    "canonicalName": "Palomitas",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "7622210575586",
+    "originalName": "OREO CHOCO",
+    "canonicalName": "Oreo",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "7702031293620",
+    "originalName": "SHAMPOO JO",
+    "canonicalName": "Shampoo",
+    "category": "Household"
+  },
+  {
+    "productCode": "7501000111800",
+    "originalName": "PAN TOSTAD",
+    "canonicalName": "Pan",
+    "category": "Bakery"
+  },
+  {
+    "productCode": "7500435253000",
+    "originalName": "HERBAL SH",
+    "canonicalName": "Shampoo",
+    "category": "Household"
+  },
+  {
+    "productCode": "7500435258029",
+    "originalName": "ARIELLTQ",
+    "canonicalName": "Detergente para ropa",
+    "category": "Household"
+  },
+  {
+    "productCode": "7501013107296",
+    "originalName": "JUMEXITO",
+    "canonicalName": "Jugo",
+    "category": "Beverages"
+  },
+  {
+    "productCode": "7501055915118",
+    "originalName": "UHT EN 200",
+    "canonicalName": "Leche",
+    "category": "Dairy"
+  },
+  {
+    "productCode": "7501092101031",
+    "originalName": "LYNCOTT DU",
+    "canonicalName": "Crema",
+    "category": "Dairy"
+  },
+  {
+    "productCode": "7501092106142",
+    "originalName": "COTTAGE RE",
+    "canonicalName": "Queso cottage",
+    "category": "Dairy"
+  },
+  {
+    "productCode": "7501791610650",
+    "originalName": "GV MICROFI",
+    "canonicalName": "Limpieza del hogar",
+    "category": "Household"
+  },
+  {
+    "productCode": "7501791654258",
+    "originalName": "GV CAFEG 5",
+    "canonicalName": "Café",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "7506475123518",
+    "originalName": "PAPI CIRUE",
+    "canonicalName": "Papitas fritas",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "7506495017392",
+    "originalName": "GREATVALUE",
+    "canonicalName": "Bolsas de basura",
+    "category": "Household"
+  },
+  {
+    "productCode": "40501",
+    "originalName": "MELON CHINO",
+    "canonicalName": "Melón",
+    "category": "Produce"
+  },
+  {
+    "productCode": "5410091733377",
+    "originalName": "GOT2B SH S",
+    "canonicalName": "Shampoo",
+    "category": "Household"
+  },
+  {
+    "productCode": "7500463463082",
+    "originalName": "S CALABAZA",
+    "canonicalName": "Calabaza",
+    "category": "Produce"
+  },
+  {
+    "productCode": "7500478045761",
+    "originalName": "CACAHUATE",
+    "canonicalName": "Cacahuate",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "7501040095177",
+    "originalName": "YOPLAIT KG",
+    "canonicalName": "Yogurt",
+    "category": "Dairy"
+  },
+  {
+    "productCode": "7501092106036",
+    "originalName": "QUESO COTT",
+    "canonicalName": "Queso cottage",
+    "category": "Dairy"
+  },
+  {
+    "productCode": "7501111105101",
+    "originalName": "SOS SUSHI",
+    "canonicalName": "Arroz sushi",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "7503027866077",
+    "originalName": "PANALIA GR",
+    "canonicalName": "Granola",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "7503029029067",
+    "originalName": "GRANCACAFE",
+    "canonicalName": "Café",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "75076436",
+    "originalName": "DOVE ROLLON",
+    "canonicalName": "Rollon",
+    "category": "Household"
+  },
+  {
+    "productCode": "7509546075242",
+    "originalName": "COLGATE CE",
+    "canonicalName": "Pasta dental",
+    "category": "Household"
+  },
+  {
+    "productCode": "7804673911020",
+    "originalName": "BARRA P WI",
+    "canonicalName": "Barra de proteina",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "200035048002",
+    "originalName": "HOGAZA",
+    "canonicalName": "Pan",
+    "category": "Bakery"
+  },
+  {
+    "productCode": "7500478049882",
+    "originalName": "RUF BUF 18",
+    "canonicalName": "Papitas fritas",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "7500608000660",
+    "originalName": "OKKO ARAND",
+    "canonicalName": "Semillas",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "7501054503095",
+    "originalName": "NCREME 100",
+    "canonicalName": "Creme",
+    "category": "Household"
+  },
+  {
+    "productCode": "7506495020521",
+    "originalName": "CHOCO GV",
+    "canonicalName": "Chocolate",
+    "category": "Snacks"
+  },
+  {
+    "originalName": "BABYSEMP2 800G 6M",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "IDOMIN SALVA OPARF",
+    "canonicalName": "Crema Idomin",
+    "category": "Household"
+  },
+  {
+    "originalName": "KÖTTBULJONG",
+    "canonicalName": "Caldo de res",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "RÖDA LINSER EKO",
+    "canonicalName": "Lentejas rojas",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "SVART VINBÄR VÄTSKE",
+    "canonicalName": "Electrolitos",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "TACO SPICE MIX 3P",
+    "canonicalName": "Especias taco",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "TORRJÄST 2X14G",
+    "canonicalName": "Levadura en polvo",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "VÄTSKEERSÄTTNING AP",
+    "canonicalName": "Electrolitos",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "VÄTSKEERSÄTTNING SP",
+    "canonicalName": "Elektrolitos",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "GODIS LV",
+    "canonicalName": "Dulces",
+    "category": "Snacks"
+  },
+  {
+    "originalName": "FISKBULJONG",
+    "canonicalName": "Caldo de pescado",
+    "category": "Pantry"
+  },
+  {
+    "originalName": "BAMSE TANDKRÄM",
+    "canonicalName": "Pasta dental",
+    "category": "Household"
+  },
+  {
+    "productCode": "0000000049597",
+    "originalName": "MANGO PARAI",
+    "canonicalName": "Mango",
+    "category": "Produce"
+  },
+  {
+    "productCode": "00715756200023",
+    "originalName": "FRESA 454",
+    "canonicalName": "Fresa",
+    "category": "Produce"
+  },
+  {
+    "productCode": "0206081000001",
+    "originalName": "FIL TILAPIA",
+    "canonicalName": "Tilapia",
+    "category": "Protein"
+  },
+  {
+    "productCode": "07501071301155",
+    "originalName": "VV LENTEJA",
+    "canonicalName": "Lentejas",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07502004711584",
+    "originalName": "PECH SH JB",
+    "canonicalName": "Pechuga de pollo",
+    "category": "Protein"
+  },
+  {
+    "productCode": "07503010519072",
+    "originalName": "TORTILLAS",
+    "canonicalName": "Tortillas",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501003184030",
+    "originalName": "DE ABEJA",
+    "canonicalName": "Miel",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501005152006",
+    "originalName": "HELLM LIGH",
+    "canonicalName": "Mayonesa",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501791601382",
+    "originalName": "EX Q MANCH",
+    "canonicalName": "Queso manchego",
+    "category": "Dairy"
+  },
+  {
+    "productCode": "07501518491401",
+    "originalName": "SALAMI GEN",
+    "canonicalName": "Salami",
+    "category": "Protein"
+  },
+  {
+    "productCode": "146211425",
+    "originalName": "NY MARBLE :2092232 NY Y FRESA ABAPROTES PROCESADOS- *500473045761 CACAHUATE CONGELADOS :191667296 GV PAPA 50 FRUTRS Y VERQURAS-",
+    "canonicalName": "Pastel 2",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "1668620621",
+    "originalName": "MOUSSE CC",
+    "canonicalName": "Pastel 1",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "4200910427",
+    "originalName": "BRON BICO E PAUADERTA Y TORTILLERIA---",
+    "canonicalName": "Farmácia",
+    "category": "Household"
+  },
+  {
+    "productCode": "08008343200271",
+    "originalName": "RUMMO ORZO",
+    "canonicalName": "Pasta",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07501040005428",
+    "originalName": "FUD",
+    "canonicalName": "Tocino",
+    "category": "Protein"
+  },
+  {
+    "originalName": "Camote Amarillo",
+    "canonicalName": "Camote",
+    "category": "Produce"
+  },
+  {
+    "productCode": "07501032922825",
+    "originalName": "PLEDGE CIT",
+    "canonicalName": "Limpieza del hogar",
+    "category": "Household"
+  },
+  {
+    "productCode": "07501080954274",
+    "originalName": "A H BICARB",
+    "canonicalName": "Limpieza del hogar",
+    "category": "Household"
+  },
+  {
+    "productCode": "07506495006167",
+    "originalName": "EX EDAMAME",
+    "canonicalName": "Edamame",
+    "category": "Protein"
+  },
+  {
+    "productCode": "07502223773035",
+    "originalName": "BD FIDEO A",
+    "canonicalName": "Fideos",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "00751666417151",
+    "originalName": "TOM CONS 2",
+    "canonicalName": "Tomates cherry",
+    "category": "Produce"
+  },
+  {
+    "productCode": "07501791605427",
+    "originalName": "CAM MED MK",
+    "canonicalName": "Camarones",
+    "category": "Protein"
+  },
+  {
+    "productCode": "07506174512200",
+    "originalName": "MILKYWAY C",
+    "canonicalName": "Chocolate",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "177",
+    "originalName": "LIMON SIN SEMILLA",
+    "canonicalName": "Limón",
+    "category": "Produce"
+  },
+  {
+    "productCode": "301",
+    "originalName": "UVA BLANCA SIN SEMI",
+    "canonicalName": "Uvas",
+    "category": "Produce"
+  },
+  {
+    "productCode": "408",
+    "originalName": "JENGIBRE",
+    "canonicalName": "Jengibre",
+    "category": "Produce"
+  },
+  {
+    "productCode": "428",
+    "originalName": "TOCINO AHUMADO FUD",
+    "canonicalName": "Tocino",
+    "category": "Protein"
+  },
+  {
+    "productCode": "737",
+    "originalName": "PIÑA MIEL",
+    "canonicalName": "Piña",
+    "category": "Produce"
+  },
+  {
+    "productCode": "762",
+    "originalName": "PAPAS BARCEL 150 GR",
+    "canonicalName": "Papas fritas",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "827",
+    "originalName": "GERMINADO DE SAN FR",
+    "canonicalName": "Germinado de soya",
+    "category": "Produce"
+  },
+  {
+    "productCode": "880",
+    "originalName": "PAK CHOY",
+    "canonicalName": "Pak choy",
+    "category": "Produce"
+  },
+  {
+    "productCode": "000",
+    "originalName": "ROSCA DOBLE CHOCOLA",
+    "canonicalName": "Pastel",
+    "category": "Snacks"
+  },
+  {
+    "productCode": "034",
+    "originalName": "RAMO GOLDEN HILLS 1",
+    "canonicalName": "Flores",
+    "category": "Household"
+  },
+  {
+    "productCode": "282",
+    "originalName": "MALVAVISCO DE LA RO",
+    "canonicalName": "Dulces",
+    "category": "Snacks"
+  },
+  {
+    "originalName": "Fórmula Infantil 6 a 12 meses Enfamil Premium Pro Select 800 g",
+    "canonicalName": "Comida bebé",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "00000000040792",
+    "originalName": "COLIFLOR",
+    "canonicalName": "Coliflor",
+    "category": "Produce"
+  },
+  {
+    "productCode": "200019020000",
+    "originalName": "BOL REPOSA",
+    "canonicalName": "Tortillas",
+    "category": "Bakery"
+  },
+  {
+    "productCode": "07501017004911",
+    "originalName": "COSTEN CHI",
+    "canonicalName": "Chipotles adobados",
+    "category": "Pantry"
+  },
+  {
+    "productCode": "07500435258029",
+    "originalName": "ARIELLIQ",
+    "canonicalName": "Detergente para trastes",
+    "category": "Household"
+  },
+  {
+    "productCode": "07506425657506",
+    "originalName": "PETALO",
+    "canonicalName": "Papel de cocina",
+    "category": "Household"
+  },
+  {
+    "productCode": "07501040083341",
+    "originalName": "LVI MOZZA",
+    "canonicalName": "Queso mozarella",
+    "category": "Dairy"
   }
 ]

@@ -637,6 +637,14 @@
   margin-bottom: 1.2rem;
 }
 
+.panel__header--clickable {
+  cursor: pointer;
+}
+
+.panel__header--clickable :is(button, input, label, select, textarea, a) {
+  cursor: auto;
+}
+
 .receipt-audit__controls {
   display: flex;
   align-items: end;
@@ -693,7 +701,7 @@
 
 .insight-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.45fr) repeat(3, minmax(0, 1fr));
   gap: 0.9rem;
 }
 
@@ -719,6 +727,35 @@
   text-transform: uppercase;
 }
 
+.insight-strip__filter {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.38rem;
+  width: max-content;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.insight-strip__filter input {
+  width: 0.92rem;
+  height: 0.92rem;
+  margin: 0;
+  accent-color: #2a6f73;
+}
+
+.insight-strip__filter span {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+  line-height: 1;
+}
+
 .insight-strip__card--mint {
   background: linear-gradient(180deg, #ddf5e8, #f7fff9);
 }
@@ -736,6 +773,17 @@
   color: var(--muted);
   font-size: 0.9rem;
   margin-bottom: 0.35rem;
+}
+
+.insight-strip .insight-strip__filter span {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  color: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.08;
+  white-space: nowrap;
 }
 
 .insight-strip strong {
@@ -914,6 +962,15 @@
   margin: 0;
 }
 
+.insight-strip__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-top: 0.35rem;
+  min-width: 0;
+}
+
 .insight-strip__card--sand .insight-strip__headline {
   justify-content: space-between;
 }
@@ -924,10 +981,14 @@
 }
 
 .insight-strip__card--sand .insight-strip__pace-card {
-  display: grid;
-  width: max-content;
-  margin-top: 0.35rem;
+  display: inline-grid;
+  flex: 0 1 auto;
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0;
   margin-left: auto;
+  justify-items: end;
   transform: translateX(5%);
 }
 
@@ -943,11 +1004,14 @@
 }
 
 .insight-strip__pace-card span {
+  display: block;
   margin: 0;
   font-size: 0.74rem;
   font-weight: 700;
   line-height: 1.08;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .insight-strip__pace-card--under {
