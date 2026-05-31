@@ -3,15 +3,30 @@ import { Pool } from 'pg'
 
 const receiptIndexTableName = 'receipt_index_entries'
 const manualReceiptsTableName = 'manual_receipts'
+const productOverridesTableName = 'product_overrides'
+const receiptReviewsTableName = 'receipt_reviews'
+const receiptItemOverridesTableName = 'receipt_item_overrides'
 
 let receiptIndexPool = null
 let receiptIndexTableReady = false
 let manualReceiptsTableReady = false
+let productOverridesTableReady = false
+let receiptReviewsTableReady = false
+let receiptItemOverridesTableReady = false
 const warningState = {
   receiptIndexRead: false,
   receiptIndexWrite: false,
   manualReceiptsRead: false,
   manualReceiptsWrite: false,
+  productOverridesRead: false,
+  productOverridesWrite: false,
+  productOverridesDivergence: false,
+  receiptReviewsRead: false,
+  receiptReviewsWrite: false,
+  receiptReviewsDivergence: false,
+  receiptItemOverridesRead: false,
+  receiptItemOverridesWrite: false,
+  receiptItemOverridesDivergence: false,
 }
 
 export async function readReceiptIndexStore({ receiptIndexPath, schemaVersion }) {
@@ -150,6 +165,84 @@ export async function readManualReceiptsStore({ manualReceiptsPath }) {
   return databaseReceipts
 }
 
+export async function readProductOverridesStore({ productOverridesPath }) {
+  return readJsonBackedArrayStore({
+    filePath: productOverridesPath,
+    subject: 'product-overrides',
+    divergenceWarningKey: 'productOverridesDivergence',
+    readFromDatabase: readProductOverridesFromDatabase,
+    writeToDatabase: writeProductOverridesToDatabase,
+    preferDatabase: true,
+  })
+}
+
+export async function writeProductOverridesStore({ overrides, productOverridesPath }) {
+  writeJsonArrayFile(productOverridesPath, overrides)
+
+  if (!process.env.DATABASE_URL) {
+    return
+  }
+
+  try {
+    await writeProductOverridesToDatabase(overrides)
+  } catch (error) {
+    warnWriteFailure('productOverridesWrite', 'product-overrides', error)
+  }
+}
+
+export async function readReceiptReviewsStore({ receiptReviewsPath }) {
+  return readJsonBackedArrayStore({
+    filePath: receiptReviewsPath,
+    subject: 'receipt-reviews',
+    divergenceWarningKey: 'receiptReviewsDivergence',
+    readFromDatabase: readReceiptReviewsFromDatabase,
+    writeToDatabase: writeReceiptReviewsToDatabase,
+    preferDatabase: true,
+  })
+}
+
+export async function writeReceiptReviewsStore({ receiptReviewsPath, reviews }) {
+  writeJsonArrayFile(receiptReviewsPath, reviews)
+
+  if (!process.env.DATABASE_URL) {
+    return
+  }
+
+  try {
+    await writeReceiptReviewsToDatabase(reviews)
+  } catch (error) {
+    warnWriteFailure('receiptReviewsWrite', 'receipt-reviews', error)
+  }
+}
+
+export async function readReceiptItemOverridesStore({ receiptItemOverridesPath }) {
+  return readJsonBackedArrayStore({
+    filePath: receiptItemOverridesPath,
+    subject: 'receipt-item-overrides',
+    divergenceWarningKey: 'receiptItemOverridesDivergence',
+    readFromDatabase: readReceiptItemOverridesFromDatabase,
+    writeToDatabase: writeReceiptItemOverridesToDatabase,
+    preferDatabase: true,
+  })
+}
+
+export async function writeReceiptItemOverridesStore({
+  overrides,
+  receiptItemOverridesPath,
+}) {
+  writeJsonArrayFile(receiptItemOverridesPath, overrides)
+
+  if (!process.env.DATABASE_URL) {
+    return
+  }
+
+  try {
+    await writeReceiptItemOverridesToDatabase(overrides)
+  } catch (error) {
+    warnWriteFailure('receiptItemOverridesWrite', 'receipt-item-overrides', error)
+  }
+}
+
 export async function writeManualReceiptsStore({ manualReceiptsPath, receipts }) {
   writeJsonArrayFile(manualReceiptsPath, receipts)
 
@@ -172,6 +265,10 @@ export async function closeReceiptIndexStore() {
   const pool = receiptIndexPool
   receiptIndexPool = null
   receiptIndexTableReady = false
+  manualReceiptsTableReady = false
+  productOverridesTableReady = false
+  receiptReviewsTableReady = false
+  receiptItemOverridesTableReady = false
   await pool.end()
 }
 
@@ -220,6 +317,48 @@ function writeJsonArrayFile(filePath, entries) {
   const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`
   fs.writeFileSync(tempPath, `${JSON.stringify(entries, null, 2)}\n`)
   fs.renameSync(tempPath, filePath)
+}
+
+async function readJsonBackedArrayStore({
+  divergenceWarningKey = null,
+  filePath,
+  preferDatabase = false,
+  readFromDatabase,
+  subject = 'json-backed-store',
+  writeToDatabase,
+}) {
+  const fileEntries = readJsonArrayFile(filePath)
+
+  if (!process.env.DATABASE_URL) {
+    return fileEntries
+  }
+
+  const databaseEntries = await readFromDatabase()
+
+  if (!databaseEntries) {
+    return fileEntries
+  }
+
+  if (databaseEntries.length === 0 && fileEntries.length > 0) {
+    await writeToDatabase(fileEntries)
+    return fileEntries
+  }
+
+  if (preferDatabase) {
+    if (!arraysAreEqual(fileEntries, databaseEntries)) {
+      warnDivergence(divergenceWarningKey, subject)
+    }
+
+    if (databaseEntries.length > 0 || fileEntries.length === 0) {
+      return databaseEntries
+    }
+  }
+
+  if (!arraysAreEqual(fileEntries, databaseEntries)) {
+    await writeToDatabase(fileEntries)
+  }
+
+  return fileEntries
 }
 
 function indexesAreEqual(left, right) {
@@ -298,6 +437,78 @@ async function ensureManualReceiptsTable() {
   `)
 
   manualReceiptsTableReady = true
+  return true
+}
+
+async function ensureProductOverridesTable() {
+  if (productOverridesTableReady) {
+    return true
+  }
+
+  const pool = getReceiptIndexPool()
+
+  if (!pool) {
+    return false
+  }
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ${productOverridesTableName} (
+      override_key text PRIMARY KEY,
+      sort_index integer NOT NULL,
+      payload jsonb NOT NULL,
+      updated_at timestamptz NOT NULL
+    )
+  `)
+
+  productOverridesTableReady = true
+  return true
+}
+
+async function ensureReceiptReviewsTable() {
+  if (receiptReviewsTableReady) {
+    return true
+  }
+
+  const pool = getReceiptIndexPool()
+
+  if (!pool) {
+    return false
+  }
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ${receiptReviewsTableName} (
+      receipt_id text PRIMARY KEY,
+      sort_index integer NOT NULL,
+      payload jsonb NOT NULL,
+      updated_at timestamptz NOT NULL
+    )
+  `)
+
+  receiptReviewsTableReady = true
+  return true
+}
+
+async function ensureReceiptItemOverridesTable() {
+  if (receiptItemOverridesTableReady) {
+    return true
+  }
+
+  const pool = getReceiptIndexPool()
+
+  if (!pool) {
+    return false
+  }
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ${receiptItemOverridesTableName} (
+      receipt_id text PRIMARY KEY,
+      sort_index integer NOT NULL,
+      payload jsonb NOT NULL,
+      updated_at timestamptz NOT NULL
+    )
+  `)
+
+  receiptItemOverridesTableReady = true
   return true
 }
 
@@ -530,6 +741,189 @@ async function writeManualReceiptsToDatabase(receipts) {
   }
 }
 
+async function readProductOverridesFromDatabase() {
+  const pool = getReceiptIndexPool()
+
+  if (!pool) {
+    return null
+  }
+
+  try {
+    await ensureProductOverridesTable()
+    const result = await pool.query(`
+      SELECT payload
+      FROM ${productOverridesTableName}
+      ORDER BY sort_index, override_key
+    `)
+
+    return result.rows.map((row) => row.payload)
+  } catch (error) {
+    warnReadFailure(
+      'productOverridesRead',
+      'product-overrides',
+      'local JSON file',
+      error,
+    )
+    return null
+  }
+}
+
+async function writeProductOverridesToDatabase(overrides) {
+  await writeJsonArrayEntriesToDatabase({
+    tableName: productOverridesTableName,
+    entries: overrides,
+    entryIdColumn: 'override_key',
+    ensureTable: ensureProductOverridesTable,
+    getEntryId: getProductOverrideKey,
+  })
+}
+
+async function readReceiptReviewsFromDatabase() {
+  const pool = getReceiptIndexPool()
+
+  if (!pool) {
+    return null
+  }
+
+  try {
+    await ensureReceiptReviewsTable()
+    const result = await pool.query(`
+      SELECT payload
+      FROM ${receiptReviewsTableName}
+      ORDER BY sort_index, receipt_id
+    `)
+
+    return result.rows.map((row) => row.payload)
+  } catch (error) {
+    warnReadFailure(
+      'receiptReviewsRead',
+      'receipt-reviews',
+      'local JSON file',
+      error,
+    )
+    return null
+  }
+}
+
+async function writeReceiptReviewsToDatabase(reviews) {
+  await writeJsonArrayEntriesToDatabase({
+    tableName: receiptReviewsTableName,
+    entries: reviews,
+    entryIdColumn: 'receipt_id',
+    ensureTable: ensureReceiptReviewsTable,
+    getEntryId: (entry) => entry.receiptId,
+  })
+}
+
+async function readReceiptItemOverridesFromDatabase() {
+  const pool = getReceiptIndexPool()
+
+  if (!pool) {
+    return null
+  }
+
+  try {
+    await ensureReceiptItemOverridesTable()
+    const result = await pool.query(`
+      SELECT payload
+      FROM ${receiptItemOverridesTableName}
+      ORDER BY sort_index, receipt_id
+    `)
+
+    return result.rows.map((row) => row.payload)
+  } catch (error) {
+    warnReadFailure(
+      'receiptItemOverridesRead',
+      'receipt-item-overrides',
+      'local JSON file',
+      error,
+    )
+    return null
+  }
+}
+
+async function writeReceiptItemOverridesToDatabase(overrides) {
+  await writeJsonArrayEntriesToDatabase({
+    tableName: receiptItemOverridesTableName,
+    entries: overrides,
+    entryIdColumn: 'receipt_id',
+    ensureTable: ensureReceiptItemOverridesTable,
+    getEntryId: (entry) => entry.receiptId,
+  })
+}
+
+async function writeJsonArrayEntriesToDatabase({
+  tableName,
+  entries,
+  entryIdColumn,
+  ensureTable,
+  getEntryId,
+}) {
+  const pool = getReceiptIndexPool()
+
+  if (!pool) {
+    return
+  }
+
+  await ensureTable()
+
+  const client = await pool.connect()
+
+  try {
+    await client.query('BEGIN')
+
+    const entryIds = entries.map(getEntryId)
+
+    if (entryIds.length === 0) {
+      await client.query(`DELETE FROM ${tableName}`)
+    } else {
+      await client.query(
+        `DELETE FROM ${tableName} WHERE NOT (${entryIdColumn} = ANY($1::text[]))`,
+        [entryIds],
+      )
+    }
+
+    for (const [index, entry] of entries.entries()) {
+      await client.query(
+        `
+          INSERT INTO ${tableName} (
+            ${entryIdColumn},
+            sort_index,
+            payload,
+            updated_at
+          )
+          VALUES ($1, $2, $3::jsonb, $4::timestamptz)
+          ON CONFLICT (${entryIdColumn}) DO UPDATE SET
+            sort_index = EXCLUDED.sort_index,
+            payload = EXCLUDED.payload,
+            updated_at = EXCLUDED.updated_at
+        `,
+        [
+          getEntryId(entry),
+          index,
+          JSON.stringify(entry),
+          new Date().toISOString(),
+        ],
+      )
+    }
+
+    await client.query('COMMIT')
+  } catch (error) {
+    await client.query('ROLLBACK')
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
+function getProductOverrideKey(entry) {
+  if (entry.productCode) {
+    return `code:${entry.productCode}`
+  }
+
+  return `name:${entry.originalName ?? ''}`
+}
+
 function warnReadFailure(key, subject, fallbackLabel, error) {
   if (warningState[key]) {
     return
@@ -549,5 +943,16 @@ function warnWriteFailure(key, subject, error) {
   warningState[key] = true
   console.warn(
     `[${subject}] Neon write failed, continuing with local JSON storage: ${error.message}`,
+  )
+}
+
+function warnDivergence(key, subject) {
+  if (!key || warningState[key]) {
+    return
+  }
+
+  warningState[key] = true
+  console.warn(
+    `[${subject}] Local JSON differs from Neon; using Neon data for live reads and leaving local JSON untouched.`,
   )
 }

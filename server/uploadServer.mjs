@@ -15,8 +15,14 @@ import {
 } from '../scripts/receiptParser.mjs'
 import {
   readManualReceiptsStore,
+  readProductOverridesStore,
+  readReceiptItemOverridesStore,
+  readReceiptReviewsStore,
   readReceiptIndexStore,
   writeManualReceiptsStore,
+  writeProductOverridesStore,
+  writeReceiptItemOverridesStore,
+  writeReceiptReviewsStore,
   removeReceiptIndexStoreEntry,
   upsertReceiptIndexStoreEntry,
   writeReceiptIndexStore,
@@ -93,21 +99,21 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true })
 })
 
-app.get('/api/product-overrides', (_req, res) => {
+app.get('/api/product-overrides', async (_req, res) => {
   res.json({
-    overrides: readProductOverrides(),
+    overrides: await readProductOverrides(),
   })
 })
 
-app.get('/api/receipt-reviews', (_req, res) => {
+app.get('/api/receipt-reviews', async (_req, res) => {
   res.json({
-    reviews: readReceiptReviews(),
+    reviews: await readReceiptReviews(),
   })
 })
 
-app.get('/api/receipt-item-overrides', (_req, res) => {
+app.get('/api/receipt-item-overrides', async (_req, res) => {
   res.json({
-    overrides: readReceiptItemOverrides(),
+    overrides: await readReceiptItemOverrides(),
   })
 })
 
@@ -166,11 +172,11 @@ app.delete('/api/receipts', async (req, res) => {
   fs.rmSync(targetPath, { force: true })
   pruneEmptyReceiptFolders(path.dirname(targetPath))
   await removeReceiptIndexEntry(normalizedRelativePath)
-  writeReceiptReviews(
-    readReceiptReviews().filter((review) => review.receiptId !== receiptId),
+  await writeReceiptReviews(
+    (await readReceiptReviews()).filter((review) => review.receiptId !== receiptId),
   )
-  writeReceiptItemOverrides(
-    readReceiptItemOverrides().filter((override) => override.receiptId !== receiptId),
+  await writeReceiptItemOverrides(
+    (await readReceiptItemOverrides()).filter((override) => override.receiptId !== receiptId),
   )
 
   res.json({
@@ -204,7 +210,7 @@ app.delete('/api/manual-receipts', async (req, res) => {
   })
 })
 
-app.post('/api/product-overrides', (req, res) => {
+app.post('/api/product-overrides', async (req, res) => {
   const { productCode = null, originalName = null, canonicalName, category } = req.body ?? {}
 
   if ((!productCode && !originalName) || !canonicalName || !category) {
@@ -214,7 +220,7 @@ app.post('/api/product-overrides', (req, res) => {
     return
   }
 
-  const overrides = readProductOverrides()
+  const overrides = await readProductOverrides()
   const nextOverride = {
     ...(productCode ? { productCode } : {}),
     ...(originalName ? { originalName } : {}),
@@ -233,14 +239,14 @@ app.post('/api/product-overrides', (req, res) => {
     overrides.splice(existingIndex, 1, nextOverride)
   }
 
-  fs.writeFileSync(productOverridesPath, `${JSON.stringify(overrides, null, 2)}\n`)
+  await writeProductOverrides(overrides)
 
   res.status(201).json({
     override: nextOverride,
   })
 })
 
-app.post('/api/receipt-reviews', (req, res) => {
+app.post('/api/receipt-reviews', async (req, res) => {
   const { receiptId, decision } = req.body ?? {}
 
   if (!receiptId || !['use_official_total', 'keep_parsed_items'].includes(decision)) {
@@ -250,7 +256,7 @@ app.post('/api/receipt-reviews', (req, res) => {
     return
   }
 
-  const reviews = readReceiptReviews()
+  const reviews = await readReceiptReviews()
   const nextReview = { receiptId, decision }
   const existingIndex = reviews.findIndex((review) => review.receiptId === receiptId)
 
@@ -260,14 +266,14 @@ app.post('/api/receipt-reviews', (req, res) => {
     reviews.splice(existingIndex, 1, nextReview)
   }
 
-  fs.writeFileSync(receiptReviewsPath, `${JSON.stringify(reviews, null, 2)}\n`)
+  await writeReceiptReviews(reviews)
 
   res.status(201).json({
     review: nextReview,
   })
 })
 
-app.post('/api/receipt-item-overrides', (req, res) => {
+app.post('/api/receipt-item-overrides', async (req, res) => {
   const { receiptId, items, removedItems = [] } = req.body ?? {}
 
   if (!receiptId || !Array.isArray(items)) {
@@ -318,7 +324,7 @@ app.post('/api/receipt-item-overrides', (req, res) => {
       )
     : []
 
-  const overrides = readReceiptItemOverrides()
+  const overrides = await readReceiptItemOverrides()
   const nextOverride = {
     receiptId,
     items: cleanedItems,
@@ -332,7 +338,7 @@ app.post('/api/receipt-item-overrides', (req, res) => {
     overrides.splice(existingIndex, 1, nextOverride)
   }
 
-  fs.writeFileSync(receiptItemOverridesPath, `${JSON.stringify(overrides, null, 2)}\n`)
+  await writeReceiptItemOverrides(overrides)
 
   res.status(201).json({
     override: nextOverride,
@@ -765,12 +771,16 @@ function sanitizeSegment(value) {
     .toLowerCase()
 }
 
-function readProductOverrides() {
-  return JSON.parse(fs.readFileSync(productOverridesPath, 'utf8'))
+async function readProductOverrides() {
+  return readProductOverridesStore({
+    productOverridesPath,
+  })
 }
 
-function readReceiptReviews() {
-  return JSON.parse(fs.readFileSync(receiptReviewsPath, 'utf8'))
+async function readReceiptReviews() {
+  return readReceiptReviewsStore({
+    receiptReviewsPath,
+  })
 }
 
 async function readReceiptIndex() {
@@ -780,8 +790,10 @@ async function readReceiptIndex() {
   })
 }
 
-function readReceiptItemOverrides() {
-  return JSON.parse(fs.readFileSync(receiptItemOverridesPath, 'utf8'))
+async function readReceiptItemOverrides() {
+  return readReceiptItemOverridesStore({
+    receiptItemOverridesPath,
+  })
 }
 
 async function readManualReceipts() {
@@ -818,12 +830,25 @@ async function removeReceiptIndexEntry(relativePath) {
   })
 }
 
-function writeReceiptReviews(reviews) {
-  fs.writeFileSync(receiptReviewsPath, `${JSON.stringify(reviews, null, 2)}\n`)
+async function writeProductOverrides(overrides) {
+  await writeProductOverridesStore({
+    productOverridesPath,
+    overrides,
+  })
 }
 
-function writeReceiptItemOverrides(overrides) {
-  fs.writeFileSync(receiptItemOverridesPath, `${JSON.stringify(overrides, null, 2)}\n`)
+async function writeReceiptReviews(reviews) {
+  await writeReceiptReviewsStore({
+    receiptReviewsPath,
+    reviews,
+  })
+}
+
+async function writeReceiptItemOverrides(overrides) {
+  await writeReceiptItemOverridesStore({
+    receiptItemOverridesPath,
+    overrides,
+  })
 }
 
 async function writeManualReceipts(receipts) {

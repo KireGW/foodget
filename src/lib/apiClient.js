@@ -22,16 +22,16 @@ export async function readJsonOrThrow(response, fallbackMessage) {
 }
 
 export function buildNetworkErrorMessage(action) {
-  return `Could not ${action} because the local receipt server could not be reached. Start the app with "npm run dev" and try again.`
+  return `Could not ${action} because the app API could not be reached. If you are running locally, start the app with "npm run dev" and try again.`
 }
 
 function buildHelpfulApiError(status, fallbackMessage) {
   if (status >= 500) {
-    return `${fallbackMessage} The local receipt server hit an internal error. Try again, and if it keeps happening restart "npm run dev".`
+    return `${fallbackMessage} The app API hit an internal error. Try again, and if you are running locally restart "npm run dev".`
   }
 
   if (status === 404 || status === 0) {
-    return `${fallbackMessage} The app could not reach the local receipt server. Make sure you started the app with "npm run dev".`
+    return `${fallbackMessage} The app could not reach the API. If you are running locally, make sure you started it with "npm run dev".`
   }
 
   return fallbackMessage
